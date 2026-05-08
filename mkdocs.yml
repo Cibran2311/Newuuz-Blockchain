@@ -70,4 +70,4 @@ nav:
   - Templates:
       - Lab Report Template: templates/lab-report-template.md
       - Assignment Submission Template: templates/assignment-submission-template.md
-      - JSON Submission Format: templates/json-submission-format/index.md
+      - JSON Submission Format: templates/json-submission-format.md
