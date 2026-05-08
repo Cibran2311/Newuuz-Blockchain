@@ -1,7 +1,8 @@
 site_name: CS422/CS423 Blockchain Technologies
 site_description: Blockchain Technologies course materials, labs, assignments and exams
-repo_name: blockchain-technologies-course
-repo_url: https://github.com/YOUR-ORG/YOUR-REPO
+site_url: https://cibran2311.github.io/Newuuz-Blockchain/
+repo_url: https://github.com/Cibran2311/Newuuz-Blockchain
+repo_name: Cibran2311/Newuuz-Blockchain
 
 theme:
   name: material
