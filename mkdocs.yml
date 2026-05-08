@@ -1,0 +1,71 @@
+site_name: CS422/CS423 Blockchain Technologies
+site_description: Blockchain Technologies course materials, labs, assignments and exams
+repo_name: blockchain-technologies-course
+repo_url: https://github.com/YOUR-ORG/YOUR-REPO
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: default
+      primary: green
+      accent: teal
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+
+nav:
+  - Introduction: index.md
+  - Syllabus: syllabus.md
+  - Education:
+      - Course Map: education/course-map.md
+      - Labs: education/labs.md
+      - Assignments: education/assignments.md
+      - Exams: education/exams.md
+  - Labs:
+      - Lab 1 — Testnet Transaction: labs/lab1-testnet-transaction.md
+      - Lab 2 — Hash Function: labs/lab2-hash-function.md
+      - Lab 3 — Blockchain Creation: labs/lab3-blockchain-creation.md
+      - Lab 4 — Disperse / Contract Interaction: labs/lab4-disperse-contract-interaction.md
+      - Lab 5 — Ethernaut 0: labs/lab5-ethernaut0.md
+      - Lab 6 — Polkadot Testnet: labs/lab6-polkadot-testnet.md
+      - Lab 7 — XCM Relay to Asset Hub: labs/lab7-xcm-assethub.md
+      - Lab 8 — EVM Contract on Asset Hub: labs/lab8-evm-assethub.md
+      - Lab 9 — TON Testnet: labs/lab9-ton-testnet.md
+      - Lab 10 — HackTON: labs/lab10-hackton.md
+      - DAO/DEX Lab — AMM Mechanics: labs/lab-dao-dex.md
+  - Assignments:
+      - Assignment 1 — ERC20 + NFT: assignments/assignment1-erc20-nft.md
+      - Assignment 2 — Ethernaut: assignments/assignment2-ethernaut.md
+      - Assignment 3 — Liquidity Provision: assignments/assignment3-liquidity-provision.md
+      - Assignment 4 — Technical Article: assignments/assignment4-article-publication.md
+  - Lectures:
+      - Lecture Notes Part I: lectures/lecture-notes-part1.md
+      - Lecture Notes Part II: lectures/lecture-notes-part2.md
+      - DEX: lectures/dex.md
+      - TON Part 1: lectures/ton-part1.md
+      - TON Part 2: lectures/ton-part2.md
+  - Templates:
+      - Lab Report Template: templates/lab-report-template.md
+      - Assignment Submission Template: templates/assignment-submission-template.md
+      - JSON Submission Format: templates/json-submission-format.md

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CS423 Blockchain Technologies submission.json",
+  "type": "object",
+  "required": [
+    "student",
+    "course",
+    "wallets",
+    "assignments"
+  ],
+  "properties": {
+    "student": {
+      "type": "object",
+      "required": [
+        "full_name",
+        "student_id"
+      ],
+      "properties": {
+        "full_name": {
+          "type": "string"
+        },
+        "student_id": {
+          "type": "string"
+        },
+        "github_username": {
+          "type": "string"
+        }
+      }
+    },
+    "course": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "semester": {
+          "type": "string"
+        }
+      }
+    },
+    "wallets": {
+      "type": "object",
+      "properties": {
+        "ethereum_sepolia": {
+          "type": "string"
+        },
+        "polkadot_westend": {
+          "type": "string"
+        },
+        "ton_testnet": {
+          "type": "string"
+        }
+      }
+    },
+    "assignments": {
+      "type": "object"
+    }
+  }
+}
