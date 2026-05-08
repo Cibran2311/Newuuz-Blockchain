@@ -68,6 +68,6 @@ nav:
       - TON Part 1: lectures/ton-part1.md
       - TON Part 2: lectures/ton-part2.md
   - Templates:
-      - Lab Report Template: templates/lab-report-template.md
-      - Assignment Submission Template: templates/assignment-submission-template.md
-      - JSON Submission Format: templates/json-submission-format.md
+      - Lab Report Template: course-templates/lab-report-template.md
+      - Assignment Submission Template: course-templates/assignment-submission-template.md
+      - JSON Submission Format: course-templates/json-submission-format.md
