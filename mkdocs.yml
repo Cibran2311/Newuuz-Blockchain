@@ -3,6 +3,7 @@ site_description: Blockchain Technologies course materials, labs, assignments an
 site_url: https://cibran2311.github.io/Newuuz-Blockchain/
 repo_url: https://github.com/Cibran2311/Newuuz-Blockchain
 repo_name: Cibran2311/Newuuz-Blockchain
+docs_dir: docs
 
 theme:
   name: material
@@ -69,4 +70,4 @@ nav:
   - Templates:
       - Lab Report Template: templates/lab-report-template.md
       - Assignment Submission Template: templates/assignment-submission-template.md
-      - JSON Submission Format: templates/json-submission-format/
+      - JSON Submission Format: templates/json-submission-format/index.md
