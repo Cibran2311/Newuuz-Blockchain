@@ -3,6 +3,7 @@
 ## Student information
 
 | Field | Value |
+|---|---|
 | Full name |  |
 | Student ID |  |
 | Wallet address |  |
@@ -21,7 +22,7 @@ Briefly describe what this lab demonstrates.
 ## Evidence
 
 | Evidence type | Link / value |
-|---|---|---|
+|---|---|
 | Transaction hash |  |
 | Explorer link |  |
 | Contract address |  |

@@ -4,82 +4,15 @@
     "student_id": "123456",
     "github_username": "ivan-blockchain"
   },
-  "course": {
-    "code": "CS423",
-    "semester": "Spring 2026"
-  },
   "wallets": {
     "ethereum_sepolia": "0x0000000000000000000000000000000000000000",
-    "polkadot_westend": "",
-    "ton_testnet": ""
+    "polkadot_westend": null,
+    "ton_testnet": null
   },
   "assignments": {
-    "assignment1": {
-      "erc20": {
-        "contract_address": "0x...",
-        "deployment_tx": "0x...",
-        "mint_tx": "0x..."
-      },
-      "nft": {
-        "standard": "ERC721",
-        "contract_address": "0x...",
-        "deployment_tx": "0x...",
-        "mint_tx": "0x...",
-        "token_id": "1"
-      },
-      "uniswap": {
-        "network": "sepolia",
-        "swap_tx": "0x...",
-        "pool_or_position_tx": "0x..."
-      },
-      "notes": "Short verification note."
-    },
-    "assignment2": {
-      "wallet_address": "0x...",
-      "complexity_total": 10,
-      "levels_solved_count": 5,
-      "levels": [
-        {
-          "level_number": 0,
-          "level_name": "Hello Ethernaut",
-          "complexity": 1,
-          "instance_address": "0x...",
-          "create_instance_tx": "0x...",
-          "interaction_txs": [
-            "0x..."
-          ],
-          "submit_instance_tx": "0x...",
-          "status": "passed",
-          "short_explanation": "Completed initial Ethernaut workflow."
-        }
-      ]
-    },
-    "assignment3": {
-      "notebook_file": "assignment3_liquidity_123456.ipynb",
-      "repository_url": "https://github.com/...",
-      "tasks_completed": {
-        "3.1": true,
-        "3.2": true,
-        "3.3": true,
-        "3.4": true,
-        "3.5_bonus": false
-      },
-      "fresh_kernel_runs": true,
-      "plots": [
-        "fee_income_vs_volume.png"
-      ],
-      "short_report_location": "Last markdown cell in notebook"
-    },
-    "assignment4": {
-      "article_url": "https://...",
-      "platform": "Medium",
-      "topic": "AMM Mathematics",
-      "reading_time_minutes": 7,
-      "word_count_estimate": 1600,
-      "has_formal_section": true,
-      "has_original_diagram": true,
-      "sources_count": 5,
-      "moderated_platform_bonus_claimed": false
-    }
+    "assignment1_nft_erc20_disperse": {},
+    "assignment2_ethernaut": {},
+    "assignment3_multichain_contract_chain": {},
+    "assignment4_technical_article": {}
   }
 }

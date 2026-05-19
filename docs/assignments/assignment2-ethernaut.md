@@ -1,55 +1,88 @@
-# Assignment 2 — Ethernaut CTF Challenge
+# Assignment 2 — Ethernaut Security Challenges
+
+## Overview
+
+This assignment focuses on Solidity security and EVM behavior through the Ethernaut CTF platform. Students solve vulnerable smart contract levels on Ethereum Sepolia and submit evidence through wallet-based transaction history.
 
 ## Goal
 
-Exploit real smart contract vulnerabilities on Sepolia using the Ethernaut platform.
+Solve Ethernaut levels until the total complexity score is **at least 10**.
 
-## Platform
+## Learning outcomes
 
-- https://ethernaut.openzeppelin.com/
+Students should be able to:
 
-## Requirement
+- inspect vulnerable Solidity contracts;
+- identify common smart contract vulnerabilities;
+- interact with deployed challenge instances;
+- use Remix, Etherscan, and MetaMask for exploit execution;
+- understand why a contract is vulnerable;
+- submit verifiable blockchain evidence.
 
-Complete Ethernaut levels whose cumulative complexity score is at least **7**.
+## Student tasks
 
-For the maximum score, cumulative complexity should reach **10**. Bonus is available for solving **15 or more levels**.
+1. Open the Ethernaut platform.
+2. Connect MetaMask to Sepolia.
+3. Create level instances.
+4. Solve selected levels.
+5. Submit completed level instances.
+6. Reach total complexity score `>= 10`.
+7. Record the completed levels and transaction evidence in `submission.json`.
 
-## Workflow
+## Complexity requirement
 
-For each level:
+| Total complexity | Result |
+|---:|---|
+| `< 7` | insufficient |
+| `7–9` | partial completion |
+| `>= 10` | full completion |
+| `15+ unique levels` | bonus candidate |
 
-1. Open the level.
-2. Create a level instance on Sepolia.
-3. Analyze the vulnerable contract.
-4. Send the exploit/interactions needed to break the invariant.
-5. Submit the instance.
-6. Save Etherscan links.
+The exact level-to-complexity map should be configured by the instructor and stored in the checker configuration rather than hardcoded in student instructions.
 
-## Verification logic
+## Required `submission.json` fields
 
-A level is considered passed when the following can be verified on-chain:
+```json
+{
+  "assignment_id": "assignment2_ethernaut",
+  "network": "sepolia",
+  "wallet": "0x...",
+  "levels": [
+    {
+      "level_name": "Fallback",
+      "level_address": "0x...",
+      "instance_address": "0x...",
+      "create_instance_tx": "0x...",
+      "interaction_txs": ["0x..."],
+      "submit_tx": "0x...",
+      "complexity": 1
+    }
+  ],
+  "claimed_total_complexity": 10
+}
+```
 
-1. Instance creation transaction.
-2. Interaction or exploit transaction.
-3. Submit instance transaction.
+## Automatic validation plan
 
-## Deliverables
+The checker should:
 
-| Field | Description |
-|---|---|
-| Wallet address | Student Sepolia address |
-| Level list | Completed Ethernaut levels |
-| Complexity total | Sum of completed level complexities |
-| Evidence | Etherscan links for create / interaction / submit |
-| Short explanation | Vulnerability and exploit idea for each solved level |
+1. Load the official Ethernaut deployment/proxy address for Sepolia.
+2. Query `LevelCompletedLog` events for the student wallet.
+3. Deduplicate completed levels.
+4. Map completed level addresses to instructor-defined complexity scores.
+5. Sum the complexity.
+6. Apply the threshold rules.
+7. Store evidence in an append-only grading log.
 
-## AI usage
+## Grading rubric
 
-Allowed: explanations of Solidity, EVM concepts, debugging exploit code.  
-Not allowed: copying full solutions without understanding or attribution.
+| Criterion | Weight |
+|---|---:|
+| Valid Ethernaut wallet evidence | 20% |
+| Completed levels detected on-chain | 40% |
+| Complexity score `>= 10` | 25% |
+| Clear submission data | 15% |
 
-## Reporting JSON
+## Academic integrity
 
-In addition to the normal deliverables, add a `submission.json` file to the root of your GitHub repository.
-
-Use the common format described in [JSON Submission Format](../templates/json-submission-format.md). This allows the instructor or checker script to verify wallet addresses, contract addresses, transaction hashes, links, and completion status automatically.
+Students may use documentation and AI tools to understand concepts, but they must be able to explain every completed level and exploit path verbally.

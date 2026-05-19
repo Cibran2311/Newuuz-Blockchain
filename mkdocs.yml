@@ -5,6 +5,9 @@ repo_url: https://github.com/Cibran2311/Newuuz-Blockchain
 repo_name: Cibran2311/Newuuz-Blockchain
 docs_dir: docs
 
+# Use stable file URLs on GitHub Pages. Remove this line if you prefer directory-style URLs.
+use_directory_urls: false
+
 theme:
   name: material
   language: en
@@ -12,12 +15,11 @@ theme:
     - scheme: default
       primary: green
       accent: teal
-  icon:
-    repo: fontawesome/brands/github
   features:
     - navigation.instant
     - navigation.tracking
     - navigation.top
+    - navigation.path
     - toc.follow
     - content.code.copy
 
@@ -38,6 +40,7 @@ markdown_extensions:
 
 nav:
   - Introduction: index.md
+  - Course Methodology: course-methodology.md
   - Syllabus: syllabus.md
   - Education:
       - Course Map: education/course-map.md
@@ -56,18 +59,22 @@ nav:
       - Lab 9 — TON Testnet: labs/lab9-ton-testnet.md
       - Lab 10 — HackTON: labs/lab10-hackton.md
       - DAO/DEX Lab — AMM Mechanics: labs/lab-dao-dex.md
+      - DEX Arbitrage Racing Game: labs/dex-arbitrage-racing.md
   - Assignments:
-      - Assignment 1 — ERC20 + NFT: assignments/assignment1-erc20-nft.md
+      - Overview: assignments/index.md
+      - Assignment 1 — NFT, ERC20 and Disperse: assignments/assignment1-nft-erc20-disperse.md
       - Assignment 2 — Ethernaut: assignments/assignment2-ethernaut.md
-      - Assignment 3 — Liquidity Provision: assignments/assignment3-liquidity-provision.md
-      - Assignment 4 — Technical Article: assignments/assignment4-article-publication.md
+      - Assignment 3 — Multi-chain Contract Chain: assignments/assignment3-multichain-contract-chain.md
+      - Assignment 4 — Technical Article: assignments/assignment4-technical-article.md
+  - Infrastructure:
+      - Auto-Grading and Portfolio Platform: infrastructure/autograding-platform.md
   - Lectures:
       - Lecture Notes Part I: lectures/lecture-notes-part1.md
       - Lecture Notes Part II: lectures/lecture-notes-part2.md
       - DEX: lectures/dex.md
       - TON Part 1: lectures/ton-part1.md
       - TON Part 2: lectures/ton-part2.md
-  - Templates:
+  - Course Templates:
       - Lab Report Template: course-templates/lab-report-template.md
       - Assignment Submission Template: course-templates/assignment-submission-template.md
       - JSON Submission Format: course-templates/json-submission-format.md

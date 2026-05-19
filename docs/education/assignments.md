@@ -1,15 +1,14 @@
 # Assignments
 
-| Assignment | Topic | Weight | Main deliverable |
-|---|---|---:|---|
-| Assignment 1 | ERC20 + NFT + Uniswap | 10% | contract addresses and transaction hashes |
-| Assignment 2 | Ethernaut CTF | 10% | solved levels with complexity score |
-| Assignment 3 | Liquidity Provision | 10% | completed AMM notebook and report |
-| Assignment 4 | Technical Article Publication | 10% | published technical article link |
+The course has four main assignments.
 
+| Assignment | Title | Main ecosystem | Evidence |
+|---|---|---|---|
+| 1 | NFT Trading, ERC20 and Disperse | Ethereum Sepolia | ERC20 events, NFT transfers, Disperse transaction |
+| 2 | Ethernaut | Ethereum Sepolia | completed levels and complexity score |
+| 3 | Multi-chain Contract Chain | Ethereum, Polkadot, TON | transaction sequence across networks |
+| 4 | Technical Article | public web | article URL and technical evidence |
 
-## Submission format
+Each assignment should include a `submission.json` file.
 
-Every assignment repository should include `submission.json` in the repository root. The file does not replace the notebook, article, report, or code, but it gives the checker a predictable place to read all verification data.
-
-See: [JSON Submission Format](../templates/json-submission-format.md).
+The assignments are designed so that most grading evidence can be checked automatically or semi-automatically using blockchain data.
