@@ -5,9 +5,6 @@ repo_url: https://github.com/Cibran2311/Newuuz-Blockchain
 repo_name: Cibran2311/Newuuz-Blockchain
 docs_dir: docs
 
-# Use stable file URLs on GitHub Pages. Remove this line if you prefer directory-style URLs.
-use_directory_urls: false
-
 theme:
   name: material
   language: en
@@ -22,10 +19,8 @@ theme:
     - navigation.path
     - toc.follow
     - content.code.copy
-
 plugins:
   - search
-
 markdown_extensions:
   - admonition
   - attr_list
@@ -37,44 +32,40 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.highlight
   - pymdownx.inlinehilite
-
 nav:
   - Introduction: index.md
-  - Course Methodology: course-methodology.md
   - Syllabus: syllabus.md
   - Education:
       - Course Map: education/course-map.md
-      - Labs: education/labs.md
-      - Assignments: education/assignments.md
+      - Labs Overview: education/labs.md
+      - Assignments Overview: education/assignments.md
       - Exams: education/exams.md
   - Labs:
-      - Lab 1 — Testnet Transaction: labs/lab1-testnet-transaction.md
-      - Lab 2 — Hash Function: labs/lab2-hash-function.md
-      - Lab 3 — Blockchain Creation: labs/lab3-blockchain-creation.md
-      - Lab 4 — Disperse / Contract Interaction: labs/lab4-disperse-contract-interaction.md
-      - Lab 5 — Ethernaut 0: labs/lab5-ethernaut0.md
-      - Lab 6 — Polkadot Testnet: labs/lab6-polkadot-testnet.md
-      - Lab 7 — XCM Relay to Asset Hub: labs/lab7-xcm-assethub.md
-      - Lab 8 — EVM Contract on Asset Hub: labs/lab8-evm-assethub.md
-      - Lab 9 — TON Testnet: labs/lab9-ton-testnet.md
-      - Lab 10 — HackTON: labs/lab10-hackton.md
-      - DAO/DEX Lab — AMM Mechanics: labs/lab-dao-dex.md
-      - DEX Arbitrage Racing Game: labs/dex-arbitrage-racing.md
+      - Lab 1 — First Transaction / Faucet / Wallet: labs/lab1-first-transaction.md
+      - Lab 2 — Hash Function and Collision: labs/lab2-hash-collision.md
+      - Lab 3 — Merkle Tree and Block Mining: labs/lab3-merkle-mining.md
+      - Lab 4 — Ethereum Transaction and Gas: labs/lab4-ethereum-transaction-gas.md
+      - Lab 5 — ERC20 Token and Disperse: labs/lab5-erc20-disperse.md
+      - Lab 6 — NFT Trading and Special Contract: labs/lab6-nft-special-contract.md
+      - Lab 7 — DEX Arbitrage Racing Game: labs/lab7-dex-arbitrage-racing.md
+      - Lab 8 — Polkadot Transaction: labs/lab8-polkadot-transaction.md
+      - Lab 9 — Polkadot AssetHub and XCM: labs/lab9-assethub-xcm.md
+      - Lab 10 — TON Transaction: labs/lab10-ton-transaction.md
+      - Lab 11 — Jetton / TON NFT: labs/lab11-jetton-ton-nft.md
+      - Lab 12 — TON DEX / HackTON: labs/lab12-ton-dex-hackton.md
   - Assignments:
-      - Overview: assignments/index.md
-      - Assignment 1 — NFT, ERC20 and Disperse: assignments/assignment1-nft-erc20-disperse.md
+      - Assignment 1 — NFT Trading + Special Contract: assignments/assignment1-nft-trading-special-contract.md
       - Assignment 2 — Ethernaut: assignments/assignment2-ethernaut.md
       - Assignment 3 — Multi-chain Contract Chain: assignments/assignment3-multichain-contract-chain.md
       - Assignment 4 — Technical Article: assignments/assignment4-technical-article.md
-  - Infrastructure:
-      - Auto-Grading and Portfolio Platform: infrastructure/autograding-platform.md
-  - Lectures:
-      - Lecture Notes Part I: lectures/lecture-notes-part1.md
-      - Lecture Notes Part II: lectures/lecture-notes-part2.md
-      - DEX: lectures/dex.md
-      - TON Part 1: lectures/ton-part1.md
-      - TON Part 2: lectures/ton-part2.md
-  - Course Templates:
+  - Grading:
+      - Grading Model: grading/grading-model.md
+      - JSON Submission Format: grading/json-submission-format.md
+      - GitHub Classroom and Actions: grading/github-classroom-actions.md
+      - Auto-check Roadmap: grading/auto-check-roadmap.md
+  - Platform:
+      - On-chain Grading Platform: platform/on-chain-grading-platform.md
+      - Student Portfolio Concept: platform/student-portfolio.md
+  - Templates:
       - Lab Report Template: course-templates/lab-report-template.md
       - Assignment Submission Template: course-templates/assignment-submission-template.md
-      - JSON Submission Format: course-templates/json-submission-format.md

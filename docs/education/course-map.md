@@ -1,13 +1,13 @@
 # Course Map
 
-This page connects the course weeks, labs, assignments, and platforms.
+## Q1 — Fundamentals
+Wallet setup, first transaction, hash functions, collisions, Merkle trees, block mining, PoW difficulty, consensus.
 
-| Block | Weeks | Ecosystem | Main outputs |
-|---|---:|---|---|
-| Foundations | 1–3 | General blockchain | testnet transaction, hash function, mining simulation |
-| Ethereum / EVM | 4–7 | Ethereum Sepolia | ERC20, NFT, Uniswap, Ethernaut |
-| Midterm | 8 | General | written and multiple-choice exam |
-| Polkadot | 9–11 | Westend / Asset Hub | transaction, XCM, EVM contract deployment |
-| DeFi / AMM | 12–13 | Python / Uniswap model | AMM notebook, LP simulation |
-| TON | 13–15 | TON Testnet | TON tx, Jetton, STON.fi swap, HackTON |
-| Final | 16 | All | final exam |
+## Q2 — Ethereum
+Ethereum transactions, gas, ERC20, Disperse, NFT purchase/sale/minting, special-contract transfer, DEX arbitrage, Ethernaut.
+
+## Q3 — Polkadot
+Westend transaction, AssetHub, XCM, Substrate/EVM interaction.
+
+## Q4 — TON
+TON wallet, transfer, jettons, TON NFT, STON.fi, HackTON-style tasks.
