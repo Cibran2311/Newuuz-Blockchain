@@ -1,4 +1,94 @@
-
 site_name: Blockchain Technologies
+site_description: Practical Blockchain Technologies Course
+site_url: https://cibran2311.github.io/Newuuz-Blockchain/
+repo_url: https://github.com/Cibran2311/Newuuz-Blockchain
+repo_name: Cibran2311/Newuuz-Blockchain
+docs_dir: docs
+
 theme:
   name: material
+  language: en
+  palette:
+    - scheme: default
+      primary: green
+      accent: teal
+    - scheme: slate
+      primary: green
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.path
+    - content.code.copy
+    - search.highlight
+    - toc.follow
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Course:
+      - Overview: course/overview.md
+      - Syllabus: course/syllabus.md
+      - Learning Outcomes: course/learning-outcomes.md
+      - How to Study: course/how-to-study.md
+  - Section 1 — Blockchain Foundations:
+      - Introduction: sections/foundations.md
+      - Lab 1 — Wallet and First Transaction: labs/lab1.md
+      - Lab 2 — Hash Functions and Collisions: labs/lab2.md
+      - Lab 3 — Merkle Trees and Mining: labs/lab3.md
+  - Section 2 — Ethereum and Smart Contracts:
+      - Introduction: sections/ethereum.md
+      - Lab 4 — Ethereum Transactions and Gas: labs/lab4.md
+      - Lab 5 — ERC20 and Disperse: labs/lab5.md
+      - Lab 6 — NFTs and Smart Contracts: labs/lab6.md
+      - Lab 7 — DEX Arbitrage and AMMs: labs/lab7.md
+      - Assignment 1 — NFT Trading: assignments/assignment1.md
+      - Assignment 2 — Ethernaut: assignments/assignment2.md
+  - Section 3 — Polkadot and Cross-chain Systems:
+      - Introduction: sections/polkadot.md
+      - Lab 8 — Polkadot Transactions: labs/lab8.md
+      - Lab 9 — AssetHub and XCM: labs/lab9.md
+  - Section 4 — TON and Async Architecture:
+      - Introduction: sections/ton.md
+      - Lab 10 — TON Transactions: labs/lab10.md
+      - Lab 11 — Jettons and TON NFTs: labs/lab11.md
+      - Lab 12 — TON DeFi and Security: labs/lab12.md
+      - Assignment 3 — Cross-chain Interaction: assignments/assignment3.md
+      - Assignment 4 — Technical Article: assignments/assignment4.md
+  - Grading:
+      - Auto-check System: grading/autocheck.md
+      - GitHub Classroom: grading/github-classroom.md
+      - submission.json: grading/submission-json.md
+  - References:
+      - Reading Roadmap: references/reading-roadmap.md
+      - Ethereum & EVM: references/ethereum.md
+      - Solidity & OpenZeppelin: references/solidity-openzeppelin.md
+      - DeFi & Uniswap: references/defi-uniswap.md
+      - Polkadot & XCM: references/polkadot-xcm.md
+      - TON & STON.fi: references/ton-stonfi.md
+      - Security Platforms: references/security-platforms.md
+  - Resources:
+      - Useful Links: resources/links.md
+      - Wallets and Explorers: resources/wallets.md
+      - Smart Contract Security: resources/security.md
