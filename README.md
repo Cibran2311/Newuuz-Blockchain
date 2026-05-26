@@ -1,27 +1,20 @@
-# Blockchain Course V2 — Lab 1 Fixed
+# CS422/CS423 Blockchain Technologies
 
-This archive contains an improved student-friendly version of Lab 1.
+Full MkDocs course site for Blockchain Technologies.
 
-## File
+## Local preview
 
-```text
-docs/labs/lab1.md
+```bash
+pip install mkdocs-material pymdown-extensions
+mkdocs serve
 ```
 
-The lab now includes:
+Open `http://127.0.0.1:8000`.
 
-- goal;
-- key terms;
-- required software;
-- required links;
-- safety rules;
-- step-by-step MetaMask setup;
-- Sepolia setup;
-- faucet instructions;
-- transaction sending;
-- Etherscan analysis;
-- submission.json example;
-- automatic validation;
-- common mistakes;
-- self-check questions;
-- additional reading.
+## GitHub Pages setup
+
+1. Push this project to GitHub.
+2. Go to **Settings → Pages**.
+3. Select **Source → GitHub Actions**.
+4. Open **Actions → Deploy MkDocs**.
+5. Run workflow manually or push to `main`.

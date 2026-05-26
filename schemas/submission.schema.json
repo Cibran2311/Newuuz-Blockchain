@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Blockchain Course Submission",
+  "type": "object",
+  "required": [
+    "student",
+    "wallets"
+  ],
+  "properties": {
+    "student": {
+      "type": "object"
+    },
+    "wallets": {
+      "type": "object"
+    },
+    "labs": {
+      "type": "object"
+    },
+    "assignments": {
+      "type": "object"
+    }
+  }
+}
