@@ -2,25 +2,85 @@
 
 Welcome to the **CS422/CS423 Blockchain Technologies** course.
 
-This course teaches blockchain engineering through practical interaction with real blockchain ecosystems:
+This course is not only about reading how blockchain works. You will interact with real test networks, deploy and use smart contracts, work with tokens and NFTs, solve security challenges, and compare different blockchain architectures.
 
-- Ethereum Sepolia;
-- Polkadot Westend / AssetHub;
-- TON Testnet.
+## Your Web3 Builder Journey
 
-## What students will do
+```text
+Blockchain User
+    ↓
+On-chain Investigator
+    ↓
+Token Creator
+    ↓
+NFT Engineer
+    ↓
+DeFi Trader
+    ↓
+Smart Contract Security Analyst
+    ↓
+Cross-chain Operator
+    ↓
+Web3 Technical Author
+```
 
-Students will:
+By the end of the course, you will have a practical blockchain portfolio containing:
 
-- create blockchain wallets;
-- send transactions;
-- analyze transactions in explorers;
-- deploy and interact with smart contracts;
-- work with ERC20 tokens and NFTs;
-- explore AMMs and DEX arbitrage;
-- solve smart contract security challenges;
-- compare Ethereum, Polkadot, and TON.
+- Ethereum Sepolia transactions;
+- ERC20 token activity;
+- NFT ownership and transfer history;
+- DEX swaps and AMM analysis;
+- completed Ethernaut security levels;
+- Polkadot extrinsics;
+- TON testnet transactions;
+- a technical article based on your work.
 
-## Main course idea
+## Why This Course Matters
 
-The course repeats similar blockchain actions in different ecosystems so that students can compare account models, transaction models, token models, explorers, and security practices.
+Blockchain systems are different from traditional web applications. Users interact with public networks, sign transactions with wallets, and leave verifiable evidence on-chain.
+
+You will learn how to:
+
+- use blockchain wallets safely;
+- read transaction data in explorers;
+- work with smart contracts;
+- understand token standards;
+- analyze DeFi mechanics;
+- compare Ethereum, Polkadot, and TON;
+- build evidence that can be automatically checked.
+
+## Course Structure
+
+| Section | Focus | Practical Result |
+|---|---|---|
+| Section 1 | Blockchain Foundations | Wallet, transaction, hash, Merkle tree, mining |
+| Section 2 | Ethereum and Smart Contracts | ERC20, NFTs, DEX, Ethernaut |
+| Section 3 | Polkadot and Cross-chain Systems | Westend transaction, AssetHub, XCM |
+| Section 4 | TON and Async Architecture | TON transaction, jettons, STON.fi / security |
+
+## Main Assignments
+
+| Assignment | Topic | Result |
+|---|---|---|
+| Assignment 1 | NFT Trading and Smart Contract Interaction | NFT ownership flow and special contract interaction |
+| Assignment 2 | Ethernaut | Solidity security challenges with complexity score >= 10 |
+| Assignment 3 | Cross-chain Smart Contract Interaction | Similar actions in Ethereum, Polkadot, and TON |
+| Assignment 4 | Technical Blockchain Article | Published technical article with blockchain evidence |
+
+## How You Submit Work
+
+Most labs and assignments are submitted through GitHub Classroom.
+
+Each repository must contain:
+
+```text
+submission.json
+```
+
+The automatic checker will read `submission.json` and verify your work using blockchain data.
+
+!!! danger "Never share secrets"
+    Never submit private keys, seed phrases, wallet recovery phrases, API keys, or passwords.
+
+!!! warning "Use testnets only"
+    Use Ethereum Sepolia, Polkadot Westend / AssetHub test environments, and TON Testnet.
