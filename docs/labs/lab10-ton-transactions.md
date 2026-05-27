@@ -1,67 +1,134 @@
-# Lab 10 — TON Wallets and Transactions
+# Mission 10 — Enter TON
 
 ## Goal
 
 Create a TON testnet wallet, receive test TON, send a transaction, and inspect it in Tonviewer.
 
+---
+
+## Why This Lab Matters
+
+TON uses wallet contracts and asynchronous messages, so its transaction model differs from Ethereum and Polkadot.
+
+---
+
 ## What You Will Learn
 
 After completing this lab you will be able to:
 
-- interact with blockchain infrastructure;
-- use required tools and explorers;
-- save transaction or computation evidence;
-- fill `submission.json` correctly.
+- create TON testnet wallet
+- send TON transaction
+- use Tonviewer
+- understand TON address formats
+- compare TON and Ethereum
 
-## Required Materials
+---
 
-Open these materials before starting:
+## Required Reading
 
-- Tonkeeper: https://tonkeeper.com/
-- TON docs: https://docs.ton.org/
-- Testnet Tonviewer: https://testnet.tonviewer.com/
+| Topic | Link |
+|---|---|
+| TON docs | https://docs.ton.org/ |
+| Tonkeeper | https://tonkeeper.com/ |
+| Testnet Tonviewer | https://testnet.tonviewer.com/ |
+
+---
+
+## Required Software
+
+| Tool | Purpose |
+|---|---|
+| Tonkeeper | Wallet |
+| Testnet faucet | Test TON |
+| Tonviewer | Explorer |
+
+---
+
+## Key Terms
+
+| Term | Meaning |
+|---|---|
+| `TON wallet` | Wallet contract controlled by user. |
+| `Message` | TON communication unit. |
+| `Trace` | Message chain in explorer. |
+| `Testnet` | Testing network. |
+
+---
+
+## Safety Notes
+
+!!! warning "Use course test environments"
+    Do not use real funds or mainnet assets. Save transaction hashes immediately.
+
+---
 
 ## Step-by-Step Instructions
 
 ### Step 1 — Install wallet
 
-Install Tonkeeper or supported TON wallet.
+Install Tonkeeper or compatible wallet.
+
 ### Step 2 — Enable testnet
 
-Enable testnet mode in wallet settings.
+Turn on testnet in settings.
+
 ### Step 3 — Get test TON
 
-Use faucet or bot specified by instructor.
+Use faucet/instructor.
+
 ### Step 4 — Send transaction
 
-Send small amount to instructor or partner.
+Send small amount to assigned wallet.
+
 ### Step 5 — Open Tonviewer
 
-Find transaction in testnet Tonviewer.
+Find transaction on testnet.
+
+### Step 6 — Submit link
+
+Record wallet and tx link.
+
+---
+
+## Expected Result
+
+TON testnet wallet and one Tonviewer transaction link.
+
+---
 
 ## Submission
 
-Add the result to `submission.json`.
+Add this fragment to `submission.json`:
 
 ```json
-{
-  "labs": {"lab10": {"ton_wallet": "kQ...", "tx_link": "https://testnet.tonviewer.com/...", "amount_ton": "0.01"}}
-}
+{"labs":{"lab10":{"network":"ton_testnet","ton_wallet":"kQ...","tx_link":"https://testnet.tonviewer.com/...","amount_ton":"0.01"}}}
 ```
+
+---
 
 ## Automatic Validation
 
-The checker verifies:
+| Check | Requirement |
+|---|---|
+| Transaction | Exists. |
+| Network | Testnet. |
+| Wallet | Sender matches. |
+| Amount | Valid. |
 
-- submitted evidence exists;
-- network is correct;
-- wallet belongs to the student;
-- transaction or computation result is valid.
+---
 
 ## Common Mistakes
 
-- using the wrong network;
-- submitting another wallet's transaction;
-- breaking JSON syntax;
-- forgetting explorer links;
-- submitting private keys or seed phrases.
+| Mistake | Fix |
+|---|---|
+| Mainnet | Enable testnet. |
+| Wallet page link | Submit tx link. |
+| Wrong address | Copy carefully. |
+
+---
+
+## Self-Check Questions
+
+1. What is TON wallet contract?
+2. What is message?
+3. How prove TON tx?

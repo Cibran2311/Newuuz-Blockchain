@@ -1,63 +1,131 @@
-# Lab 4 — Ethereum Transactions and Gas
+# Mission 4 — Read the Chain
 
 ## Goal
 
-Analyze Ethereum transaction structure and gas usage in Etherscan.
+Analyze an Ethereum transaction and understand gas, nonce, status, and fees.
+
+---
+
+## Why This Lab Matters
+
+Developers debug smart contracts by reading transaction details. This lab makes explorers useful instead of mysterious.
+
+---
 
 ## What You Will Learn
 
 After completing this lab you will be able to:
 
-- interact with blockchain infrastructure;
-- use required tools and explorers;
-- save transaction or computation evidence;
-- fill `submission.json` correctly.
+- read Etherscan fields
+- explain gas limit vs gas used
+- find transaction fee
+- record transaction evidence
 
-## Required Materials
+---
 
-Open these materials before starting:
+## Required Reading
 
-- Ethereum gas docs: https://ethereum.org/en/developers/docs/gas/
-- Sepolia Etherscan: https://sepolia.etherscan.io/
+| Topic | Link |
+|---|---|
+| Ethereum gas | https://ethereum.org/en/developers/docs/gas/ |
+| Ethereum transactions | https://ethereum.org/en/developers/docs/transactions/ |
+| Sepolia Etherscan | https://sepolia.etherscan.io/ |
+
+---
+
+## Required Software
+
+| Tool | Purpose |
+|---|---|
+| MetaMask | Transaction source |
+| Etherscan | Explorer |
+
+---
+
+## Key Terms
+
+| Term | Meaning |
+|---|---|
+| `Gas limit` | Maximum gas allowed. |
+| `Gas used` | Actual gas consumed. |
+| `Nonce` | Transaction counter. |
+| `Status` | Success/failure. |
+| `Fee` | Cost of transaction. |
+
+---
+
+## Safety Notes
+
+!!! danger "Never share secrets"
+    Never submit private keys, seed phrases, recovery phrases, or passwords.
+
+!!! warning "Use testnets only"
+    Use Sepolia for Ethereum labs unless the instructor explicitly says otherwise.
+
+---
 
 ## Step-by-Step Instructions
 
-### Step 1 — Choose transaction
+### Step 1 — Choose tx
 
-Use your Lab 1 transaction or send a new one.
+Use Lab 1 tx or send a new Sepolia tx.
+
 ### Step 2 — Open Etherscan
 
-Find the transaction by hash.
+Search by transaction hash.
+
 ### Step 3 — Record fields
 
-Record From, To, Value, Nonce, Gas Limit, Gas Used, Fee, Status.
+From, To, Nonce, Gas Limit, Gas Used, Fee, Status.
+
 ### Step 4 — Explain gas
 
-Explain gas limit vs gas used.
+Write a short explanation.
+
+### Step 5 — Update JSON
+
+Add tx and gas fields.
+
+---
+
+## Expected Result
+
+A transaction analysis with correct gas fields and explanation.
+
+---
 
 ## Submission
 
-Add the result to `submission.json`.
+Add this fragment to `submission.json`:
 
 ```json
-{
-  "labs": {"lab4": {"tx_hash": "0x...", "gas_limit": 21000, "gas_used": 21000, "status": "success"}}
-}
+{"labs":{"lab4":{"tx_hash":"0x...","gas_limit":21000,"gas_used":21000,"status":"success","explanation":"Gas limit is ..."}}}
 ```
+
+---
 
 ## Automatic Validation
 
-The checker verifies:
+| Check | Requirement |
+|---|---|
+| Transaction | Hash exists. |
+| Gas fields | Values match explorer. |
+| Explanation | Non-empty. |
 
-- submitted evidence exists;
-- network is correct;
-- wallet belongs to the student;
-- transaction or computation result is valid.
+---
 
 ## Common Mistakes
 
-- using the wrong network;
-- submitting another wallet's transaction;
-- breaking JSON syntax;
-- forgetting explorer links;
-- submitting private keys or seed phrases.
+| Mistake | Fix |
+|---|---|
+| Gas price vs gas used | Use correct field. |
+| Mainnet tx | Use Sepolia. |
+| Empty explanation | Add 3–5 sentences. |
+
+---
+
+## Self-Check Questions
+
+1. What is gas?
+2. What is nonce?
+3. What is failed transaction?

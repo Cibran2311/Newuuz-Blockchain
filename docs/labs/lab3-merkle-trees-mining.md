@@ -1,63 +1,131 @@
-# Lab 3 — Merkle Trees and Block Mining
+# Mission 3 — Mine Your First Block
 
 ## Goal
 
-Construct a Merkle tree and simulate Proof-of-Work mining.
+Build a Merkle tree and simulate Proof-of-Work by finding a nonce.
+
+---
+
+## Why This Lab Matters
+
+Merkle trees summarize transactions, and Proof-of-Work shows why changing a block is expensive.
+
+---
 
 ## What You Will Learn
 
 After completing this lab you will be able to:
 
-- interact with blockchain infrastructure;
-- use required tools and explorers;
-- save transaction or computation evidence;
-- fill `submission.json` correctly.
+- construct Merkle root
+- build simplified block header
+- find nonce
+- explain difficulty
 
-## Required Materials
+---
 
-Open these materials before starting:
+## Required Reading
 
-- Merkle tree: https://en.wikipedia.org/wiki/Merkle_tree
-- Bitcoin block chain guide: https://developer.bitcoin.org/devguide/block_chain.html
+| Topic | Link |
+|---|---|
+| Merkle tree | https://en.wikipedia.org/wiki/Merkle_tree |
+| Bitcoin developer guide | https://developer.bitcoin.org/devguide/block_chain.html |
+| Proof of Work | https://en.wikipedia.org/wiki/Proof_of_work |
+
+---
+
+## Required Software
+
+| Tool | Purpose |
+|---|---|
+| Python / Colab | Simulation |
+| Notebook | Submit results |
+
+---
+
+## Key Terms
+
+| Term | Meaning |
+|---|---|
+| `Merkle root` | Single hash summarizing transactions. |
+| `Nonce` | Value changed during mining. |
+| `Difficulty` | Rule the hash must satisfy. |
+| `Block header` | Data hashed to identify block. |
+
+---
+
+## Safety Notes
+
+!!! info
+    This is a simplified mining simulation, not real cryptocurrency mining.
+
+---
 
 ## Step-by-Step Instructions
 
 ### Step 1 — Prepare transactions
 
-Use a small transaction list.
+Create a list of transaction strings or numbers.
+
 ### Step 2 — Hash transactions
 
 Hash every transaction.
-### Step 3 — Build Merkle tree
+
+### Step 3 — Build tree
 
 Pair hashes until one root remains.
-### Step 4 — Mine block
 
-Change nonce until hash satisfies difficulty.
+### Step 4 — Create header
+
+Combine previous hash, Merkle root, and nonce.
+
+### Step 5 — Mine
+
+Change nonce until hash matches difficulty.
+
+### Step 6 — Record
+
+Save root, nonce, hash, and difficulty.
+
+---
+
+## Expected Result
+
+A valid Merkle root and nonce producing a block hash matching difficulty.
+
+---
 
 ## Submission
 
-Add the result to `submission.json`.
+Add this fragment to `submission.json`:
 
 ```json
-{
-  "labs": {"lab3": {"transactions": [165,124,549], "merkle_root": "...", "nonce": 12345, "block_hash": "..."}}
-}
+{"labs":{"lab3":{"transactions":["tx1","tx2","tx3"],"merkle_root":"...","nonce":12345,"block_hash":"...","difficulty":"000"}}}
 ```
+
+---
 
 ## Automatic Validation
 
-The checker verifies:
+| Check | Requirement |
+|---|---|
+| Merkle root | Recalculates correctly. |
+| Nonce | Produces submitted block hash. |
+| Difficulty | Hash satisfies target. |
 
-- submitted evidence exists;
-- network is correct;
-- wallet belongs to the student;
-- transaction or computation result is valid.
+---
 
 ## Common Mistakes
 
-- using the wrong network;
-- submitting another wallet's transaction;
-- breaking JSON syntax;
-- forgetting explorer links;
-- submitting private keys or seed phrases.
+| Mistake | Fix |
+|---|---|
+| Changed order | Keep order fixed. |
+| Hash mismatch | Use consistent encoding. |
+| Difficulty not met | Continue mining. |
+
+---
+
+## Self-Check Questions
+
+1. What is Merkle root?
+2. Why does one changed tx change the root?
+3. What is nonce?

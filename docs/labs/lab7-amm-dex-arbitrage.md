@@ -1,69 +1,136 @@
-# Lab 7 — Automated Market Makers and DEX Arbitrage
+# Mission 7 — Trade Like a DeFi Bot
 
 ## Goal
 
-Compare two AMM pools and use price differences for arbitrage.
+Compare two AMM pools and try to profit from price differences.
+
+---
+
+## Why This Lab Matters
+
+DeFi bots compare pools, calculate slippage, and execute arbitrage. This lab connects AMM math to real transactions.
+
+---
 
 ## What You Will Learn
 
 After completing this lab you will be able to:
 
-- interact with blockchain infrastructure;
-- use required tools and explorers;
-- save transaction or computation evidence;
-- fill `submission.json` correctly.
+- explain x*y=k
+- read reserves
+- calculate price
+- understand slippage
+- execute swaps
+- calculate PnL
 
-## Required Materials
+---
 
-Open these materials before starting:
+## Required Reading
 
-- Uniswap developers: https://developers.uniswap.org/
-- Uniswap V2: https://docs.uniswap.org/contracts/v2/concepts/protocol-overview/how-uniswap-works
+| Topic | Link |
+|---|---|
+| Uniswap docs | https://developers.uniswap.org/ |
+| Uniswap V2 | https://docs.uniswap.org/contracts/v2/concepts/protocol-overview/how-uniswap-works |
+| AMM | https://en.wikipedia.org/wiki/Automated_market_maker |
+
+---
+
+## Required Software
+
+| Tool | Purpose |
+|---|---|
+| MetaMask | Sign swaps |
+| Class DEX contracts | Alpha/Beta |
+| Etherscan | Inspect swaps |
+
+---
+
+## Key Terms
+
+| Term | Meaning |
+|---|---|
+| `AMM` | Automated market maker. |
+| `Pool` | Reserves for swaps. |
+| `Slippage` | Price movement from trade. |
+| `Arbitrage` | Profit from price difference. |
+| `Reserve` | Token amount in pool. |
+
+---
+
+## Safety Notes
+
+!!! warning "Use course test environments"
+    Do not use real funds or mainnet assets. Save transaction hashes immediately.
+
+---
 
 ## Step-by-Step Instructions
 
 ### Step 1 — Receive test tokens
 
-Receive TEST and USDC from class faucet.
-### Step 2 — Inspect DEX Alpha
+Get TEST/USDC from TA faucet.
 
-Read reserves and calculate price.
-### Step 3 — Inspect DEX Beta
+### Step 2 — Inspect Alpha
 
-Read reserves and calculate price.
+Read reserves and price.
+
+### Step 3 — Inspect Beta
+
+Read reserves and price.
+
 ### Step 4 — Choose strategy
 
-Buy on cheaper pool and sell on expensive pool.
+Buy cheap, sell expensive.
+
 ### Step 5 — Execute swaps
 
-Submit swaps and save hashes.
-### Step 6 — Calculate final value
+Submit txs and record hashes.
 
-Convert final balances to USDC equivalent.
+### Step 6 — Calculate value
+
+Convert final balances to USDC-equivalent.
+
+---
+
+## Expected Result
+
+Swap txs, final value, and arbitrage explanation.
+
+---
 
 ## Submission
 
-Add the result to `submission.json`.
+Add this fragment to `submission.json`:
 
 ```json
-{
-  "labs": {"lab7": {"dex_alpha": "0x...", "dex_beta": "0x...", "swap_txs": ["0x..."], "final_usdc_value": "0"}}
-}
+{"labs":{"lab7":{"wallet":"0x...","dex_alpha":"0x...","dex_beta":"0x...","swap_txs":["0x..."],"final_usdc_value":"0","strategy":"Buy on Alpha, sell on Beta"}}}
 ```
+
+---
 
 ## Automatic Validation
 
-The checker verifies:
+| Check | Requirement |
+|---|---|
+| Swaps | Interact with correct DEX contracts. |
+| Wallet | Student wallet participated. |
+| Final value | Calculation present. |
+| Strategy | Explanation present. |
 
-- submitted evidence exists;
-- network is correct;
-- wallet belongs to the student;
-- transaction or computation result is valid.
+---
 
 ## Common Mistakes
 
-- using the wrong network;
-- submitting another wallet's transaction;
-- breaking JSON syntax;
-- forgetting explorer links;
-- submitting private keys or seed phrases.
+| Mistake | Fix |
+|---|---|
+| Ignoring slippage | Check expected output. |
+| Wrong direction | Buy cheap sell expensive. |
+| No calculation | Compute final value. |
+
+---
+
+## Self-Check Questions
+
+1. What is x*y=k?
+2. Why does swap change price?
+3. When is arbitrage profitable?

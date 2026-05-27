@@ -1,63 +1,127 @@
-# Lab 2 — Hash Functions and Collision Analysis
+# Mission 2 — Hash Detective
 
 ## Goal
 
-Implement a simplified hash function and find a collision.
+Implement a weak hash function, find a collision, and compare it with SHA-256.
+
+---
+
+## Why This Lab Matters
+
+Blockchains depend on hashes for transaction IDs, Merkle trees, block headers, and mining. Weak hashes show why cryptographic hashes are necessary.
+
+---
 
 ## What You Will Learn
 
 After completing this lab you will be able to:
 
-- interact with blockchain infrastructure;
-- use required tools and explorers;
-- save transaction or computation evidence;
-- fill `submission.json` correctly.
+- explain hash functions
+- find a collision in a weak hash
+- compare weak hash with SHA-256
+- explain collision resistance
 
-## Required Materials
+---
 
-Open these materials before starting:
+## Required Reading
 
-- Google Colab: https://colab.research.google.com/
-- Python hashlib: https://docs.python.org/3/library/hashlib.html
+| Topic | Link |
+|---|---|
+| Python hashlib | https://docs.python.org/3/library/hashlib.html |
+| Google Colab | https://colab.research.google.com/ |
+| SHA-2 | https://en.wikipedia.org/wiki/SHA-2 |
+
+---
+
+## Required Software
+
+| Tool | Purpose |
+|---|---|
+| Python / Colab | Run code |
+| Notebook | Submit work |
+
+---
+
+## Key Terms
+
+| Term | Meaning |
+|---|---|
+| `Hash` | Fixed-size output from input data. |
+| `Collision` | Two different inputs with the same hash. |
+| `SHA-256` | Cryptographic hash function. |
+| `Avalanche effect` | Small input change causes large output change. |
+
+---
+
+## Safety Notes
+
+!!! info
+    The lab uses a deliberately weak hash function. This is for learning only.
+
+---
 
 ## Step-by-Step Instructions
 
-### Step 1 — Open Python environment
+### Step 1 — Open Python
 
-Use Google Colab, Jupyter, or local Python.
-### Step 2 — Implement simplified hash
+Use Colab, Jupyter, or local Python.
 
-Write a function with a small output range.
-### Step 3 — Find collision
+### Step 2 — Write weak hash
 
-Find two different inputs with the same output.
-### Step 4 — Compare with SHA-256
+Create a function with a small output range, for example modulo 100.
 
-Use `hashlib.sha256()` and explain why collisions are hard for SHA-256.
+### Step 3 — Search collision
+
+Loop over many inputs and store seen outputs.
+
+### Step 4 — Compare SHA-256
+
+Use hashlib.sha256 and explain why collision search is infeasible.
+
+### Step 5 — Save notebook
+
+Commit `.ipynb` or `.py` file.
+
+---
+
+## Expected Result
+
+Two different inputs with the same weak hash and explanation of why SHA-256 is different.
+
+---
 
 ## Submission
 
-Add the result to `submission.json`.
+Add this fragment to `submission.json`:
 
 ```json
-{
-  "labs": {"lab2": {"input_1": "123", "input_2": "321", "hash_1": "42", "hash_2": "42"}}
-}
+{"labs":{"lab2":{"input_1":"123","input_2":"321","hash_1":"42","hash_2":"42","notebook_path":"notebooks/lab2.ipynb"}}}
 ```
+
+---
 
 ## Automatic Validation
 
-The checker verifies:
+| Check | Requirement |
+|---|---|
+| Inputs | input_1 != input_2. |
+| Collision | hash_1 == hash_2. |
+| File | Notebook/script exists. |
 
-- submitted evidence exists;
-- network is correct;
-- wallet belongs to the student;
-- transaction or computation result is valid.
+---
 
 ## Common Mistakes
 
-- using the wrong network;
-- submitting another wallet's transaction;
-- breaking JSON syntax;
-- forgetting explorer links;
-- submitting private keys or seed phrases.
+| Mistake | Fix |
+|---|---|
+| Same inputs | Use two different inputs. |
+| No file | Commit notebook. |
+| Claiming SHA-256 collision | Do not claim real SHA-256 collision. |
+
+---
+
+## Self-Check Questions
+
+1. What is a collision?
+2. Why is collision resistance important?
+3. Where are hashes used in blockchain?

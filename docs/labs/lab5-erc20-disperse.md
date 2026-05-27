@@ -2,193 +2,140 @@
 
 ## Goal
 
-In this lab you will work with ERC20 tokens on Ethereum Sepolia. You will either deploy or use a class ERC20 token, perform token transfers, inspect transfer events, and use Disperse for batch token distribution.
+Work with ERC20 tokens, perform transfers, inspect Transfer events, and use Disperse for batch distribution.
+
+---
 
 ## Why This Lab Matters
 
-ERC20 is the most common token standard in Ethereum-compatible ecosystems.
+ERC20 powers stablecoins, governance tokens, rewards, and DeFi. Batch transfer is a real operational task.
 
-Real projects use ERC20 tokens for:
-
-- governance tokens;
-- stablecoins;
-- in-game currencies;
-- reward systems;
-- DeFi protocols;
-- DAO voting.
-
-Batch transfers are common when a project needs to distribute tokens to many users, contributors, or students.
+---
 
 ## What You Will Learn
 
 After completing this lab you will be able to:
 
-- explain the ERC20 token standard;
-- read ERC20 metadata;
-- perform ERC20 transfers;
-- understand `Transfer` events;
-- use Disperse for batch token transfer;
-- find token activity in Etherscan;
-- prepare ERC20 evidence for automatic checking.
+- explain ERC20
+- read metadata
+- send token transfers
+- inspect Transfer events
+- use Disperse
+
+---
 
 ## Required Reading
 
 | Topic | Link |
 |---|---|
 | ERC20 standard | https://eips.ethereum.org/EIPS/eip-20 |
-| OpenZeppelin Contracts | https://docs.openzeppelin.com/contracts/ |
+| OpenZeppelin | https://docs.openzeppelin.com/contracts/ |
 | OpenZeppelin Wizard | https://wizard.openzeppelin.com/ |
-| Remix IDE | https://remix.ethereum.org/ |
+| Remix | https://remix.ethereum.org/ |
 | Disperse | https://disperse.app/ |
+
+---
 
 ## Required Software
 
 | Tool | Purpose |
 |---|---|
-| MetaMask | Sign transactions |
-| Remix IDE | Optional contract deployment |
-| OpenZeppelin Wizard | Generate ERC20 contract |
-| Sepolia Etherscan | Inspect transactions and events |
-| Disperse | Batch token transfer |
+| MetaMask | Sign txs |
+| Remix | Optional deploy |
+| Etherscan | Events |
+| Disperse | Batch transfer |
+
+---
 
 ## Key Terms
 
 | Term | Meaning |
 |---|---|
-| ERC20 | Standard interface for fungible tokens on Ethereum. |
-| Fungible token | Token where each unit is equal to another unit. |
-| `balanceOf` | Function that returns token balance of an address. |
-| `transfer` | Function used to send tokens. |
-| `approve` | Function that allows another address/contract to spend tokens. |
-| `allowance` | Amount approved for spending. |
-| `Transfer` event | Event emitted when tokens move between addresses. |
-| Disperse | Tool for sending tokens to many addresses in one operation. |
+| `ERC20` | Fungible token standard. |
+| `balanceOf` | Reads balance. |
+| `transfer` | Sends tokens. |
+| `approve` | Allows spending. |
+| `Transfer event` | Proves token movement. |
+
+---
 
 ## Safety Notes
 
-!!! warning
-    Use Sepolia only. Do not deploy or transfer on Ethereum Mainnet.
+!!! danger "Never share secrets"
+    Never submit private keys, seed phrases, recovery phrases, or passwords.
 
-!!! danger
-    Do not upload private keys or seed phrases.
+!!! warning "Use testnets only"
+    Use Sepolia for Ethereum labs unless the instructor explicitly says otherwise.
+
+---
 
 ## Step-by-Step Instructions
 
-### Step 1 — Choose Token Approach
+### Step 1 — Choose token
 
-The instructor may provide a class ERC20 token contract. If a class token is provided, use it.
+Use class token or deploy with OpenZeppelin Wizard and Remix.
 
-If you need to deploy your own token:
+### Step 2 — Record metadata
 
-1. Open OpenZeppelin Wizard: https://wizard.openzeppelin.com/
-2. Select **ERC20**.
-3. Set token name and symbol.
-4. Enable minting if required.
-5. Copy contract code.
-6. Open Remix: https://remix.ethereum.org/
-7. Compile and deploy to Sepolia using MetaMask.
+Contract address, name, symbol, decimals, totalSupply.
 
-### Step 2 — Record Token Metadata
-
-Open the token contract in Etherscan or Remix and record:
-
-- token contract address;
-- token name;
-- symbol;
-- decimals;
-- total supply.
-
-### Step 3 — Perform ERC20 Transfers
+### Step 3 — Send transfers
 
 Send tokens to at least three addresses.
 
-For each transfer, record the transaction hash.
+### Step 4 — Inspect events
 
-### Step 4 — Inspect Transfer Events
-
-Open each transaction in Sepolia Etherscan.
-
-Find the event log:
-
-```text
-Transfer(address indexed from, address indexed to, uint256 value)
-```
-
-Record:
-
-- sender;
-- recipient;
-- value;
-- token contract address.
+Open tx logs and find Transfer events.
 
 ### Step 5 — Use Disperse
 
-1. Open https://disperse.app/
-2. Connect MetaMask.
-3. Make sure network is Sepolia.
-4. Select token transfer mode.
-5. Paste recipient addresses and token amounts.
-6. Confirm transaction.
-7. Save transaction hash.
+Connect on Sepolia, paste recipients/amounts, submit batch tx.
+
+### Step 6 — Save evidence
+
+Record token contract, transfer txs, Disperse tx.
+
+---
 
 ## Expected Result
 
-At the end of the lab you should have:
+ERC20 contract, three transfers, one Disperse transaction, and visible Transfer events.
 
-- ERC20 token contract address;
-- at least three token transfer transactions;
-- one Disperse transaction;
-- visible `Transfer` events in Etherscan.
+---
 
 ## Submission
 
 Add this fragment to `submission.json`:
 
 ```json
-{
-  "labs": {
-    "lab5": {
-      "network": "sepolia",
-      "wallet": "0xYourWalletAddress",
-      "token_contract": "0xTokenContract",
-      "token_name": "Student Token",
-      "token_symbol": "STUD",
-      "transfer_txs": [
-        "0xTransferTx1",
-        "0xTransferTx2",
-        "0xTransferTx3"
-      ],
-      "disperse_tx": "0xDisperseTx"
-    }
-  }
-}
+{"labs":{"lab5":{"network":"sepolia","wallet":"0x...","token_contract":"0x...","token_name":"Student Token","token_symbol":"STUD","transfer_txs":["0x...","0x...","0x..."],"disperse_tx":"0x..."}}}
 ```
+
+---
 
 ## Automatic Validation
 
 | Check | Requirement |
 |---|---|
-| Token contract | Contract exists on Sepolia. |
-| ERC20 compatibility | Token exposes basic ERC20 methods. |
-| Transfer events | Submitted transactions contain ERC20 `Transfer` events. |
-| Sender | Student wallet participated in transfers. |
-| Disperse | Disperse transaction exists and includes batch transfers. |
+| Contract | Exists on Sepolia. |
+| Transfers | Contain ERC20 Transfer events. |
+| Sender | Student wallet participates. |
+| Disperse | Batch tx exists. |
+
+---
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---|---|
-| Sending ETH instead of ERC20 token | Use token contract `transfer`, not native ETH send. |
-| Wrong network | Switch to Sepolia. |
-| Contract not deployed | Wait for deployment confirmation and copy correct address. |
-| No Transfer event | Check that transaction was token transfer, not approval only. |
-| Disperse fails | Check token balance and allowance. |
-| Invalid JSON array | Make sure `transfer_txs` is a JSON array. |
+| ETH instead of token | Use token transfer. |
+| No Transfer event | Check tx type. |
+| Disperse fails | Check balance and allowance. |
+
+---
 
 ## Self-Check Questions
 
-1. What is the difference between ETH and ERC20 tokens?
-2. What does the `Transfer` event prove?
-3. Why do batch transfers help?
-4. What is the difference between `transfer` and `approve`?
-5. How can the checker verify your transfer automatically?
+1. What is ERC20?
+2. What does Transfer event prove?
+3. Why use Disperse?

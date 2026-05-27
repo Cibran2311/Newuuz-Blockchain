@@ -1,38 +1,95 @@
-# Assignment 4 — Technical Blockchain Article
+# Assignment 4 — Web3 Technical Article
 
 ## Goal
 
-Publish a technical article based on practical blockchain work.
+Publish a technical article based on practical blockchain work from the course.
+
+---
+
+## Scenario
+
+You are acting as a technical author. Your task is to explain one blockchain topic clearly using evidence, examples, and your own analysis.
+
+---
 
 ## Learning Objectives
 
 After completing this assignment students will be able to:
 
-- interact with smart contracts;
-- analyze blockchain events;
-- collect evidence from explorers;
-- submit machine-readable results.
+- write technical explanations
+- use blockchain evidence
+- compare architectures
+- communicate DeFi/security concepts
 
-## Tasks
+---
 
-1. Choose topic
-2. Write technical article
-3. Include evidence, formulas, code, or diagrams
-4. Publish on Medium/dev.to/Hashnode/Habr or similar
-5. Submit URL
+## Requirements
+
+1. Choose course-related topic.
+2. Write technical article.
+3. Include code, diagrams, tx hashes, or contracts where useful.
+4. Publish on Medium/dev.to/Hashnode/Habr or similar.
+5. Submit URL.
+
+---
 
 ## Deliverables
 
-Students must submit all evidence in `submission.json` and include required reports, links, or scripts in the repository.
+- article URL
+- topic
+- short abstract
+- related tx hashes or contracts
+- submission.json
 
-## submission.json Example
+---
+
+## Submission Format
+
+Add this section to `submission.json`:
 
 ```json
-{
-  "assignments": {"assignment4": {"article_url": "https://...", "topic": "Ethereum vs TON", "related_tx_hashes": ["0x..."]}}
-}
+{"assignments":{"assignment4":{"article_url":"https://...","topic":"Ethereum vs TON architecture","abstract":"...","related_tx_hashes":["0x..."],"related_contracts":["0x..."]}}}
 ```
 
-## Automatic Validation
+---
 
-The checker verifies submitted blockchain evidence, correct network, wallet ownership, and assignment-specific conditions.
+## Automatic / Semi-Automatic Validation
+
+| Check | Requirement |
+|---|---|
+| URL | Article is reachable. |
+| Platform | Platform is acceptable. |
+| Length | Meets minimum size. |
+| Relevance | Course-related. |
+| Evidence | Technical evidence included. |
+
+---
+
+## Grading Rubric
+
+| Criterion | Weight | What is evaluated |
+|---|---:|---|
+| Technical depth | 35% | Concepts accurate. |
+| Original analysis | 25% | Own reasoning. |
+| Evidence | 20% | Uses tx/contracts/examples. |
+| Clarity | 20% | Readable structure. |
+
+---
+
+## Common Mistakes
+
+| Mistake | Fix |
+|---|---|
+| Too generic | Add concrete evidence. |
+| No sources | Reference docs. |
+| AI text without understanding | Be ready to explain orally. |
+
+---
+
+## Final Checklist
+
+- [ ] All required actions are completed.
+- [ ] All transaction hashes are saved.
+- [ ] `submission.json` is valid.
+- [ ] Evidence uses testnet networks.
+- [ ] Repository is pushed before deadline.
