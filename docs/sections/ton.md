@@ -6,16 +6,20 @@ Students learn:
 
 - TON wallet model;
 - testnet transactions;
+- TON message traces;
 - jettons;
 - TON NFTs;
-- message traces;
 - STON.fi and TON DeFi;
 - TON smart contract security.
 
-## Labs and assignments
+## Labs
 
 - Lab 10 / Mission 10 — Enter TON.
 - Lab 11 / Mission 11 — Dissect a Jetton Transfer.
 - Lab 12 / Mission 12 — Trade or Break on TON.
-- Assignment 3 — Cross-chain Journey.
-- Assignment 4 — Web3 Technical Article.
+
+## Related Assignments
+
+The TON section prepares students for the final cross-chain and article assignments.
+
+All major assignments are listed in the separate **Assignments** section.

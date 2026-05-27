@@ -17,18 +17,30 @@ Mission 11 → Jetton transfer analysis
 Mission 12 → TON DeFi or security challenge
 ```
 
-## Big assignments
+## Course logic
+
+The course moves from simple blockchain usage to cross-chain analysis:
+
+| Stage | Focus | Output |
+|---|---|---|
+| Foundations | Wallets, transactions, hashes, blocks | Basic blockchain literacy |
+| Ethereum | EVM, gas, ERC20, NFTs, DeFi, security | Smart contract and Web3 skills |
+| Polkadot | Accounts, extrinsics, AssetHub, XCM | Cross-chain systems understanding |
+| TON | Messages, jettons, async execution, DeFi | Alternative blockchain architecture |
+| Assignments | Combined workflows | Portfolio-ready evidence |
+
+## Major assignments
 
 | Assignment | When | Purpose |
 |---|---|---|
-| Assignment 1 — NFT Quest | Ethereum section | Full NFT ownership and contract interaction flow |
-| Assignment 2 — Security Arena | Ethereum section | Ethernaut security challenges, complexity score >= 10 |
-| Assignment 3 — Cross-chain Journey | Final section | Compare Ethereum, Polkadot, and TON using real evidence |
-| Assignment 4 — Web3 Technical Article | Final section | Publish technical explanation based on practical work |
+| Assignment 1 — NFT Quest | After NFT lab | Full NFT ownership and contract interaction flow |
+| Assignment 2 — Security Arena | After Ethereum section | Ethernaut security challenges, complexity score >= 10 |
+| Assignment 3 — Cross-chain Journey | After Polkadot and TON labs | Compare Ethereum, Polkadot, and TON using real evidence |
+| Assignment 4 — Web3 Technical Article | Final stage | Publish technical explanation based on practical work |
 
 ## Final portfolio
 
-After the course, each student should have a set of verifiable artifacts:
+After the course, each student should have verifiable artifacts:
 
 - transaction hashes;
 - deployed or used contracts;

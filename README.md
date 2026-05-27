@@ -1,6 +1,19 @@
 # CS422/CS423 Blockchain Technologies
 
-Final MkDocs Material course site.
+Final MkDocs Material course site for the Blockchain Technologies course.
+
+## Structure
+
+```text
+docs/
+├── course/
+├── sections/
+├── labs/
+├── assignments/
+├── grading/
+├── references/
+└── resources/
+```
 
 ## Local preview
 
@@ -27,3 +40,10 @@ mkdocs build --strict
 2. Open **Settings → Pages**.
 3. Select **Source → GitHub Actions**.
 4. Run **Actions → Deploy MkDocs**.
+
+## Notes
+
+- Labs are organized by technical sections.
+- Assignments are separated into their own top-level section.
+- Students submit evidence through `submission.json`.
+- Testnets only.
