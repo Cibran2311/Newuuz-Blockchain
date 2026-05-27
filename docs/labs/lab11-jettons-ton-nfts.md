@@ -2,13 +2,25 @@
 
 ## Goal
 
-Work with TON jettons and compare them with ERC20 tokens.
+In this lab you will work with TON jettons and understand why TON token architecture differs from ERC20.
 
 ---
 
 ## Why This Lab Matters
 
-TON jettons use Jetton Master and per-holder Jetton Wallet contracts. This shows how TON architecture differs from Ethereum.
+In Ethereum ERC20, balances are usually stored inside one token contract.
+
+In TON, jettons use a different architecture:
+
+```text
+Jetton Master
+    ↓
+Jetton Wallet for holder A
+Jetton Wallet for holder B
+Jetton Wallet for holder C
+```
+
+This design fits TON’s asynchronous and sharded architecture.
 
 ---
 
@@ -16,11 +28,12 @@ TON jettons use Jetton Master and per-holder Jetton Wallet contracts. This shows
 
 After completing this lab you will be able to:
 
-- explain Jetton Master
-- identify Jetton Wallets
-- send jetton
-- inspect trace
-- compare with ERC20
+- explain what a jetton is;
+- distinguish Jetton Master and Jetton Wallet;
+- send jettons;
+- inspect TON message traces;
+- compare ERC20 and jettons;
+- identify sender and recipient Jetton Wallet contracts.
 
 ---
 
@@ -28,9 +41,10 @@ After completing this lab you will be able to:
 
 | Topic | Link |
 |---|---|
-| TON docs | https://docs.ton.org/ |
+| TON documentation | https://docs.ton.org/ |
 | TON token contracts | https://github.com/ton-blockchain/token-contract |
 | Testnet Tonviewer | https://testnet.tonviewer.com/ |
+| Tonkeeper | https://tonkeeper.com/ |
 
 ---
 
@@ -38,9 +52,10 @@ After completing this lab you will be able to:
 
 | Tool | Purpose |
 |---|---|
-| Tonkeeper | Wallet |
-| Test jetton | Token |
-| Tonviewer | Explorer |
+| Tonkeeper | TON wallet |
+| Test jetton | Token used in lab |
+| Testnet Tonviewer | Inspect jetton transfer |
+| Instructor faucet/minter | Receive class jettons |
 
 ---
 
@@ -49,50 +64,114 @@ After completing this lab you will be able to:
 | Term | Meaning |
 |---|---|
 | `Jetton` | TON fungible token standard. |
-| `Jetton Master` | Metadata/code contract. |
-| `Jetton Wallet` | Per-holder balance contract. |
-| `Internal message` | Contract-to-contract message. |
+| `Jetton Master` | Contract storing token metadata and wallet code. |
+| `Jetton Wallet` | Per-holder contract storing jetton balance. |
+| `Internal message` | Contract-to-contract message in TON. |
+| `Trace` | Sequence of messages shown by explorer. |
+| `Mint` | Create new jetton tokens. |
 
 ---
 
 ## Safety Notes
 
-!!! warning "Use course test environments"
-    Do not use real funds or mainnet assets. Save transaction hashes immediately.
+!!! warning "Use testnet jettons only"
+    Do not use real TON assets.
+
+!!! info
+    Your TON wallet and your Jetton Wallet are not the same address.
 
 ---
 
 ## Step-by-Step Instructions
 
-### Step 1 — Receive jetton
+### Step 1 — Prepare TON Testnet Wallet
 
-Import/receive class jetton.
+Use the wallet from Lab 10.
 
-### Step 2 — Send jetton
+Make sure:
 
-Transfer to partner/instructor.
+- testnet mode is enabled;
+- wallet has test TON for fees.
 
-### Step 3 — Open trace
+---
 
-Inspect messages in Tonviewer.
+### Step 2 — Receive Test Jettons
 
-### Step 4 — Find contracts
+The instructor will provide one of:
 
-Record Master and Jetton Wallets.
+- Jetton Master address;
+- minter link;
+- transfer from faucet;
+- class distribution.
 
-### Step 5 — Explain architecture
+Receive test jettons to your wallet.
 
-Write short comparison with ERC20.
+---
 
-### Step 6 — Submit evidence
+### Step 3 — Open Jetton in Wallet
 
-Add addresses and link.
+In Tonkeeper or explorer, check that the jetton appears.
+
+Record:
+
+- Jetton name;
+- Jetton Master address;
+- your wallet address.
+
+---
+
+### Step 4 — Send Jettons
+
+Send a small jetton amount to:
+
+- instructor;
+- another student;
+- assigned recipient.
+
+Save transaction link.
+
+---
+
+### Step 5 — Inspect Trace in Tonviewer
+
+Open the transfer in:
+
+```text
+https://testnet.tonviewer.com/
+```
+
+Look for:
+
+- sender wallet;
+- recipient wallet;
+- Jetton Master;
+- sender Jetton Wallet;
+- recipient Jetton Wallet;
+- internal messages.
+
+---
+
+### Step 6 — Explain the Architecture
+
+Write a short explanation:
+
+```text
+In TON, each holder has a separate Jetton Wallet contract.
+The Jetton Master stores metadata and wallet code.
+A jetton transfer creates messages between wallet contracts.
+```
 
 ---
 
 ## Expected Result
 
-Jetton transfer trace and Jetton Master/Wallet addresses.
+At the end of this lab you should have:
+
+- Jetton Master address;
+- sender Jetton Wallet address;
+- recipient Jetton Wallet address;
+- jetton transfer transaction link;
+- short architecture explanation.
 
 ---
 
@@ -101,19 +180,35 @@ Jetton transfer trace and Jetton Master/Wallet addresses.
 Add this fragment to `submission.json`:
 
 ```json
-{"labs":{"lab11":{"network":"ton_testnet","jetton_master":"kQ...","sender_jetton_wallet":"kQ...","recipient_jetton_wallet":"kQ...","tx_link":"https://testnet.tonviewer.com/..."}}}
+{
+  "labs": {
+    "lab11": {
+      "network": "ton_testnet",
+      "ton_wallet": "kQYourWallet",
+      "jetton_master": "kQJettonMaster",
+      "sender_jetton_wallet": "kQSenderJettonWallet",
+      "recipient_jetton_wallet": "kQRecipientJettonWallet",
+      "tx_link": "https://testnet.tonviewer.com/...",
+      "explanation": "Jetton Master stores metadata, Jetton Wallet stores holder balance."
+    }
+  }
+}
 ```
 
 ---
 
 ## Automatic Validation
 
+The checker will verify:
+
 | Check | Requirement |
 |---|---|
-| Transfer | Jetton transfer exists. |
-| Wallets | Jetton Wallet addresses present. |
-| Network | Testnet. |
-| Explanation | Present. |
+| Network | Evidence is from TON testnet. |
+| Jetton transfer | Transfer exists. |
+| Sender | Sender wallet matches submitted wallet. |
+| Jetton Master | Address is present. |
+| Jetton Wallets | Sender and recipient wallet addresses are present. |
+| Explanation | Architecture explanation is present. |
 
 ---
 
@@ -121,14 +216,18 @@ Add this fragment to `submission.json`:
 
 | Mistake | Fix |
 |---|---|
-| Wallet vs Jetton Wallet | Record both. |
-| TON transfer instead of jetton | Submit token transfer. |
-| No trace | Use Tonviewer trace. |
+| Confusing TON wallet and Jetton Wallet | Record both addresses separately. |
+| Submitting native TON transfer | Submit jetton transfer. |
+| Wrong network | Use testnet. |
+| No trace | Open transaction in Tonviewer and inspect messages. |
+| Missing Jetton Master | Find token root/master contract. |
 
 ---
 
 ## Self-Check Questions
 
-1. Why per-holder Jetton Wallet?
-2. How different from ERC20?
-3. What is Jetton Master?
+1. How is a jetton different from ERC20?
+2. What does Jetton Master store?
+3. Why does each holder have a Jetton Wallet?
+4. What is an internal message?
+5. How does Tonviewer show a jetton transfer?

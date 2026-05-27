@@ -2,13 +2,26 @@
 
 ## Goal
 
-Interact with TON DeFi through STON.fi or solve a TON smart contract security challenge.
+In this lab you will complete one of two TON advanced tracks:
+
+- **Track A:** perform a TON DeFi swap using STON.fi or SDK;
+- **Track B:** solve a TON smart contract security challenge.
+
+The instructor will specify which track is required.
 
 ---
 
 ## Why This Lab Matters
 
-This final lab connects TON architecture to practical DeFi and security tasks.
+TON is not only a transfer network. It has:
+
+- fungible tokens;
+- NFT standards;
+- DEX protocols;
+- asynchronous smart contracts;
+- security challenges.
+
+This lab connects TON architecture with real applications.
 
 ---
 
@@ -16,10 +29,12 @@ This final lab connects TON architecture to practical DeFi and security tasks.
 
 After completing this lab you will be able to:
 
-- interact with TON DeFi
-- inspect message traces
-- understand async execution
-- analyze TON security challenge
+- interact with TON DeFi;
+- inspect TON transaction traces;
+- understand asynchronous message chains;
+- use STON.fi or its SDK;
+- analyze TON security challenge evidence;
+- submit advanced TON evidence for checking.
 
 ---
 
@@ -27,10 +42,11 @@ After completing this lab you will be able to:
 
 | Topic | Link |
 |---|---|
-| TON docs | https://docs.ton.org/ |
+| TON documentation | https://docs.ton.org/ |
 | STON.fi docs | https://docs.ston.fi/ |
 | STON.fi SDK | https://docs.ston.fi/developer-section/dex/sdk |
 | HackTON | https://www.hacktheton.com/en/level/introduction |
+| Testnet Tonviewer | https://testnet.tonviewer.com/ |
 
 ---
 
@@ -38,11 +54,12 @@ After completing this lab you will be able to:
 
 | Tool | Purpose |
 |---|---|
-| Tonkeeper | Wallet |
-| Node.js | Optional SDK |
-| STON.fi SDK | Swap script |
-| Tonviewer | Trace |
-| HackTON | Challenge |
+| Tonkeeper | Sign TON transactions |
+| TON testnet wallet | Lab account |
+| STON.fi / SDK | DeFi interaction |
+| Node.js | Required if using SDK |
+| Tonviewer | Trace inspection |
+| HackTON | Security challenge platform |
 
 ---
 
@@ -50,73 +67,168 @@ After completing this lab you will be able to:
 
 | Term | Meaning |
 |---|---|
-| `Swap` | Exchange tokens. |
-| `Trace` | Message sequence. |
-| `SDK` | Developer toolkit. |
-| `HackTON` | TON security platform. |
-| `Async` | Execution through messages over time. |
+| `Swap` | Exchange one token for another. |
+| `Router` | Contract that routes swaps through pools. |
+| `Pool` | Liquidity contract for token pair. |
+| `Trace` | Message chain caused by a transaction. |
+| `SDK` | Software development kit for programmatic interaction. |
+| `HackTON` | TON security challenge platform. |
+| `Async execution` | Execution model based on messages over time. |
 
 ---
 
 ## Safety Notes
 
-!!! warning "Use course test environments"
-    Do not use real funds or mainnet assets. Save transaction hashes immediately.
+!!! warning "Use testnet"
+    Do not use real TON or real jettons.
+
+!!! info "Choose assigned track"
+    Do not complete both tracks unless instructor allows bonus work.
 
 ---
 
-## Step-by-Step Instructions
+## Track A — TON DeFi Swap
 
-### Step 1 — Choose mode
+### Step 1 — Prepare Wallet
 
-STON.fi swap or HackTON challenge as assigned.
+Make sure your testnet wallet has:
 
-### Step 2 — Prepare tools
+- test TON;
+- required jettons if needed.
 
-Install Node.js/dependencies or open HackTON.
+### Step 2 — Open STON.fi or SDK
 
-### Step 3 — Complete action
+Use instructor-provided interface or SDK instructions.
 
-Perform swap or solve challenge.
+If using SDK, prepare Node.js project:
 
-### Step 4 — Inspect trace
+```bash
+npm init -y
+npm install @ston-fi/sdk
+```
 
-Open Tonviewer.
+Exact package may depend on current STON.fi SDK version.
 
-### Step 5 — Save proof
+### Step 3 — Prepare Swap
 
-Commit script or proof.
+Record:
 
-### Step 6 — Submit JSON
+- input token;
+- output token;
+- amount;
+- expected output;
+- pool/router if visible.
 
-Add mode and evidence.
+### Step 4 — Execute Swap
+
+Submit swap transaction and confirm in wallet.
+
+### Step 5 — Inspect Trace
+
+Open transaction in testnet Tonviewer.
+
+Look for:
+
+- wallet message;
+- router/pool messages;
+- token wallet messages;
+- final token movement.
+
+---
+
+## Track B — TON Security Challenge
+
+### Step 1 — Open Challenge
+
+Open HackTON or instructor-provided challenge.
+
+### Step 2 — Read Task
+
+Identify:
+
+- goal;
+- vulnerable contract;
+- required exploit;
+- proof condition.
+
+### Step 3 — Execute Solution
+
+Interact with contract according to challenge requirements.
+
+### Step 4 — Save Proof
+
+Save:
+
+- proof transaction;
+- challenge level;
+- explanation;
+- wallet address.
 
 ---
 
 ## Expected Result
 
-Either TON DeFi swap trace or HackTON proof.
+At the end of this lab you should have either:
+
+- TON DeFi swap trace;
+
+or
+
+- HackTON/security challenge proof.
 
 ---
 
 ## Submission
 
-Add this fragment to `submission.json`:
+For STON.fi swap:
 
 ```json
-{"labs":{"lab12":{"mode":"stonfi_swap","network":"ton_testnet","tx_link":"https://testnet.tonviewer.com/...","script_file":"scripts/swap.ts"}}}
+{
+  "labs": {
+    "lab12": {
+      "mode": "stonfi_swap",
+      "network": "ton_testnet",
+      "ton_wallet": "kQYourWallet",
+      "input_token": "TON",
+      "output_token": "JETTON",
+      "tx_link": "https://testnet.tonviewer.com/...",
+      "script_file": "scripts/swap.ts"
+    }
+  }
+}
+```
+
+For HackTON:
+
+```json
+{
+  "labs": {
+    "lab12": {
+      "mode": "hackton",
+      "network": "ton_testnet",
+      "ton_wallet": "kQYourWallet",
+      "level": "introduction",
+      "proof_tx": "https://testnet.tonviewer.com/...",
+      "explanation": "..."
+    }
+  }
+}
 ```
 
 ---
 
 ## Automatic Validation
 
+The checker will verify:
+
 | Check | Requirement |
 |---|---|
-| Mode | Valid. |
-| Evidence | Tx/proof exists. |
-| Wallet | Student involved. |
-| Network | TON testnet. |
+| Mode | `stonfi_swap` or `hackton`. |
+| Network | Evidence is on TON testnet. |
+| Wallet | Submitted wallet is involved. |
+| Swap/proof | Transaction or proof exists. |
+| Script | Script file exists if SDK mode is used. |
+| Explanation | Explanation is present for HackTON mode. |
 
 ---
 
@@ -124,15 +236,18 @@ Add this fragment to `submission.json`:
 
 | Mistake | Fix |
 |---|---|
-| Wrong mode | Use assigned one. |
-| Missing script | Commit script. |
-| Mainnet | Use testnet. |
-| Incomplete trace | Submit trace link. |
+| Using mainnet | Use testnet. |
+| Missing script file | Commit script if SDK was used. |
+| Submitting wallet page only | Submit transaction/proof link. |
+| Confusing external and internal messages | Inspect trace carefully. |
+| Wrong mode value | Use `stonfi_swap` or `hackton`. |
 
 ---
 
 ## Self-Check Questions
 
-1. What is TON async execution?
-2. What is trace?
-3. How does TON DeFi differ from Ethereum?
+1. What is asynchronous execution?
+2. What is a TON transaction trace?
+3. What is the difference between swap transaction and token transfer?
+4. Why is TON DeFi harder to inspect than simple transfers?
+5. What proves that a HackTON challenge was completed?
