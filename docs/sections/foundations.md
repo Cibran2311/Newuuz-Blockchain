@@ -1,12 +1,17 @@
-# Section — Foundations
+# Section 1 — Blockchain Foundations
 
-## Introduction
+This section introduces the basic building blocks of blockchain systems.
 
-This section introduces wallets, transactions, hash functions, Merkle trees, mining, and consensus.
+Students learn:
 
-## Learning objectives
+- what a wallet is;
+- how transactions work;
+- why blockchains use hashes;
+- how Merkle trees summarize transactions;
+- how mining and difficulty work.
 
-- interact with blockchain infrastructure;
-- analyze transactions;
-- collect evidence;
-- compare ecosystem architecture.
+## Labs
+
+- Lab 1 / Mission 1 — Enter the Blockchain.
+- Lab 2 / Mission 2 — Hash Detective.
+- Lab 3 / Mission 3 — Mine Your First Block.

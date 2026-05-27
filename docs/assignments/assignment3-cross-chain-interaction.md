@@ -22,8 +22,6 @@ Ethereum Sepolia → Polkadot / AssetHub → TON Testnet
 
 Each step must produce verifiable blockchain evidence.
 
-The exact contract/action may be assigned by the instructor, but the final submission must prove that you can work across all three ecosystems.
-
 ---
 
 ## Learning Objectives
@@ -64,15 +62,7 @@ Examples:
 - trigger event;
 - interact with class contract.
 
-Save:
-
-- Ethereum wallet;
-- contract address;
-- transaction hash;
-- event name if applicable;
-- Etherscan link.
-
----
+Save Ethereum wallet, contract address, transaction hash, event name if applicable, and Etherscan link.
 
 ### Step 2 — Polkadot Step
 
@@ -85,14 +75,7 @@ Examples:
 - submit XCM-related extrinsic;
 - interact with assigned pallet/action.
 
-Save:
-
-- Polkadot wallet;
-- extrinsic hash;
-- source/destination chain if relevant;
-- Subscan link.
-
----
+Save Polkadot wallet, extrinsic hash, source/destination chain if relevant, and Subscan link.
 
 ### Step 3 — TON Step
 
@@ -105,20 +88,11 @@ Examples:
 - execute STON.fi swap;
 - complete TON challenge.
 
-Save:
-
-- TON wallet;
-- transaction link;
-- message trace if relevant;
-- Tonviewer link.
-
----
+Save TON wallet, transaction link, message trace if relevant, and Tonviewer link.
 
 ### Step 4 — Compare Architectures
 
 Write a short comparison.
-
-Use this table as a guide:
 
 | Metric | Ethereum | Polkadot | TON |
 |---|---|---|---|
@@ -129,19 +103,6 @@ Use this table as a guide:
 | Smart contract model |  |  |  |
 | Developer experience |  |  |  |
 | Finality / speed |  |  |  |
-
----
-
-## Deliverables
-
-Submit:
-
-- Ethereum transaction hash;
-- Ethereum contract address if used;
-- Polkadot extrinsic hash;
-- TON transaction link;
-- comparison notes;
-- all relevant wallet addresses.
 
 ---
 
@@ -205,26 +166,3 @@ Submit:
 | TON step | 25% | Correct TON action and evidence. |
 | Comparison quality | 20% | Meaningful architecture comparison. |
 | Submission quality | 5% | JSON is valid and complete. |
-
----
-
-## Common Mistakes
-
-| Mistake | Fix |
-|---|---|
-| Completing only one chain | Complete all three ecosystems. |
-| No comparison notes | Fill comparison fields. |
-| Wrong explorer link | Use Etherscan, Subscan, Tonviewer correctly. |
-| Wrong network | Use Sepolia, Westend/AssetHub testnet, TON Testnet. |
-| Wallet mismatch | Use your own wallets and submit matching addresses. |
-
----
-
-## Final Checklist
-
-- [ ] Ethereum transaction is complete.
-- [ ] Polkadot extrinsic is complete.
-- [ ] TON transaction is complete.
-- [ ] All explorer links work.
-- [ ] Comparison notes are written.
-- [ ] `submission.json` is valid.

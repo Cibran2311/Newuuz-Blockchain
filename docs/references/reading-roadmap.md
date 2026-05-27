@@ -1,3 +1,29 @@
 # Reading Roadmap
 
-Before labs 1–3 read Ethereum accounts, transactions, hash functions, Merkle trees, and PoW. Before labs 4–7 read Ethereum gas, Solidity, OpenZeppelin, and Uniswap. Before labs 8–9 read Polkadot docs. Before labs 10–12 read TON and STON.fi docs.
+## Before labs 1–3
+
+- Ethereum accounts and transactions.
+- Hash functions.
+- Merkle trees.
+- Proof-of-Work.
+
+## Before labs 4–7
+
+- Ethereum gas.
+- Solidity basics.
+- OpenZeppelin ERC20/ERC721.
+- Uniswap AMM.
+
+## Before labs 8–9
+
+- Polkadot accounts.
+- Polkadot.js Apps.
+- AssetHub.
+- XCM.
+
+## Before labs 10–12
+
+- TON wallets.
+- TON messages.
+- Jettons.
+- STON.fi.

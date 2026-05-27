@@ -8,6 +8,8 @@ submission.json
 
 This file is the main source of evidence for automatic grading.
 
+---
+
 ## Why We Use JSON
 
 Blockchain assignments produce many pieces of evidence:
@@ -21,6 +23,8 @@ Blockchain assignments produce many pieces of evidence:
 - notebook paths.
 
 A single machine-readable JSON file allows GitHub Actions and grading scripts to check submissions automatically.
+
+---
 
 ## Basic Structure
 
@@ -40,6 +44,8 @@ A single machine-readable JSON file allows GitHub Actions and grading scripts to
   "assignments": {}
 }
 ```
+
+---
 
 ## Example with Labs
 
@@ -63,53 +69,23 @@ A single machine-readable JSON file allows GitHub Actions and grading scripts to
       "amount_eth": "0.0001",
       "tx_hash": "0xabc...",
       "explorer_url": "https://sepolia.etherscan.io/tx/0xabc..."
-    },
-    "lab5": {
-      "network": "sepolia",
-      "wallet": "0x1111111111111111111111111111111111111111",
-      "token_contract": "0x3333333333333333333333333333333333333333",
-      "transfer_txs": [
-        "0xtransfer1...",
-        "0xtransfer2...",
-        "0xtransfer3..."
-      ],
-      "disperse_tx": "0xdisperse..."
     }
   },
-  "assignments": {
-    "assignment2": {
-      "network": "sepolia",
-      "ethernaut_wallet": "0x1111111111111111111111111111111111111111",
-      "target_complexity": 10,
-      "claimed_levels": [
-        "Fallback",
-        "Fallout",
-        "Coin Flip"
-      ]
-    }
-  }
+  "assignments": {}
 }
 ```
 
-## Validation Rules
-
-| Rule | Description |
-|---|---|
-| Valid JSON | File must parse correctly. |
-| Required fields | Student and wallet fields must exist. |
-| Address format | Ethereum addresses must look like `0x...`. |
-| Transaction existence | Submitted tx hashes must exist on correct network. |
-| Wallet ownership | Transaction sender must match submitted wallet. |
-| Event evidence | Token/NFT/Ethernaut events must exist. |
-| Deadline | Transaction time must be before deadline if enabled. |
+---
 
 ## How to Check JSON Locally
-
-You can check JSON syntax with Python:
 
 ```bash
 python -m json.tool submission.json
 ```
+
+If the file is valid, Python will print formatted JSON. If it is invalid, Python will show the error and line number.
+
+---
 
 ## Common JSON Mistakes
 
@@ -120,6 +96,8 @@ python -m json.tool submission.json
 | Single quotes | `'wallet': '0x...'` | `"wallet": "0x..."` |
 | Trailing comma | `"a": 1, }` | `"a": 1 }` |
 | Array written as string | `"txs": "0x1,0x2"` | `"txs": ["0x1", "0x2"]` |
+
+---
 
 ## Security Rules
 

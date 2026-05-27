@@ -80,98 +80,33 @@ After completing this lab you will be able to:
 
 ### Step 1 — Install Tonkeeper
 
-Open:
-
-```text
-https://tonkeeper.com/
-```
-
-Install Tonkeeper on mobile or browser if available.
-
----
+Open https://tonkeeper.com/ and install Tonkeeper.
 
 ### Step 2 — Create Testnet Wallet
 
-1. Open Tonkeeper.
-2. Create a wallet.
-3. Save the recovery phrase securely.
-4. Open settings.
-5. Enable **Testnet** or developer mode.
-6. Switch to testnet wallet.
-
----
+Create a wallet, save the recovery phrase securely, enable **Testnet** or developer mode, and switch to testnet wallet.
 
 ### Step 3 — Receive Test TON
 
-Use the faucet or bot provided by instructor.
-
-Record your TON testnet wallet address.
-
-Expected format may start with:
-
-```text
-kQ...
-```
-
-or
-
-```text
-UQ...
-```
-
-depending on wallet/export format.
-
----
+Use the faucet or bot provided by instructor. Record your TON testnet wallet address.
 
 ### Step 4 — Send TON Transaction
 
-Send a small amount:
-
-```text
-0.01 TON
-```
-
-to instructor wallet or assigned address.
-
-Confirm transaction.
-
----
+Send `0.01 TON` to instructor wallet or assigned address.
 
 ### Step 5 — Open Tonviewer
 
-Open:
-
-```text
-https://testnet.tonviewer.com/
-```
-
-Search for your wallet or transaction.
-
-Record:
-
-- transaction link;
-- sender;
-- recipient;
-- amount;
-- status/time;
-- message trace if visible.
+Open https://testnet.tonviewer.com/ and search for your wallet or transaction. Record transaction link, sender, recipient, amount, status/time, and message trace if visible.
 
 ---
 
 ## Expected Result
 
-At the end of this lab you should have:
-
-- TON testnet wallet;
-- test TON balance;
-- successful TON testnet transaction;
-- Tonviewer transaction link.
+At the end of this lab you should have TON testnet wallet, test TON balance, successful TON testnet transaction, and Tonviewer transaction link.
 
 ---
 
 ## Submission
-
-Add this fragment to `submission.json`:
 
 ```json
 {
@@ -190,8 +125,6 @@ Add this fragment to `submission.json`:
 ---
 
 ## Automatic Validation
-
-The checker will verify:
 
 | Check | Requirement |
 |---|---|

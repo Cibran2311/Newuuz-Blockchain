@@ -10,15 +10,7 @@ This lab prepares you for **Assignment 1 — NFT Quest**.
 
 ## Why This Lab Matters
 
-NFTs are used for:
-
-- digital collectibles;
-- game assets;
-- membership passes;
-- certificates;
-- event tickets;
-- access control;
-- on-chain credentials.
+NFTs are used for digital collectibles, game assets, membership passes, certificates, event tickets, access control, and on-chain credentials.
 
 Unlike ERC20 tokens, NFTs are unique. Each NFT is identified by:
 
@@ -108,14 +100,6 @@ After completing this lab you will be able to:
 3. Make sure you have Sepolia ETH for gas.
 4. Copy your wallet address.
 
-Expected result:
-
-```text
-0xYourWalletAddress
-```
-
----
-
 ### Step 2 — Receive or Buy the Professor NFT
 
 The instructor will provide one of the following:
@@ -125,28 +109,9 @@ The instructor will provide one of the following:
 - direct transfer flow;
 - mint/buy function.
 
-Do the required interaction and save:
+Do the required interaction and save the professor NFT contract address, token ID, transaction hash, and Etherscan link.
 
-- professor NFT contract address;
-- professor NFT token ID;
-- transaction hash;
-- Etherscan link.
-
-Open the transaction in Etherscan and find the ERC721 `Transfer` event.
-
-A typical ERC721 transfer event looks like:
-
-```text
-Transfer(from, to, tokenId)
-```
-
-Check that:
-
-```text
-to = your wallet
-```
-
----
+Open the transaction in Etherscan and find the ERC721 `Transfer` event. Check that `to = your wallet`.
 
 ### Step 3 — Return or Sell the Professor NFT
 
@@ -157,11 +122,7 @@ Follow the instructor’s instruction:
 - send it to an assigned address;
 - interact with a class contract.
 
-Save the transaction hash.
-
-Check in Etherscan that ownership changed away from your wallet.
-
----
+Save the transaction hash and check in Etherscan that ownership changed away from your wallet.
 
 ### Step 4 — Mint Your Personal NFT
 
@@ -169,12 +130,7 @@ You may use a class NFT minter or deploy your own contract.
 
 If deploying your own:
 
-1. Open OpenZeppelin Wizard:
-
-```text
-https://wizard.openzeppelin.com/
-```
-
+1. Open OpenZeppelin Wizard.
 2. Select **ERC721**.
 3. Set name and symbol.
 4. Enable minting if required.
@@ -184,21 +140,9 @@ https://wizard.openzeppelin.com/
 8. Deploy to **Sepolia**.
 9. Mint one NFT to your wallet.
 
-Save:
-
-- personal NFT contract address;
-- personal token ID;
-- mint transaction hash.
-
----
+Save personal NFT contract address, token ID, and mint transaction hash.
 
 ### Step 5 — Check NFT Owner
-
-Use one of these methods:
-
-- Etherscan read contract tab;
-- Remix;
-- custom script.
 
 Call:
 
@@ -212,11 +156,7 @@ Expected result:
 ownerOf(personal_token_id) = your wallet
 ```
 
----
-
 ### Step 6 — Approve the Special Contract
-
-The instructor will provide a special contract address.
 
 Call:
 
@@ -226,15 +166,9 @@ approve(special_contract, personal_token_id)
 
 Save the approval transaction hash.
 
-In Etherscan, look for `Approval` event.
-
----
-
 ### Step 7 — Transfer NFT to the Special Contract
 
-Transfer your NFT to the special contract using the method required by the instructor.
-
-Common options:
+Transfer your NFT to the special contract using the method required by the instructor:
 
 ```solidity
 transferFrom(your_wallet, special_contract, tokenId)
@@ -246,29 +180,17 @@ or
 safeTransferFrom(your_wallet, special_contract, tokenId)
 ```
 
-Save the transfer transaction hash.
-
 Check that `ownerOf(tokenId)` is now the special contract address.
 
 ---
 
 ## Expected Result
 
-At the end of the lab you should have:
-
-- professor NFT interaction evidence;
-- personal NFT contract address;
-- personal token ID;
-- approval transaction;
-- transfer transaction to special contract;
-- Etherscan links;
-- updated `submission.json`.
+At the end of the lab you should have professor NFT interaction evidence, personal NFT contract address, personal token ID, approval transaction, transfer transaction to special contract, Etherscan links, and updated `submission.json`.
 
 ---
 
 ## Submission
-
-Add this fragment to `submission.json`:
 
 ```json
 {
@@ -295,8 +217,6 @@ Add this fragment to `submission.json`:
 
 ## Automatic Validation
 
-The checker will verify:
-
 | Check | Requirement |
 |---|---|
 | Network | All transactions are on Sepolia. |
@@ -320,7 +240,6 @@ The checker will verify:
 | Using ERC20 transfer logic | ERC721 uses `tokenId`, not amount. |
 | NFT not owned by student before transfer | Check `ownerOf(tokenId)` before transfer. |
 | Wrong network | Use Sepolia only. |
-| Submitting marketplace page instead of tx hash | Submit transaction hash and Etherscan link. |
 
 ---
 

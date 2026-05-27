@@ -1,12 +1,16 @@
-# Section — Polkadot
+# Section 3 — Polkadot and Cross-chain Systems
 
-## Introduction
+This section introduces Polkadot and cross-chain architecture.
 
-This section introduces Polkadot accounts, extrinsics, Relay Chain, parachains, AssetHub, and XCM.
+Students learn:
 
-## Learning objectives
+- Polkadot account model;
+- extrinsics;
+- Relay Chain and parachains;
+- AssetHub;
+- XCM.
 
-- interact with blockchain infrastructure;
-- analyze transactions;
-- collect evidence;
-- compare ecosystem architecture.
+## Labs
+
+- Lab 8 / Mission 8 — Enter Polkadot.
+- Lab 9 / Mission 9 — Send a Cross-chain Message.

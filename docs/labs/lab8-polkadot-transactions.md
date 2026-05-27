@@ -10,10 +10,7 @@ In this lab you will create a Polkadot account, connect to Westend, receive test
 
 Polkadot is not an Ethereum clone. It uses different account formats, different transaction terminology, and a runtime-based architecture.
 
-In Ethereum you usually submit a transaction.  
-In Polkadot you submit an **extrinsic**.
-
-This lab introduces the practical user flow for Polkadot.
+In Ethereum you usually submit a transaction. In Polkadot you submit an **extrinsic**.
 
 ---
 
@@ -80,24 +77,11 @@ After completing this lab you will be able to:
 
 ### Step 1 — Install Polkadot.js Extension
 
-Open:
-
-```text
-https://polkadot.js.org/extension/
-```
-
-Install the extension for your browser.
-
----
+Open https://polkadot.js.org/extension/ and install the extension for your browser.
 
 ### Step 2 — Create Account
 
-1. Open the extension.
-2. Click **Create new account**.
-3. Save the recovery phrase securely.
-4. Set account name.
-5. Set password.
-6. Copy your account address.
+Open extension, click **Create new account**, save the recovery phrase securely, set account name and password, and copy your address.
 
 Expected address format:
 
@@ -105,92 +89,35 @@ Expected address format:
 5...
 ```
 
----
-
 ### Step 3 — Open Polkadot.js Apps
 
-Open:
-
-```text
-https://polkadot.js.org/apps/
-```
-
-Connect the extension.
-
----
+Open https://polkadot.js.org/apps/ and connect the extension.
 
 ### Step 4 — Select Westend
 
-In the network selector choose:
-
-```text
-Westend
-```
-
-If the interface asks for permission, allow your account to connect.
-
----
+In the network selector choose **Westend**.
 
 ### Step 5 — Get Westend Tokens
 
-Use the faucet provided by instructor or official faucet if available.
-
-Record:
-
-- wallet address;
-- faucet transaction/extrinsic if visible;
-- current balance.
-
----
+Use the faucet provided by instructor or official faucet if available. Record wallet address and balance.
 
 ### Step 6 — Send Transfer
 
-In Polkadot.js Apps:
-
-1. Open **Accounts**.
-2. Find your account.
-3. Click **Send** or transfer button.
-4. Enter recipient address.
-5. Enter small amount.
-6. Sign and submit.
-
----
+In Polkadot.js Apps, open **Accounts**, find your account, click transfer/send, enter recipient address and amount, then sign and submit.
 
 ### Step 7 — Find Extrinsic in Subscan
 
-Open:
-
-```text
-https://westend.subscan.io/
-```
-
-Search by extrinsic hash or account address.
-
-Record:
-
-- extrinsic hash;
-- signer;
-- destination;
-- amount;
-- status.
+Open https://westend.subscan.io/ and search by extrinsic hash or account address. Record extrinsic hash, signer, destination, amount, and status.
 
 ---
 
 ## Expected Result
 
-At the end of this lab you should have:
-
-- Polkadot.js account;
-- Westend test balance;
-- successful transfer extrinsic;
-- Subscan link;
-- updated `submission.json`.
+At the end of this lab you should have a Polkadot.js account, Westend test balance, successful transfer extrinsic, Subscan link, and updated `submission.json`.
 
 ---
 
 ## Submission
-
-Add this fragment to `submission.json`:
 
 ```json
 {
@@ -209,8 +136,6 @@ Add this fragment to `submission.json`:
 ---
 
 ## Automatic Validation
-
-The checker will verify:
 
 | Check | Requirement |
 |---|---|

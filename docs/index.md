@@ -4,6 +4,8 @@ Welcome to the **CS422/CS423 Blockchain Technologies** course.
 
 This course is not only about reading how blockchain works. You will interact with real test networks, deploy and use smart contracts, work with tokens and NFTs, solve security challenges, and compare different blockchain architectures.
 
+---
+
 ## Your Web3 Builder Journey
 
 ```text
@@ -21,6 +23,8 @@ Smart Contract Security Analyst
     ↓
 Cross-chain Operator
     ↓
+TON / Polkadot / Ethereum Systems Explorer
+    ↓
 Web3 Technical Author
 ```
 
@@ -34,6 +38,8 @@ By the end of the course, you will have a practical blockchain portfolio contain
 - Polkadot extrinsics;
 - TON testnet transactions;
 - a technical article based on your work.
+
+---
 
 ## Why This Course Matters
 
@@ -49,6 +55,8 @@ You will learn how to:
 - compare Ethereum, Polkadot, and TON;
 - build evidence that can be automatically checked.
 
+---
+
 ## Course Structure
 
 | Section | Focus | Practical Result |
@@ -58,26 +66,9 @@ You will learn how to:
 | Section 3 | Polkadot and Cross-chain Systems | Westend transaction, AssetHub, XCM |
 | Section 4 | TON and Async Architecture | TON transaction, jettons, STON.fi / security |
 
-## Main Assignments
+---
 
-| Assignment | Topic | Result |
-|---|---|---|
-| Assignment 1 | NFT Trading and Smart Contract Interaction | NFT ownership flow and special contract interaction |
-| Assignment 2 | Ethernaut | Solidity security challenges with complexity score >= 10 |
-| Assignment 3 | Cross-chain Smart Contract Interaction | Similar actions in Ethereum, Polkadot, and TON |
-| Assignment 4 | Technical Blockchain Article | Published technical article with blockchain evidence |
-
-## How You Submit Work
-
-Most labs and assignments are submitted through GitHub Classroom.
-
-Each repository must contain:
-
-```text
-submission.json
-```
-
-The automatic checker will read `submission.json` and verify your work using blockchain data.
+## Safety Rules
 
 !!! danger "Never share secrets"
     Never submit private keys, seed phrases, wallet recovery phrases, API keys, or passwords.

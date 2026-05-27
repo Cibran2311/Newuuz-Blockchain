@@ -1,12 +1,21 @@
-# Section — Ethereum
+# Section 2 — Ethereum and Smart Contracts
 
-## Introduction
+This section introduces Ethereum, EVM, smart contracts, ERC20 tokens, NFTs, AMMs, and smart contract security.
 
-This section introduces Ethereum, EVM, gas, ERC20, NFTs, AMMs, DEX arbitrage, and Ethernaut.
+Students learn:
 
-## Learning objectives
+- Ethereum account model;
+- gas and transaction fees;
+- ERC20 and ERC721 standards;
+- Disperse batch transfers;
+- AMM mechanics;
+- Ethernaut security challenges.
 
-- interact with blockchain infrastructure;
-- analyze transactions;
-- collect evidence;
-- compare ecosystem architecture.
+## Labs and assignments
+
+- Lab 4 / Mission 4 — Read the Chain.
+- Lab 5 / Mission 5 — Launch Your Token.
+- Lab 6 / Mission 6 — Create and Move NFTs.
+- Lab 7 / Mission 7 — Trade Like a DeFi Bot.
+- Assignment 1 — NFT Quest.
+- Assignment 2 — Security Arena.

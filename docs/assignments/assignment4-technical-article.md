@@ -8,47 +8,47 @@ Publish a technical article based on practical blockchain work from the course.
 
 ## Scenario
 
-You are acting as a technical author. Your task is to explain one blockchain topic clearly using evidence, examples, and your own analysis.
+You are a technical author. Your task is to explain one blockchain topic clearly using evidence, examples, and your own analysis.
 
 ---
 
-## Learning Objectives
+## Suggested Topics
 
-After completing this assignment students will be able to:
-
-- write technical explanations
-- use blockchain evidence
-- compare architectures
-- communicate DeFi/security concepts
+- Ethereum vs TON architecture.
+- Ethernaut solutions.
+- NFT ownership mechanics.
+- DEX arbitrage.
+- XCM and cross-chain systems.
+- TON asynchronous execution.
+- Jettons vs ERC20.
+- Gas, fees, and transaction models.
 
 ---
 
 ## Requirements
 
-1. Choose course-related topic.
-2. Write technical article.
-3. Include code, diagrams, tx hashes, or contracts where useful.
-4. Publish on Medium/dev.to/Hashnode/Habr or similar.
-5. Submit URL.
-
----
-
-## Deliverables
-
-- article URL
-- topic
-- short abstract
-- related tx hashes or contracts
-- submission.json
+1. Publish article on Medium, dev.to, Habr, Hashnode, or similar platform.
+2. Include technical analysis.
+3. Include diagrams, code snippets, formulas, or transaction examples where useful.
+4. Reference blockchain evidence where appropriate.
+5. Submit article URL in `submission.json`.
 
 ---
 
 ## Submission Format
 
-Add this section to `submission.json`:
-
 ```json
-{"assignments":{"assignment4":{"article_url":"https://...","topic":"Ethereum vs TON architecture","abstract":"...","related_tx_hashes":["0x..."],"related_contracts":["0x..."]}}}
+{
+  "assignments": {
+    "assignment4": {
+      "article_url": "https://...",
+      "topic": "Ethereum vs TON architecture",
+      "abstract": "...",
+      "related_tx_hashes": ["0x..."],
+      "related_contracts": ["0x..."]
+    }
+  }
+}
 ```
 
 ---
@@ -59,37 +59,17 @@ Add this section to `submission.json`:
 |---|---|
 | URL | Article is reachable. |
 | Platform | Platform is acceptable. |
-| Length | Meets minimum size. |
-| Relevance | Course-related. |
-| Evidence | Technical evidence included. |
+| Length | Article meets minimum size. |
+| Relevance | Topic is course-related. |
+| Evidence | Blockchain evidence is included where applicable. |
 
 ---
 
 ## Grading Rubric
 
-| Criterion | Weight | What is evaluated |
+| Criterion | Weight | Description |
 |---|---:|---|
-| Technical depth | 35% | Concepts accurate. |
-| Original analysis | 25% | Own reasoning. |
-| Evidence | 20% | Uses tx/contracts/examples. |
-| Clarity | 20% | Readable structure. |
-
----
-
-## Common Mistakes
-
-| Mistake | Fix |
-|---|---|
-| Too generic | Add concrete evidence. |
-| No sources | Reference docs. |
-| AI text without understanding | Be ready to explain orally. |
-
----
-
-## Final Checklist
-
-- [ ] All required actions are completed.
-- [ ] All transaction hashes are saved.
-- [ ] `submission.json` is valid.
-- [ ] Evidence uses testnet networks.
-- [ ] Repository is pushed before deadline.
+| Technical depth | 35% | Explains concepts accurately. |
+| Original analysis | 25% | Contains own reasoning, not only copy-paste. |
+| Evidence | 20% | Uses transactions/contracts/examples. |
+| Clarity | 20% | Readable and well-structured. |

@@ -86,70 +86,23 @@ After completing this lab you will be able to:
 
 ### Step 1 — Prepare TON Testnet Wallet
 
-Use the wallet from Lab 10.
-
-Make sure:
-
-- testnet mode is enabled;
-- wallet has test TON for fees.
-
----
+Use the wallet from Lab 10. Make sure testnet mode is enabled and wallet has test TON for fees.
 
 ### Step 2 — Receive Test Jettons
 
-The instructor will provide one of:
-
-- Jetton Master address;
-- minter link;
-- transfer from faucet;
-- class distribution.
-
-Receive test jettons to your wallet.
-
----
+The instructor will provide Jetton Master address, minter link, transfer from faucet, or class distribution.
 
 ### Step 3 — Open Jetton in Wallet
 
-In Tonkeeper or explorer, check that the jetton appears.
-
-Record:
-
-- Jetton name;
-- Jetton Master address;
-- your wallet address.
-
----
+Check that the jetton appears. Record Jetton name, Jetton Master address, and your wallet address.
 
 ### Step 4 — Send Jettons
 
-Send a small jetton amount to:
-
-- instructor;
-- another student;
-- assigned recipient.
-
-Save transaction link.
-
----
+Send a small jetton amount to instructor, another student, or assigned recipient. Save transaction link.
 
 ### Step 5 — Inspect Trace in Tonviewer
 
-Open the transfer in:
-
-```text
-https://testnet.tonviewer.com/
-```
-
-Look for:
-
-- sender wallet;
-- recipient wallet;
-- Jetton Master;
-- sender Jetton Wallet;
-- recipient Jetton Wallet;
-- internal messages.
-
----
+Open transaction in testnet Tonviewer. Look for sender wallet, recipient wallet, Jetton Master, sender Jetton Wallet, recipient Jetton Wallet, and internal messages.
 
 ### Step 6 — Explain the Architecture
 
@@ -165,19 +118,11 @@ A jetton transfer creates messages between wallet contracts.
 
 ## Expected Result
 
-At the end of this lab you should have:
-
-- Jetton Master address;
-- sender Jetton Wallet address;
-- recipient Jetton Wallet address;
-- jetton transfer transaction link;
-- short architecture explanation.
+At the end of this lab you should have Jetton Master address, sender Jetton Wallet address, recipient Jetton Wallet address, jetton transfer transaction link, and short architecture explanation.
 
 ---
 
 ## Submission
-
-Add this fragment to `submission.json`:
 
 ```json
 {
@@ -198,8 +143,6 @@ Add this fragment to `submission.json`:
 ---
 
 ## Automatic Validation
-
-The checker will verify:
 
 | Check | Requirement |
 |---|---|

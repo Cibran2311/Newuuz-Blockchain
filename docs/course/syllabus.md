@@ -1,13 +1,39 @@
 # Syllabus
 
-## Q1 — Foundations
-Wallets, first transaction, hashes, Merkle trees, mining.
+## Quarter 1 — Blockchain Foundations
 
-## Q2 — Ethereum
-Transactions, gas, ERC20, Disperse, NFTs, AMMs, Ethernaut.
+- Wallet setup.
+- First transaction.
+- Hash functions.
+- Collisions.
+- Merkle trees.
+- Proof-of-Work mining.
+- Consensus overview.
 
-## Q3 — Polkadot
-Polkadot.js, Westend, extrinsics, AssetHub, XCM.
+## Quarter 2 — Ethereum
 
-## Q4 — TON
-Tonkeeper, TON testnet, jettons, STON.fi, HackTON.
+- Ethereum transactions.
+- Gas.
+- ERC20.
+- Disperse.
+- ERC721 NFTs.
+- Smart contract interaction.
+- AMMs and DEX arbitrage.
+- Ethernaut.
+
+## Quarter 3 — Polkadot
+
+- Polkadot.js.
+- Westend.
+- Extrinsics.
+- AssetHub.
+- XCM.
+
+## Quarter 4 — TON
+
+- Tonkeeper.
+- TON testnet.
+- TON transactions.
+- Jettons.
+- STON.fi.
+- TON security challenges.

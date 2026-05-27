@@ -61,7 +61,7 @@ After completing this lab you will be able to:
 | `Liquidity pool` | Contract containing reserves of two tokens. |
 | `Reserve` | Amount of token stored in the pool. |
 | `x * y = k` | Constant product formula used by many AMMs. |
-| `Slippage` | Price change caused by trade size. |
+| `Slippage` | Price movement caused by trade size. |
 | `Arbitrage` | Buying in one market and selling in another for profit. |
 | `Swap` | Exchange one token for another. |
 
@@ -75,13 +75,7 @@ In a constant product AMM:
 x * y = k
 ```
 
-Where:
-
-- `x` = reserve of token X;
-- `y` = reserve of token Y;
-- `k` = constant.
-
-Approximate price can be estimated as:
+Approximate price:
 
 ```text
 price(TEST in USDC) = USDC reserve / TEST reserve
@@ -94,11 +88,7 @@ Example:
 | DEX Alpha | 1000 TEST | 5000 USDC | 5 USDC / TEST |
 | DEX Beta | 800 TEST | 4800 USDC | 6 USDC / TEST |
 
-In this example:
-
-- TEST is cheaper on Alpha;
-- TEST is more expensive on Beta;
-- strategy: buy TEST on Alpha, sell TEST on Beta.
+In this example, TEST is cheaper on Alpha and more expensive on Beta, so the strategy is to buy TEST on Alpha and sell TEST on Beta.
 
 ---
 
@@ -116,47 +106,13 @@ In this example:
 
 ### Step 1 — Receive Test Tokens
 
-The instructor or TA will provide:
+The instructor or TA will provide TEST token, USDC token, DEX Alpha, and DEX Beta.
 
-- TEST token;
-- USDC token;
-- DEX Alpha contract/interface;
-- DEX Beta contract/interface.
-
-Make sure your wallet has:
-
-```text
-TEST
-USDC
-Sepolia ETH / test gas token
-```
-
----
+Make sure your wallet has TEST, USDC, and gas token.
 
 ### Step 2 — Read Pool Reserves
 
-For each DEX, read reserves.
-
-You may use:
-
-- DEX web interface;
-- Remix;
-- contract read functions;
-- script.
-
-Record:
-
-```text
-DEX Alpha:
-TEST reserve = ...
-USDC reserve = ...
-
-DEX Beta:
-TEST reserve = ...
-USDC reserve = ...
-```
-
----
+For each DEX, read TEST and USDC reserves using DEX interface, Remix, read functions, or script.
 
 ### Step 3 — Calculate Prices
 
@@ -166,27 +122,11 @@ Use:
 price(TEST) = USDC reserve / TEST reserve
 ```
 
-Example:
-
-```text
-Alpha = 5000 / 1000 = 5 USDC per TEST
-Beta = 4800 / 800 = 6 USDC per TEST
-```
-
-Decision:
-
-```text
-Buy TEST where price is lower.
-Sell TEST where price is higher.
-```
-
----
+Buy where price is lower. Sell where price is higher.
 
 ### Step 4 — Estimate Swap Output
 
-Before trading, call the DEX price function if available.
-
-Examples of possible function names:
+Before trading, call a price function if available:
 
 ```solidity
 getSwapPrice(...)
@@ -194,43 +134,17 @@ getAmountOut(...)
 quote(...)
 ```
 
-Record expected output.
-
----
-
 ### Step 5 — Execute First Swap
 
-Execute the first swap on the cheaper DEX.
-
-Example:
-
-```text
-Swap USDC → TEST on DEX Alpha
-```
-
-Save transaction hash.
-
----
+Execute the first swap on the cheaper DEX and save the transaction hash.
 
 ### Step 6 — Execute Second Swap
 
-Execute the second swap on the more expensive DEX.
-
-Example:
-
-```text
-Swap TEST → USDC on DEX Beta
-```
-
-Save transaction hash.
-
----
+Execute the second swap on the more expensive DEX and save the transaction hash.
 
 ### Step 7 — Calculate Final Value
 
-Calculate your final value in USDC.
-
-Example:
+Calculate final value in USDC:
 
 ```text
 final_value = USDC balance + TEST balance * final_TEST_price
@@ -242,19 +156,11 @@ Write whether you made profit or loss.
 
 ## Expected Result
 
-At the end of this lab you should have:
-
-- reserve data for DEX Alpha and DEX Beta;
-- price calculation;
-- at least one swap transaction;
-- final USDC-equivalent value;
-- explanation of your arbitrage strategy.
+At the end of this lab you should have reserve data for DEX Alpha and DEX Beta, price calculation, at least one swap transaction, final USDC-equivalent value, and explanation of your arbitrage strategy.
 
 ---
 
 ## Submission
-
-Add this fragment to `submission.json`:
 
 ```json
 {
@@ -287,8 +193,6 @@ Add this fragment to `submission.json`:
 
 ## Automatic Validation
 
-The checker will verify:
-
 | Check | Requirement |
 |---|---|
 | DEX contracts | Submitted DEX addresses match class contracts. |
@@ -309,7 +213,6 @@ The checker will verify:
 | Failed swap | Check token approval and balance. |
 | No final calculation | Calculate final value in USDC. |
 | Submitting only one DEX address | Submit both Alpha and Beta. |
-| Wrong token direction | Write token input/output clearly. |
 
 ---
 

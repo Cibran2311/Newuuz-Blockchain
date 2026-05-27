@@ -13,13 +13,7 @@ The instructor will specify which track is required.
 
 ## Why This Lab Matters
 
-TON is not only a transfer network. It has:
-
-- fungible tokens;
-- NFT standards;
-- DEX protocols;
-- asynchronous smart contracts;
-- security challenges.
+TON is not only a transfer network. It has fungible tokens, NFT standards, DEX protocols, asynchronous smart contracts, and security challenges.
 
 This lab connects TON architecture with real applications.
 
@@ -91,10 +85,7 @@ After completing this lab you will be able to:
 
 ### Step 1 — Prepare Wallet
 
-Make sure your testnet wallet has:
-
-- test TON;
-- required jettons if needed.
+Make sure your testnet wallet has test TON and required jettons if needed.
 
 ### Step 2 — Open STON.fi or SDK
 
@@ -111,13 +102,7 @@ Exact package may depend on current STON.fi SDK version.
 
 ### Step 3 — Prepare Swap
 
-Record:
-
-- input token;
-- output token;
-- amount;
-- expected output;
-- pool/router if visible.
+Record input token, output token, amount, expected output, and pool/router if visible.
 
 ### Step 4 — Execute Swap
 
@@ -125,14 +110,7 @@ Submit swap transaction and confirm in wallet.
 
 ### Step 5 — Inspect Trace
 
-Open transaction in testnet Tonviewer.
-
-Look for:
-
-- wallet message;
-- router/pool messages;
-- token wallet messages;
-- final token movement.
+Open transaction in testnet Tonviewer and inspect wallet, router, pool, and token wallet messages.
 
 ---
 
@@ -144,12 +122,7 @@ Open HackTON or instructor-provided challenge.
 
 ### Step 2 — Read Task
 
-Identify:
-
-- goal;
-- vulnerable contract;
-- required exploit;
-- proof condition.
+Identify goal, vulnerable contract, required exploit, and proof condition.
 
 ### Step 3 — Execute Solution
 
@@ -157,24 +130,13 @@ Interact with contract according to challenge requirements.
 
 ### Step 4 — Save Proof
 
-Save:
-
-- proof transaction;
-- challenge level;
-- explanation;
-- wallet address.
+Save proof transaction, challenge level, explanation, and wallet address.
 
 ---
 
 ## Expected Result
 
-At the end of this lab you should have either:
-
-- TON DeFi swap trace;
-
-or
-
-- HackTON/security challenge proof.
+At the end of this lab you should have either a TON DeFi swap trace or HackTON/security challenge proof.
 
 ---
 
@@ -218,8 +180,6 @@ For HackTON:
 ---
 
 ## Automatic Validation
-
-The checker will verify:
 
 | Check | Requirement |
 |---|---|

@@ -18,9 +18,7 @@ This assignment checks whether you can work with NFT ownership, approvals, event
 
 You are an NFT engineer working with a course NFT system.
 
-The professor NFT represents a controlled asset.  
-Your personal NFT represents your own on-chain artifact.  
-The special contract represents an external system that must receive or lock your NFT.
+The professor NFT represents a controlled asset. Your personal NFT represents your own on-chain artifact. The special contract represents an external system that must receive or lock your NFT.
 
 Your task is to prove the complete ownership flow using on-chain evidence.
 
@@ -57,39 +55,19 @@ After completing this assignment you will be able to:
 
 ### Step 1 — Prepare Wallet
 
-Use the same Sepolia wallet from previous labs.
-
-Make sure you have Sepolia ETH for gas.
-
----
+Use the same Sepolia wallet from previous labs. Make sure you have Sepolia ETH for gas.
 
 ### Step 2 — Interact with Professor NFT
 
-The instructor will provide:
-
-- professor NFT contract;
-- token ID or mint/buy flow;
-- return/sell instructions.
+The instructor will provide professor NFT contract, token ID or mint/buy flow, and return/sell instructions.
 
 Complete the professor NFT flow and save evidence.
 
----
-
 ### Step 3 — Mint Personal NFT
 
-Use either:
+Use class NFT minter, Remix + OpenZeppelin Wizard, or instructor-provided contract.
 
-- class NFT minter;
-- Remix + OpenZeppelin Wizard;
-- instructor-provided contract.
-
-Save:
-
-- contract address;
-- token ID;
-- mint transaction hash.
-
----
+Save contract address, token ID, and mint transaction hash.
 
 ### Step 4 — Verify Ownership
 
@@ -105,8 +83,6 @@ Expected result:
 your wallet
 ```
 
----
-
 ### Step 5 — Approve Special Contract
 
 Call:
@@ -117,13 +93,11 @@ approve(special_contract, tokenId)
 
 Save approval transaction.
 
----
-
 ### Step 6 — Transfer NFT to Special Contract
 
 Transfer NFT to special contract using the required function or UI.
 
-Check that:
+Check:
 
 ```solidity
 ownerOf(tokenId) == special_contract
@@ -197,19 +171,6 @@ Submit:
 | Special contract interaction | 30% | Approval and transfer to correct contract. |
 | Evidence quality | 15% | JSON, hashes, and explorer links are correct. |
 | Explanation | 10% | Student can explain ownership flow. |
-
----
-
-## Common Mistakes
-
-| Mistake | Fix |
-|---|---|
-| Submitting only contract address | Submit contract address and token ID. |
-| Wrong token ID | Check event logs. |
-| Approval missing | Call approve before transfer if needed. |
-| NFT sent to wrong address | Use official special contract address. |
-| Using mainnet | Use Sepolia only. |
-| Not checking ownerOf | Verify owner before and after transfer. |
 
 ---
 

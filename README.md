@@ -1,20 +1,29 @@
 # CS422/CS423 Blockchain Technologies
 
-Full MkDocs course site for Blockchain Technologies.
+Final MkDocs Material course site.
 
 ## Local preview
 
 ```bash
-pip install mkdocs-material pymdown-extensions
+python -m pip install -r requirements.txt
 mkdocs serve
 ```
 
-Open `http://127.0.0.1:8000`.
+Open:
 
-## GitHub Pages setup
+```text
+http://127.0.0.1:8000
+```
 
-1. Push this project to GitHub.
-2. Go to **Settings → Pages**.
+## Build
+
+```bash
+mkdocs build --strict
+```
+
+## GitHub Pages
+
+1. Push the repository to GitHub.
+2. Open **Settings → Pages**.
 3. Select **Source → GitHub Actions**.
-4. Open **Actions → Deploy MkDocs**.
-5. Run workflow manually or push to `main`.
+4. Run **Actions → Deploy MkDocs**.

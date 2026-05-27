@@ -8,7 +8,12 @@
   ],
   "properties": {
     "student": {
-      "type": "object"
+      "type": "object",
+      "required": [
+        "full_name",
+        "student_id",
+        "github_username"
+      ]
     },
     "wallets": {
       "type": "object"

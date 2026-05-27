@@ -1,12 +1,21 @@
-# Section — Ton
+# Section 4 — TON and Asynchronous Blockchain Architecture
 
-## Introduction
+This section introduces TON, an asynchronous and sharded blockchain ecosystem.
 
-This section introduces TON wallets, testnet transactions, jettons, message traces, STON.fi, and TON security.
+Students learn:
 
-## Learning objectives
+- TON wallet model;
+- testnet transactions;
+- jettons;
+- TON NFTs;
+- message traces;
+- STON.fi and TON DeFi;
+- TON smart contract security.
 
-- interact with blockchain infrastructure;
-- analyze transactions;
-- collect evidence;
-- compare ecosystem architecture.
+## Labs and assignments
+
+- Lab 10 / Mission 10 — Enter TON.
+- Lab 11 / Mission 11 — Dissect a Jetton Transfer.
+- Lab 12 / Mission 12 — Trade or Break on TON.
+- Assignment 3 — Cross-chain Journey.
+- Assignment 4 — Web3 Technical Article.

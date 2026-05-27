@@ -2,13 +2,13 @@
 
 ## Goal
 
-Build a Merkle tree and simulate Proof-of-Work by finding a nonce.
+In this lab you will build a Merkle tree from transactions and simulate Proof-of-Work mining by finding a valid nonce.
 
 ---
 
 ## Why This Lab Matters
 
-Merkle trees summarize transactions, and Proof-of-Work shows why changing a block is expensive.
+Merkle trees allow blockchains to summarize many transactions with one root hash. Mining demonstrates how Proof-of-Work links computation to block creation.
 
 ---
 
@@ -16,10 +16,11 @@ Merkle trees summarize transactions, and Proof-of-Work shows why changing a bloc
 
 After completing this lab you will be able to:
 
-- construct Merkle root
-- build simplified block header
-- find nonce
-- explain difficulty
+- hash transactions
+- build a Merkle root
+- construct a simplified block header
+- find a nonce for a target difficulty
+- explain why changing one transaction changes the block hash
 
 ---
 
@@ -28,7 +29,7 @@ After completing this lab you will be able to:
 | Topic | Link |
 |---|---|
 | Merkle tree | https://en.wikipedia.org/wiki/Merkle_tree |
-| Bitcoin developer guide | https://developer.bitcoin.org/devguide/block_chain.html |
+| Bitcoin block chain guide | https://developer.bitcoin.org/devguide/block_chain.html |
 | Proof of Work | https://en.wikipedia.org/wiki/Proof_of_work |
 
 ---
@@ -37,8 +38,9 @@ After completing this lab you will be able to:
 
 | Tool | Purpose |
 |---|---|
-| Python / Colab | Simulation |
-| Notebook | Submit results |
+| Python / Colab | Run mining simulation |
+| Notebook or script | Submit code |
+| GitHub repository | Store results |
 
 ---
 
@@ -46,51 +48,40 @@ After completing this lab you will be able to:
 
 | Term | Meaning |
 |---|---|
-| `Merkle root` | Single hash summarizing transactions. |
-| `Nonce` | Value changed during mining. |
-| `Difficulty` | Rule the hash must satisfy. |
-| `Block header` | Data hashed to identify block. |
+| `Merkle root` | Single hash representing all transactions in a Merkle tree. |
+| `Nonce` | Number changed repeatedly during mining. |
+| `Difficulty` | Condition that a block hash must satisfy. |
+| `Block header` | Data used to calculate block hash. |
 
 ---
 
 ## Safety Notes
 
 !!! info
-    This is a simplified mining simulation, not real cryptocurrency mining.
+    This is a simplified mining simulation. You are not mining real cryptocurrency.
 
 ---
 
 ## Step-by-Step Instructions
 
 ### Step 1 — Prepare transactions
-
-Create a list of transaction strings or numbers.
-
+Create a small list of transaction strings or numbers.
 ### Step 2 — Hash transactions
-
-Hash every transaction.
-
-### Step 3 — Build tree
-
-Pair hashes until one root remains.
-
-### Step 4 — Create header
-
-Combine previous hash, Merkle root, and nonce.
-
-### Step 5 — Mine
-
-Change nonce until hash matches difficulty.
-
-### Step 6 — Record
-
-Save root, nonce, hash, and difficulty.
+Hash each transaction using SHA-256 or the lab hash function.
+### Step 3 — Build Merkle tree
+Pair hashes and hash pairs until one root remains.
+### Step 4 — Create block header
+Combine previous hash, Merkle root, timestamp/student ID, and nonce.
+### Step 5 — Mine block
+Change nonce until the block hash matches the difficulty rule.
+### Step 6 — Save result
+Record transactions, Merkle root, nonce, difficulty, and block hash.
 
 ---
 
 ## Expected Result
 
-A valid Merkle root and nonce producing a block hash matching difficulty.
+At the end of the lab you should have a valid Merkle root and a nonce that produces a block hash satisfying the selected difficulty.
 
 ---
 
@@ -99,18 +90,31 @@ A valid Merkle root and nonce producing a block hash matching difficulty.
 Add this fragment to `submission.json`:
 
 ```json
-{"labs":{"lab3":{"transactions":["tx1","tx2","tx3"],"merkle_root":"...","nonce":12345,"block_hash":"...","difficulty":"000"}}}
+{
+  "labs": {
+    "lab3": {
+      "transactions": ["tx1", "tx2", "tx3"],
+      "merkle_root": "...",
+      "nonce": 12345,
+      "block_hash": "...",
+      "difficulty": "000"
+    }
+  }
+}
 ```
 
 ---
 
 ## Automatic Validation
 
+The checker will verify:
+
 | Check | Requirement |
 |---|---|
-| Merkle root | Recalculates correctly. |
-| Nonce | Produces submitted block hash. |
-| Difficulty | Hash satisfies target. |
+| Merkle root | Root recalculates from submitted transactions. |
+| Nonce | Nonce produces submitted block hash. |
+| Difficulty | Block hash satisfies difficulty. |
+| Code | Notebook or script exists. |
 
 ---
 
@@ -118,14 +122,16 @@ Add this fragment to `submission.json`:
 
 | Mistake | Fix |
 |---|---|
-| Changed order | Keep order fixed. |
-| Hash mismatch | Use consistent encoding. |
-| Difficulty not met | Continue mining. |
+| Changing transaction order | Keep order fixed. |
+| Using inconsistent encoding | Encode strings consistently. |
+| Hash does not satisfy difficulty | Continue mining. |
+| Forgetting nonce | Record final nonce. |
 
 ---
 
 ## Self-Check Questions
 
-1. What is Merkle root?
-2. Why does one changed tx change the root?
+1. What is a Merkle root?
+2. Why does changing one transaction change the root?
 3. What is nonce?
+4. What does difficulty mean?

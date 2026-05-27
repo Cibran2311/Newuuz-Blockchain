@@ -8,14 +8,7 @@ In this lab you will explore AssetHub and XCM in the Polkadot ecosystem. You wil
 
 ## Why This Lab Matters
 
-Polkadot is built around multiple specialized chains. Instead of every application living on one global smart contract chain, Polkadot uses:
-
-- Relay Chain;
-- parachains;
-- system parachains;
-- cross-chain messaging.
-
-XCM is a key part of Polkadot architecture because it allows chains to communicate.
+Polkadot is built around multiple specialized chains. XCM is a key part of Polkadot architecture because it allows chains to communicate.
 
 ---
 
@@ -38,7 +31,6 @@ After completing this lab you will be able to:
 |---|---|
 | Polkadot documentation | https://docs.polkadot.com/ |
 | Polkadot.js Apps | https://polkadot.js.org/apps/ |
-| AssetHub documentation | https://docs.polkadot.com/ |
 | Subscan | https://subscan.io/ |
 
 ---
@@ -63,7 +55,6 @@ After completing this lab you will be able to:
 | `AssetHub` | System parachain for asset operations. |
 | `XCM` | Cross-Consensus Messaging format. |
 | `Reserve transfer` | Transfer model where assets are reserved on one chain and represented on another. |
-| `Sovereign account` | Account controlled by another chain. |
 
 ---
 
@@ -81,77 +72,25 @@ After completing this lab you will be able to:
 
 ### Step 1 — Open Polkadot.js Apps
 
-Open:
-
-```text
-https://polkadot.js.org/apps/
-```
-
-Connect your Polkadot.js extension.
-
----
+Open https://polkadot.js.org/apps/ and connect your Polkadot.js extension.
 
 ### Step 2 — Select Required Chain
 
-The instructor will specify which chains to use.
+The instructor will specify which chains to use, for example `Westend → AssetHub`.
 
-Common test setup:
-
-```text
-Westend → AssetHub
-```
-
-or
-
-```text
-AssetHub → Westend
-```
-
-Record:
-
-- source chain;
-- destination chain;
-- wallet address.
-
----
+Record source chain, destination chain, and wallet address.
 
 ### Step 3 — Prepare Balance
 
 Make sure your wallet has enough test tokens for fees.
 
-If needed, use faucet or instructor distribution.
-
----
-
 ### Step 4 — Perform AssetHub / XCM Action
 
-Depending on the class setup, perform one of:
-
-- reserve transfer;
-- asset transfer;
-- XCM teleport/reserve-backed action;
-- assigned Polkadot.js extrinsic.
-
-Follow instructor parameters exactly.
-
-Record the extrinsic hash.
-
----
+Depending on class setup, perform reserve transfer, asset transfer, XCM action, or assigned extrinsic.
 
 ### Step 5 — Inspect Extrinsic
 
-Open Subscan for the relevant network.
-
-Find:
-
-- extrinsic hash;
-- signer;
-- pallet/method;
-- success/failure;
-- events;
-- source/destination information if visible.
-
----
+Open Subscan and find extrinsic hash, signer, pallet/method, success/failure, events, and source/destination data.
 
 ### Step 6 — Explain Message Flow
 
@@ -168,18 +107,11 @@ This differs from a normal transfer because ...
 
 ## Expected Result
 
-At the end of this lab you should have:
-
-- XCM/AssetHub-related extrinsic hash;
-- source and destination chain;
-- Subscan link;
-- short explanation of message flow.
+At the end of this lab you should have an AssetHub/XCM-related extrinsic hash, source and destination chain, Subscan link, and short explanation.
 
 ---
 
 ## Submission
-
-Add this fragment to `submission.json`:
 
 ```json
 {
@@ -199,8 +131,6 @@ Add this fragment to `submission.json`:
 ---
 
 ## Automatic Validation
-
-The checker will verify:
 
 | Check | Requirement |
 |---|---|
