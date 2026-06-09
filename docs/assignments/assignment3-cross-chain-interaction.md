@@ -1,13 +1,15 @@
-# Assignment 3 — Chain of Contracts
+# Assignment 3 — Group Chain of Contracts
 
 ## Goal
 
-Build and verify a chain of smart contracts on Ethereum and Polkadot, then compare this synchronous contract-call model with TON asynchronous message architecture.
+Build a group-owned chain of smart contracts on **Ethereum Sepolia**.
 
-The main idea is to implement a linked execution flow:
+Students work in groups and connect their contracts into one execution chain. The result must be verifiable through Sepolia transactions, contract addresses, and emitted events.
+
+The main flow is:
 
 ```text
-User
+Student Wallet
   ↓
 ChainEntry
   ↓
@@ -20,78 +22,165 @@ ChainLink 3
 ChainTerminal
 ```
 
-Each contract in the chain must call or trigger the next contract. The final contract must store or emit the final result.
+Each group member should be responsible for at least one part of the chain.
 
 ---
 
-## Scenario
+## Why This Assignment Exists
 
-You are building a modular blockchain workflow where one contract does not perform the whole operation alone.
+In real blockchain systems, contracts rarely work alone. They interact with other contracts, forward data, emit events, and depend on correct configuration.
 
-Instead, the logic is split into several contracts:
-
-- `ChainEntry` starts the workflow;
-- `ChainLink` contracts process intermediate steps;
-- `ChainTerminal` receives the final result;
-- events prove that every step was executed in the correct order.
-
-This architecture helps students understand:
+This assignment helps you practice:
 
 - contract-to-contract calls;
+- group coordination;
+- deployment order;
+- address configuration;
 - event-based verification;
-- execution flow;
-- gas/weight limitations;
-- differences between Ethereum, Polkadot, and TON.
+- transaction analysis through Etherscan;
+- evidence-based blockchain reporting.
 
 ---
 
-## Learning Objectives
+## Network
 
-After completing this assignment you will be able to:
+Use only:
 
-- design a multi-contract workflow;
-- deploy several connected smart contracts;
-- execute a chain of contract calls;
-- emit and inspect events;
-- verify execution order;
-- compare Solidity and ink! contract models;
-- explain why TON requires a different asynchronous approach.
+```text
+Ethereum Sepolia Testnet
+```
+
+Do not use Ethereum mainnet.
+
+Recommended tools:
+
+- MetaMask;
+- Remix IDE or Hardhat;
+- Sepolia faucet;
+- Sepolia Etherscan;
+- GitHub repository for code and reports.
+
+---
+
+## Group Size
+
+Recommended group size:
+
+```text
+3–5 students
+```
+
+Minimum group size:
+
+```text
+3 students
+```
+
+If a group has only 3 students, one student may own more than one contract.
 
 ---
 
 ## Required Chain
 
-The minimum required chain is:
+Minimum chain:
 
 ```text
 User → ChainEntry → ChainLink(1) → ChainLink(2) → ChainLink(3) → ChainTerminal
 ```
 
-Minimum contracts:
+Required contracts:
 
-| Contract | Purpose |
+| Contract | Minimum Quantity | Purpose |
+|---|---:|---|
+| `ChainEntry` | 1 | Starts the workflow. |
+| `ChainLink` | 3 | Receives data and forwards it to the next contract. |
+| `ChainTerminal` | 1 | Receives the final data and stores the result. |
+
+---
+
+## Recommended Group Roles
+
+| Role | Responsibility |
 |---|---|
-| `ChainEntry` | Starts the chain and validates the caller. |
-| `ChainLink(1)` | Receives data from entry and forwards it. |
-| `ChainLink(2)` | Receives data from link 1 and forwards it. |
-| `ChainLink(3)` | Receives data from link 2 and forwards it. |
-| `ChainTerminal` | Receives final data and stores/emits final result. |
+| Coordinator | Organizes addresses, order, and final submission. |
+| Entry Owner | Deploys or configures `ChainEntry`. |
+| Link Owner | Deploys one `ChainLink`. |
+| Terminal Owner | Deploys or configures `ChainTerminal`. |
+| Reporter | Prepares evidence and checks JSON validity. |
+
+A student may have more than one role, but every student must have a visible personal contribution.
+
+---
+
+## Contract Logic
+
+### ChainEntry
+
+`ChainEntry` starts the chain.
+
+It should:
+
+1. accept input data;
+2. emit a start event;
+3. call the first `ChainLink`;
+4. emit a completion event after the chain finishes, if your design supports it.
+
+Example function name:
+
+```solidity
+startChain(bytes32 data)
+```
+
+### ChainLink
+
+Each `ChainLink` receives data and forwards it to the next contract.
+
+It should:
+
+1. receive input data;
+2. optionally transform the data;
+3. emit an event;
+4. call the next contract.
+
+Example function name:
+
+```solidity
+execute(bytes32 data)
+```
+
+### ChainTerminal
+
+`ChainTerminal` receives the final result.
+
+It should:
+
+1. receive final data;
+2. store the final result in a public variable;
+3. emit a final event.
+
+Example variable:
+
+```solidity
+bytes32 public lastResult;
+```
 
 ---
 
 ## Required Events
 
-The Ethereum implementation should emit events similar to:
+Your implementation must emit events that make the execution order visible.
+
+Recommended event structure:
 
 ```solidity
 event ChainStarted(address indexed user, bytes32 data);
 event EntryExecuted(address indexed entry, address indexed next);
-event LinkExecuted(uint256 indexed index, address indexed current, address indexed next);
+event LinkExecuted(uint256 indexed index, address indexed current, address indexed next, bytes32 data);
 event FinalReceived(address indexed terminal, bytes32 finalData);
 event ChainCompleted(address indexed user, bytes32 finalData);
 ```
 
-The exact event names may differ, but the execution must be verifiable.
+Exact names may differ, but the meaning must be clear.
 
 Expected logical order:
 
@@ -105,146 +194,231 @@ FinalReceived
 ChainCompleted
 ```
 
+If your implementation cannot emit `ChainCompleted` after the terminal step, explain why in the report.
+
 ---
 
-## Part A — Ethereum Implementation
+## Step-by-Step Instructions
 
-### Requirements
+### Step 1 — Form a Group
 
-1. Use Ethereum Sepolia or local Hardhat network if Sepolia deployment is not required by the instructor.
-2. Implement or reuse the contract chain structure.
-3. Deploy:
-   - `ChainEntry`;
-   - at least three `ChainLink` contracts;
-   - `ChainTerminal`.
-4. Configure contracts so that each contract knows the next contract address.
-5. Call the entry function, for example:
+Create a group of 3–5 students.
+
+Choose:
+
+- group ID;
+- group coordinator;
+- contract owners;
+- final chain order.
+
+Example:
+
+```text
+Group ID: G1
+
+Student A → ChainEntry
+Student B → ChainLink 1
+Student C → ChainLink 2
+Student D → ChainLink 3
+Student E → ChainTerminal
+```
+
+### Step 2 — Prepare Sepolia Wallets
+
+Each student must prepare a wallet on Sepolia.
+
+Each student should submit:
+
+- wallet address;
+- role in the group;
+- owned contract address;
+- deployment transaction hash.
+
+### Step 3 — Deploy Contracts
+
+Deploy all required contracts on Sepolia.
+
+Recommended deployment order:
+
+1. `ChainTerminal`;
+2. `ChainLink 3`;
+3. `ChainLink 2`;
+4. `ChainLink 1`;
+5. `ChainEntry`.
+
+This reverse deployment order is usually easier because each contract needs to know the next contract address.
+
+Alternative: deploy first, then call setter functions such as:
+
+```solidity
+setNext(address nextContract)
+```
+
+### Step 4 — Connect the Chain
+
+The final chain must be connected like this:
+
+```text
+ChainEntry → ChainLink 1 → ChainLink 2 → ChainLink 3 → ChainTerminal
+```
+
+Save evidence for each connection:
+
+- setter transaction hashes; or
+- constructor arguments; or
+- verified source code / deployment script.
+
+### Step 5 — Execute the Chain
+
+Call the entry contract:
 
 ```solidity
 startChain(bytes32 data)
 ```
 
-6. Verify that the full chain was executed.
-7. Save:
-   - contract addresses;
-   - deployment transaction hashes;
-   - start transaction hash;
-   - emitted events;
-   - final stored result.
+Use a unique input value.
+
+Example:
+
+```text
+keccak256("G1-chain-test-001")
+```
+
+Save:
+
+- start transaction hash;
+- Etherscan link;
+- emitted events;
+- final stored result.
+
+### Step 6 — Verify Final Result
+
+The terminal contract must expose the final result.
+
+Examples:
+
+```solidity
+lastResult()
+lastSender()
+executionCount()
+```
+
+Your report must show that the terminal contract received the data.
 
 ---
 
-## Part B — Polkadot / ink! Implementation
+## Required Evidence
 
-### Requirements
+Each group must provide:
 
-1. Implement or run a similar chain using ink! contracts.
-2. Use local test environment, Westend-compatible environment, or instructor-provided setup.
-3. Implement equivalent roles:
-   - entry contract;
-   - link contracts;
-   - terminal contract.
-4. Execute the chain.
-5. Save:
-   - contract addresses or local deployment output;
-   - execution proof;
-   - events if available;
-   - final stored result.
-
-If public deployment is not available, submit local test output and repository path.
+| Evidence | Required |
+|---|---|
+| Group ID | Yes |
+| Student wallets | Yes |
+| Contract owners | Yes |
+| Contract addresses | Yes |
+| Deployment transaction hashes | Yes |
+| Chain connection evidence | Yes |
+| Start transaction hash | Yes |
+| Event order | Yes |
+| Final result from terminal contract | Yes |
+| Etherscan links | Yes |
 
 ---
 
-## Part C — TON Architecture Comparison
+## Group Submission
 
-TON implementation is not required by default.
+The group submits one shared file:
 
-Instead, write a technical comparison explaining how this chain would work differently in TON.
+```text
+group_submission.json
+```
 
-Your comparison must answer:
+Example:
 
-1. How would TON represent this workflow using asynchronous messages?
-2. Why is direct synchronous contract-to-contract execution not the same in TON?
-3. How would failure propagation differ?
-4. How would gas/fees differ?
-5. How would you trace the execution in Tonviewer?
-6. What would be harder or easier compared to Ethereum and Polkadot?
-
-Bonus: implement a small TON prototype if the instructor allows it.
+```json
+{
+  "assignment": "assignment3",
+  "title": "Group Chain of Contracts",
+  "network": "sepolia",
+  "group": {
+    "group_id": "G1",
+    "members": [
+      {
+        "student_id": "001",
+        "name": "Student A",
+        "wallet": "0xA...",
+        "role": "ChainEntry",
+        "owned_contract": "0xEntry...",
+        "deployment_tx": "0xDeployEntry..."
+      },
+      {
+        "student_id": "002",
+        "name": "Student B",
+        "wallet": "0xB...",
+        "role": "ChainLink1",
+        "owned_contract": "0xLink1...",
+        "deployment_tx": "0xDeployLink1..."
+      }
+    ]
+  },
+  "chain": {
+    "chain_entry": "0xEntry...",
+    "chain_links": [
+      "0xLink1...",
+      "0xLink2...",
+      "0xLink3..."
+    ],
+    "chain_terminal": "0xTerminal...",
+    "connection_txs": [
+      "0xSetNextEntry...",
+      "0xSetNextLink1...",
+      "0xSetNextLink2...",
+      "0xSetNextLink3..."
+    ],
+    "start_chain_tx": "0xStartChain...",
+    "explorer_url": "https://sepolia.etherscan.io/tx/0xStartChain...",
+    "input_data": "0x...",
+    "expected_event_order": [
+      "ChainStarted",
+      "EntryExecuted",
+      "LinkExecuted",
+      "LinkExecuted",
+      "LinkExecuted",
+      "FinalReceived",
+      "ChainCompleted"
+    ],
+    "final_result": "0x..."
+  },
+  "report": {
+    "repository_url": "https://github.com/your-group/assignment3-chain-of-contracts",
+    "report_path": "reports/assignment3-report.md",
+    "notes": "Short explanation of the implementation."
+  }
+}
+```
 
 ---
 
-## Deliverables
+## Individual Submission
 
-Submit:
+Each student also adds a short individual part to their own `submission.json`.
 
-- Ethereum contract addresses;
-- Ethereum start transaction hash;
-- emitted event evidence;
-- final stored result;
-- Polkadot / ink! contract addresses or local test output;
-- Polkadot execution proof;
-- TON comparison report;
-- updated `submission.json`.
-
----
-
-## Submission Format
-
-Add this section to `submission.json`:
+Example:
 
 ```json
 {
   "assignments": {
     "assignment3": {
-      "title": "Chain of Contracts",
-      "ethereum": {
-        "network": "sepolia",
-        "wallet": "0xYourWallet",
-        "chain_entry": "0xChainEntry",
-        "chain_links": [
-          "0xChainLink1",
-          "0xChainLink2",
-          "0xChainLink3"
-        ],
-        "chain_terminal": "0xChainTerminal",
-        "deployment_txs": [
-          "0xDeployEntry",
-          "0xDeployLink1",
-          "0xDeployLink2",
-          "0xDeployLink3",
-          "0xDeployTerminal"
-        ],
-        "start_chain_tx": "0xStartChainTx",
-        "expected_events": [
-          "ChainStarted",
-          "EntryExecuted",
-          "LinkExecuted",
-          "LinkExecuted",
-          "LinkExecuted",
-          "FinalReceived",
-          "ChainCompleted"
-        ],
-        "final_result": "0xFinalData",
-        "explorer_url": "https://sepolia.etherscan.io/tx/0xStartChainTx"
-      },
-      "polkadot": {
-        "network": "local_or_westend",
-        "account": "5YourPolkadotAddress",
-        "chain_entry": "contract-address-or-local-id",
-        "chain_links": [
-          "contract-address-or-local-id-1",
-          "contract-address-or-local-id-2",
-          "contract-address-or-local-id-3"
-        ],
-        "chain_terminal": "contract-address-or-local-id",
-        "execution_proof": "extrinsic hash / local test output / report path",
-        "final_result": "final stored value"
-      },
-      "ton_comparison": {
-        "report_path": "reports/ton-chain-comparison.md",
-        "summary": "TON would use asynchronous messages instead of direct synchronous contract calls."
-      }
+      "mode": "group",
+      "network": "sepolia",
+      "group_id": "G1",
+      "wallet": "0xA...",
+      "role": "ChainEntry",
+      "owned_contract": "0xEntry...",
+      "deployment_tx": "0xDeployEntry...",
+      "group_start_chain_tx": "0xStartChain...",
+      "personal_contribution": "Deployed ChainEntry, configured the first link, and started the chain."
     }
   }
 }
@@ -252,18 +426,48 @@ Add this section to `submission.json`:
 
 ---
 
+## Report Requirements
+
+The group report must contain:
+
+1. Group members and roles.
+2. Chain diagram.
+3. Contract addresses.
+4. Deployment transaction hashes.
+5. Connection transaction hashes.
+6. Start transaction hash.
+7. Event order screenshot or decoded event list.
+8. Final result from `ChainTerminal`.
+9. Short explanation of problems and fixes.
+10. Individual contribution table.
+
+Example contribution table:
+
+| Student | Wallet | Role | Contribution |
+|---|---|---|---|
+| Student A | `0x...` | ChainEntry | Deployed entry and started chain. |
+| Student B | `0x...` | ChainLink1 | Deployed first link. |
+| Student C | `0x...` | ChainLink2 | Deployed second link. |
+| Student D | `0x...` | ChainLink3 | Deployed third link. |
+| Student E | `0x...` | ChainTerminal | Deployed terminal and verified result. |
+
+---
+
 ## Automatic / Semi-Automatic Validation
+
+The checker can verify:
 
 | Check | Requirement |
 |---|---|
-| Ethereum contracts | Required contracts are submitted. |
-| Ethereum execution | `start_chain_tx` exists and is successful. |
-| Event order | Expected events are emitted in correct logical order. |
-| Final result | Terminal contract stores or emits final data. |
-| Student wallet | Student wallet started or deployed the chain. |
-| Polkadot implementation | ink! implementation or local test proof is submitted. |
-| TON comparison | Report exists and answers required architecture questions. |
-| JSON validity | `submission.json` is valid JSON. |
+| Network | Must be Sepolia. |
+| Group size | 3–5 students recommended. |
+| Contracts exist | Entry, at least 3 links, terminal. |
+| Deployment txs | Each submitted deployment tx exists. |
+| Start tx | `start_chain_tx` exists and succeeded. |
+| Event order | Events match expected chain logic. |
+| Final result | Terminal contract exposes or emits result. |
+| Individual contribution | Each student has wallet, role, owned contract, and tx. |
+| JSON validity | `group_submission.json` is valid JSON. |
 
 ---
 
@@ -271,11 +475,25 @@ Add this section to `submission.json`:
 
 | Criterion | Weight | Description |
 |---|---:|---|
-| Ethereum chain implementation | 30% | Contracts are deployed and connected correctly. |
-| Ethereum execution evidence | 20% | Events and final result prove full chain execution. |
-| Polkadot / ink! implementation | 25% | Equivalent chain or local proof is provided. |
-| TON architecture comparison | 15% | Comparison explains async messages and architectural differences. |
-| Submission quality | 10% | JSON, addresses, hashes, and report paths are correct. |
+| Group chain works end-to-end | 35% | Full chain executes from entry to terminal. |
+| Correct event evidence | 20% | Events prove correct execution order. |
+| Individual contribution | 20% | Each student owns or clearly contributes to one part. |
+| Deployment and configuration quality | 10% | Contracts are connected cleanly and reproducibly. |
+| Report quality | 10% | Report explains addresses, txs, screenshots, and problems. |
+| JSON quality | 5% | Submission files are valid and complete. |
+
+---
+
+## Penalties
+
+| Problem | Possible Penalty |
+|---|---:|
+| Missing individual contribution | Up to -20% for that student |
+| No successful start transaction | Up to -35% |
+| No event evidence | Up to -20% |
+| Contracts not connected | Up to -30% |
+| Invalid JSON | Up to -10% |
+| Mainnet transaction used | Assignment may be rejected |
 
 ---
 
@@ -283,25 +501,28 @@ Add this section to `submission.json`:
 
 | Mistake | Fix |
 |---|---|
-| Contracts are deployed but not connected | Set the next contract address for every chain element. |
-| Only one contract is used | The assignment requires a chain of at least five contracts. |
-| No event evidence | Emit events at every step. |
-| Final contract does not store result | Add a readable final state variable or event. |
-| Polkadot part missing | Submit ink! implementation or local test output. |
-| TON part treated as normal EVM call | Explain TON asynchronous messages instead. |
-| JSON contains comments | JSON does not support comments. |
+| Deploying contracts but not linking them | Use constructor arguments or `setNext(...)`. |
+| Starting the chain from the wrong contract | The workflow must start from `ChainEntry`. |
+| No final state in terminal | Store final data in a public variable. |
+| No events | Emit events at every step. |
+| One student does everything | Every student needs a visible contribution. |
+| Using different networks | Everyone must use Sepolia. |
+| Submitting screenshots only | Always submit transaction hashes and addresses. |
 
 ---
 
 ## Final Checklist
 
-- [ ] Ethereum `ChainEntry` is deployed.
-- [ ] At least three Ethereum `ChainLink` contracts are deployed.
-- [ ] Ethereum `ChainTerminal` is deployed.
-- [ ] Contracts are connected in correct order.
-- [ ] `startChain(...)` or equivalent function was called.
-- [ ] Events prove full chain execution.
-- [ ] Final result is stored or emitted.
-- [ ] Polkadot / ink! implementation or local proof is submitted.
-- [ ] TON comparison report is written.
-- [ ] `submission.json` is valid.
+- [ ] Group has 3–5 students.
+- [ ] Every student has a Sepolia wallet.
+- [ ] `ChainEntry` is deployed.
+- [ ] At least three `ChainLink` contracts are deployed.
+- [ ] `ChainTerminal` is deployed.
+- [ ] Contracts are connected in the correct order.
+- [ ] The chain was started from `ChainEntry`.
+- [ ] Start transaction succeeded on Sepolia.
+- [ ] Events prove the execution order.
+- [ ] Terminal contract stores or emits final result.
+- [ ] Group report is ready.
+- [ ] `group_submission.json` is valid.
+- [ ] Every student updated individual `submission.json`.
