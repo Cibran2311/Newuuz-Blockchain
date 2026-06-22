@@ -1,19 +1,33 @@
-# CS422/CS423 Blockchain Technologies
+# CS422/CS423 Blockchain Technologies — Compact Core Version
 
-Final MkDocs Material course site for the Blockchain Technologies course.
+This is the reduced version of the Blockchain Technologies course.
 
-## Structure
+## Main Change
+
+The required path is now shorter and more realistic:
 
 ```text
-docs/
-├── course/
-├── sections/
-├── labs/
-├── assignments/
-├── grading/
-├── references/
-└── resources/
+Lab 1, Lab 2, Lab 3,
+Lab 4, Lab 5, Lab 6,
+Lab 8, Lab 10,
+Assignment 3,
+Assignment 4
 ```
+
+The following tasks are moved to Optional / Advanced:
+
+```text
+Lab 7, Lab 9, Lab 11, Lab 12,
+Assignment 1, Assignment 2
+```
+
+## Expected Workload
+
+| Student Level | Approximate Workload |
+|---|---:|
+| Strong student | 28–35 hours |
+| Average student | 40–55 hours |
+| Beginner | 60–75 hours |
 
 ## Local preview
 
@@ -22,28 +36,8 @@ python -m pip install -r requirements.txt
 mkdocs serve
 ```
 
-Open:
-
-```text
-http://127.0.0.1:8000
-```
-
 ## Build
 
 ```bash
 mkdocs build --strict
 ```
-
-## GitHub Pages
-
-1. Push the repository to GitHub.
-2. Open **Settings → Pages**.
-3. Select **Source → GitHub Actions**.
-4. Run **Actions → Deploy MkDocs**.
-
-## Notes
-
-- Labs are organized by technical sections.
-- Assignments are separated into their own top-level section.
-- Students submit evidence through `submission.json`.
-- Testnets only.

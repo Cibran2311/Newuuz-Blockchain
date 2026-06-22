@@ -1,5 +1,18 @@
 # Assignment 1 — NFT Quest: Trading and Special Contract Interaction
 
+!!! note "Compact Course Status"
+    This assignment is optional in the compact course. It can be used as an extension of Lab 6.
+
+## Difficulty Mode
+
+| Mode | Recommendation |
+|---|---|
+| Course track | Standard |
+
+In the Core track this assignment can be merged with Lab 6. In Standard and Advanced tracks it remains a separate checkpoint.
+
+---
+
 ## Goal
 
 Complete a full NFT ownership flow:

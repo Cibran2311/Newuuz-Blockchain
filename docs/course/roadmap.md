@@ -1,52 +1,37 @@
 # Course Roadmap
 
-## Practical path
+## Compact Required Path
 
 ```text
-Mission 1  → Wallet and first transaction
-Mission 2  → Hash collision
-Mission 3  → Merkle tree and mining
-Mission 4  → Ethereum gas and transaction analysis
-Mission 5  → ERC20 token and Disperse
-Mission 6  → NFT ownership and special contract
-Mission 7  → DEX arbitrage
-Mission 8  → Polkadot extrinsic
-Mission 9  → AssetHub and XCM
-Mission 10 → TON transaction
-Mission 11 → Jetton transfer analysis
-Mission 12 → TON DeFi or security challenge
+Lab 1  → Wallet and first transaction
+Lab 2  → Hash collision
+Lab 3  → Merkle tree and mining
+Lab 4  → Ethereum gas and transaction analysis
+Lab 5  → ERC20 token and Disperse
+Lab 6  → NFT ownership and special contract
+Lab 8  → Polkadot transaction
+Lab 10 → TON transaction
+Assignment 3 → Group Chain of Contracts on Sepolia
+Assignment 4 → Web3 Technical Article
 ```
 
-## Course logic
-
-The course moves from simple blockchain usage to cross-chain analysis:
+## Course Logic
 
 | Stage | Focus | Output |
 |---|---|---|
 | Foundations | Wallets, transactions, hashes, blocks | Basic blockchain literacy |
-| Ethereum | EVM, gas, ERC20, NFTs, DeFi, security | Smart contract and Web3 skills |
-| Polkadot | Accounts, extrinsics, AssetHub, XCM | Cross-chain systems understanding |
-| TON | Messages, jettons, async execution, DeFi | Alternative blockchain architecture |
-| Assignments | Combined workflows | Portfolio-ready evidence |
+| Ethereum | Gas, ERC20, NFTs, approvals | Smart contract interaction skills |
+| Alternative Ecosystems | Polkadot and TON basics | Architecture comparison |
+| Group Work | Shared Sepolia contract chain | Team-based verifiable blockchain workflow |
+| Final Writing | Technical article | Structured explanation and reflection |
 
-## Major assignments
+## Optional Extension Path
 
-| Assignment | When | Purpose |
-|---|---|---|
-| Assignment 1 — NFT Quest | After NFT lab | Full NFT ownership and contract interaction flow |
-| Assignment 2 — Security Arena | After Ethereum section | Ethernaut security challenges, complexity score >= 10 |
-| Assignment 3 — Cross-chain Journey | After Polkadot and TON labs | Compare Ethereum, Polkadot, and TON using real evidence |
-| Assignment 4 — Web3 Technical Article | Final stage | Publish technical explanation based on practical work |
-
-## Final portfolio
-
-After the course, each student should have verifiable artifacts:
-
-- transaction hashes;
-- deployed or used contracts;
-- NFT ownership history;
-- DEX swap evidence;
-- Ethernaut completions;
-- Polkadot extrinsics;
-- TON transaction traces;
-- public technical article.
+```text
+Lab 7  → DEX arbitrage
+Lab 9  → XCM
+Lab 11 → Jetton transfer analysis
+Lab 12 → TON DeFi or security
+Assignment 1 → NFT Quest
+Assignment 2 → Ethernaut
+```

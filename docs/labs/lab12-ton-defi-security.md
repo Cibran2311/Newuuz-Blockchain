@@ -1,5 +1,18 @@
 # Mission 12 — Trade or Break on TON
 
+!!! note "Compact Course Status"
+    This lab is optional in the compact course. Use it only for advanced TON work.
+
+## Difficulty Mode
+
+| Mode | Recommendation |
+|---|---|
+| Course track | Advanced |
+
+This is a bonus lab. Use it for stronger students or as a replacement for another advanced task.
+
+---
+
 ## Goal
 
 In this lab you will complete one of two TON advanced tracks:

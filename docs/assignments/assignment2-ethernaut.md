@@ -1,5 +1,18 @@
 # Assignment 2 — Security Arena: Ethernaut
 
+!!! note "Compact Course Status"
+    This assignment is optional in the compact course. It can be used as the security bonus track.
+
+## Difficulty Mode
+
+| Mode | Recommendation |
+|---|---|
+| Course track | Standard / Advanced |
+
+Core: optional or 3–5 beginner levels. Standard: complexity score >= 6. Advanced: complexity score >= 10 or >= 15.
+
+---
+
 ## Goal
 
 In this assignment you will solve Ethernaut smart contract security challenges on Ethereum Sepolia.

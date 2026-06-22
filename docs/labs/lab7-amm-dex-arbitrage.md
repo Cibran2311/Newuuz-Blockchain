@@ -1,5 +1,18 @@
 # Mission 7 — Trade Like a DeFi Bot
 
+!!! note "Compact Course Status"
+    This lab is optional in the compact course. Use it as a DeFi bonus task.
+
+## Difficulty Mode
+
+| Mode | Recommendation |
+|---|---|
+| Course track | Standard / Advanced |
+
+Core students may watch this as a demo or submit a guided report. Standard students complete the simplified swap/arbitrage workflow. Advanced students optimize the strategy and explain price impact.
+
+---
+
 ## Goal
 
 In this lab you will analyze two automated market maker pools, compare token prices, execute swaps, and calculate whether your arbitrage strategy made profit or loss.

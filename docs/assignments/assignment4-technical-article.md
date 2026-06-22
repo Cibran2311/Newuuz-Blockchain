@@ -1,5 +1,15 @@
 # Assignment 4 — Web3 Technical Article
 
+## Difficulty Mode
+
+| Mode | Recommendation |
+|---|---|
+| Course track | Core / Standard / Advanced |
+
+Core: short structured article. Standard: full article. Advanced: public article with deeper technical comparison.
+
+---
+
 ## Goal
 
 Publish a technical article based on practical blockchain work from the course.

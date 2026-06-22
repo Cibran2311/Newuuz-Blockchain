@@ -1,5 +1,18 @@
 # Mission 9 — Send a Cross-chain Message
 
+!!! note "Compact Course Status"
+    This lab is optional in the compact course. Use it as an advanced Polkadot/XCM task or instructor demo.
+
+## Difficulty Mode
+
+| Mode | Recommendation |
+|---|---|
+| Course track | Advanced by default |
+
+This lab is optional in the Core and Standard tracks unless the instructor has enough time for XCM. It is recommended as a demo or bonus task.
+
+---
+
 ## Goal
 
 In this lab you will explore AssetHub and XCM in the Polkadot ecosystem. You will perform or analyze a cross-chain-related action and explain how it differs from a normal transfer.

@@ -1,77 +1,50 @@
-# Blockchain Technologies
+# CS422/CS423 Blockchain Technologies
 
-Welcome to the **CS422/CS423 Blockchain Technologies** course.
+Welcome to the compact practical Blockchain Technologies course.
 
-This course is not only about reading how blockchain works. You will interact with real test networks, deploy and use smart contracts, work with tokens and NFTs, solve security challenges, and compare different blockchain architectures.
+This version is intentionally reduced. The goal is to keep the course understandable, checkable, and realistic for a normal student workload.
 
----
+## Core Idea
 
-## Your Web3 Builder Journey
+Students learn blockchain by producing verifiable evidence:
 
-```text
-Blockchain User
-    ↓
-On-chain Investigator
-    ↓
-Token Creator
-    ↓
-NFT Engineer
-    ↓
-DeFi Trader
-    ↓
-Smart Contract Security Analyst
-    ↓
-Cross-chain Operator
-    ↓
-TON / Polkadot / Ethereum Systems Explorer
-    ↓
-Web3 Technical Author
-```
+- wallet addresses;
+- testnet transactions;
+- contract addresses;
+- event logs;
+- explorer links;
+- JSON submissions;
+- short technical reports.
 
-By the end of the course, you will have a practical blockchain portfolio containing:
+## Compact Course Structure
 
-- Ethereum Sepolia transactions;
-- ERC20 token activity;
-- NFT ownership and transfer history;
-- DEX swaps and AMM analysis;
-- completed Ethernaut security levels;
-- Polkadot extrinsics;
-- TON testnet transactions;
-- a technical article based on your work.
+The required course now contains:
 
----
+| Block | Required Work |
+|---|---|
+| Blockchain Foundations | Lab 1, Lab 2, Lab 3 |
+| Ethereum and Smart Contracts | Lab 4, Lab 5, Lab 6 |
+| Alternative Ecosystems | Lab 8, Lab 10 |
+| Group Work | Assignment 3 — Group Chain of Contracts |
+| Final Reflection | Assignment 4 — Web3 Technical Article |
 
-## Why This Course Matters
+## What Was Cut From the Required Path
 
-Blockchain systems are different from traditional web applications. Users interact with public networks, sign transactions with wallets, and leave verifiable evidence on-chain.
+The following items are no longer required by default:
 
-You will learn how to:
+- Lab 7 — DEX arbitrage;
+- Lab 9 — XCM;
+- Lab 11 — Jetton transfer;
+- Lab 12 — TON DeFi / Security;
+- Assignment 1 — NFT Quest;
+- Assignment 2 — Ethernaut.
 
-- use blockchain wallets safely;
-- read transaction data in explorers;
-- work with smart contracts;
-- understand token standards;
-- analyze DeFi mechanics;
-- compare Ethereum, Polkadot, and TON;
-- build evidence that can be automatically checked.
+They remain available as optional or advanced tasks.
 
----
+## Expected Workload
 
-## Course Structure
-
-| Section | Focus | Practical Result |
-|---|---|---|
-| Section 1 | Blockchain Foundations | Wallet, transaction, hash, Merkle tree, mining |
-| Section 2 | Ethereum and Smart Contracts | ERC20, NFTs, DEX, Ethernaut |
-| Section 3 | Polkadot and Cross-chain Systems | Westend transaction, AssetHub, XCM |
-| Section 4 | TON and Async Architecture | TON transaction, jettons, STON.fi / security |
-
----
-
-## Safety Rules
-
-!!! danger "Never share secrets"
-    Never submit private keys, seed phrases, wallet recovery phrases, API keys, or passwords.
-
-!!! warning "Use testnets only"
-    Use Ethereum Sepolia, Polkadot Westend / AssetHub test environments, and TON Testnet.
+| Student Level | Approximate Workload |
+|---|---:|
+| Strong student | 28–35 hours |
+| Average student | 40–55 hours |
+| Beginner | 60–75 hours |

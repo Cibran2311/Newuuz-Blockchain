@@ -1,39 +1,23 @@
 # Assignments
 
-Assignments are larger checkpoint tasks. They are separated from labs because they combine several skills and produce stronger portfolio artifacts.
+The compact course has two required assignments.
 
-Labs teach one practical skill at a time.  
-Assignments check whether students can connect those skills into a complete workflow.
+## Required Assignments
 
----
+| Assignment | Status | Purpose |
+|---|---|---|
+| Assignment 3 — Group Chain of Contracts | Required | Build a group-owned Sepolia smart contract chain |
+| Assignment 4 — Web3 Technical Article | Required | Explain course work in a technical article |
 
-## Assignment Overview
+## Optional Assignments
 
-| Assignment | Main Theme | Related Labs | Result |
-|---|---|---|---|
-| Assignment 1 — NFT Quest | NFT ownership and contract interaction | Lab 6 | NFT flow with professor NFT, personal NFT, and special contract |
-| Assignment 2 — Security Arena | Smart contract security | Lab 4–7 | Ethernaut completions with complexity score >= 10 |
-| Assignment 3 — Cross-chain Journey | Ethereum + Polkadot + TON comparison | Lab 8–12 | Evidence from three ecosystems and architecture comparison |
-| Assignment 4 — Web3 Technical Article | Technical writing | Full course | Published article based on course work |
+| Assignment | Status | Purpose |
+|---|---|---|
+| Assignment 1 — NFT Quest | Optional / bonus | Extended NFT ownership and contract interaction |
+| Assignment 2 — Security Arena | Optional / bonus | Ethernaut security challenges |
 
----
+## Why Assignment 3 Became Central
 
-## How Assignments Differ from Labs
+Assignment 3 is now the main practical checkpoint because it combines Ethereum, smart contracts, group coordination, deployment, contract-to-contract interaction, event verification, JSON evidence, and Etherscan checking.
 
-| Labs | Assignments |
-|---|---|
-| Step-by-step training | Larger practical challenge |
-| One main topic | Several topics connected together |
-| Mostly deterministic checking | Deterministic + semi-manual review |
-| Short evidence | Complete portfolio artifact |
-
----
-
-## Submission
-
-All assignments are submitted through `submission.json`.
-
-Each assignment page shows the exact JSON fragment required for that task.
-
-!!! warning
-    Do not submit private keys, seed phrases, or mainnet transactions.
+It is easier to understand than a three-network cross-chain assignment and easier to verify automatically.

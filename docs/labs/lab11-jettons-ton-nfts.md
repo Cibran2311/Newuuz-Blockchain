@@ -1,5 +1,18 @@
 # Mission 11 — Dissect a Jetton Transfer
 
+!!! note "Compact Course Status"
+    This lab is optional in the compact course. Use it as a guided TON token-analysis task.
+
+## Difficulty Mode
+
+| Mode | Recommendation |
+|---|---|
+| Course track | Standard / Advanced |
+
+Core students may skip this lab. Standard students complete a guided jetton-transfer analysis. Advanced students compare traces and message flow in more detail.
+
+---
+
 ## Goal
 
 In this lab you will work with TON jettons and understand why TON token architecture differs from ERC20.
