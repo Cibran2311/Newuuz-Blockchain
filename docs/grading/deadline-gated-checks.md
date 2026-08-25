@@ -1,31 +1,12 @@
-# Deadline-gated Checks
+# Preview and Final Checks
 
-GitHub Actions can run checks only on certain dates.
+The GitHub Actions workflow has two instructor-selected modes.
 
-## Manual final check
+| Mode | Use |
+|---|---|
+| `preview` | Diagnose missing data, API failures, and incomplete evidence without treating the output as a final snapshot |
+| `final` | Create the result spreadsheet used for grading review |
 
-```yaml
-on:
-  workflow_dispatch:
-```
+Both modes run the same evidence checks. They create different result spreadsheet names so a preview cannot be confused with a final run.
 
-## Scheduled final check
-
-```yaml
-on:
-  schedule:
-    - cron: "0 19 25 3 *"
-```
-
-## Python deadline mode
-
-```python
-from datetime import datetime, timezone
-
-DEADLINE = datetime(2026, 3, 25, 18, 59, tzinfo=timezone.utc)
-
-if datetime.now(timezone.utc) < DEADLINE:
-    print("Practice check only")
-else:
-    print("Final grading mode")
-```
+The workflow does not contain a hard-coded course deadline. Google Classroom remains the source for due dates, late status, and whether a student turned in the assignment. The instructor starts the final check after the deadline and reviews exceptions before publishing grades.

@@ -137,21 +137,7 @@ At the end of this lab you should have Jetton Master address, sender Jetton Wall
 
 ## Submission
 
-```json
-{
-  "labs": {
-    "lab11": {
-      "network": "ton_testnet",
-      "ton_wallet": "kQYourWallet",
-      "jetton_master": "kQJettonMaster",
-      "sender_jetton_wallet": "kQSenderJettonWallet",
-      "recipient_jetton_wallet": "kQRecipientJettonWallet",
-      "tx_link": "https://testnet.tonviewer.com/...",
-      "explanation": "Jetton Master stores metadata, Jetton Wallet stores holder balance."
-    }
-  }
-}
-```
+Submit the TON Testnet explorer link and your report in Google Classroom. Identify the Jetton Master, sender and recipient Jetton Wallets, registered TON wallet, and explain the responsibility of each contract.
 
 ---
 

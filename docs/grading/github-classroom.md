@@ -1,29 +1,29 @@
-# GitHub Classroom Integration
+# Google Classroom and GitHub
 
-Students receive repositories through GitHub Classroom.
+Google Classroom is the student-facing submission channel. GitHub stores code and runs the instructor's checker.
 
-## Recommended student repository
+## Student repository
+
+A typical repository can use this structure:
 
 ```text
 student-repo/
-├── submission.json
 ├── notebooks/
 ├── reports/
 ├── scripts/
 └── README.md
 ```
 
-## GitHub Actions
+The exact repository or profile URL is recorded once in the protected Google Sheets registry. Students submit the relevant link in the Classroom assignment and push their final changes before clicking **Turn in**.
 
-Use Actions for:
+## Instructor workflow
 
-- JSON validation;
-- deadline checks;
-- blockchain checks;
-- feedback for students.
+1. Review late or unsubmitted work in Google Classroom.
+2. Open the course repository on GitHub.
+3. Select **Actions → Blockchain Autotest → Run workflow**.
+4. Choose `preview` for a diagnostic run or `final` for the grading snapshot.
+5. Choose all checks or one assignment.
+6. Open the newly created Google result spreadsheet.
+7. Review the `Manual review` and `Errors` worksheets before entering grades in Classroom.
 
-## Recommended workflow
-
-- Push check: practice feedback.
-- Manual workflow: final instructor check.
-- Scheduled workflow: automatic deadline check.
+The workflow is manual by design: the instructor controls when a snapshot becomes final.

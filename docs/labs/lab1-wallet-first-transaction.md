@@ -97,22 +97,7 @@ At the end of the lab you should have a MetaMask wallet, Sepolia ETH, one succes
 
 ## Submission
 
-Add this fragment to `submission.json`:
-
-```json
-{
-  "labs": {
-    "lab1": {
-      "network": "sepolia",
-      "wallet": "0xYourWalletAddress",
-      "recipient": "0xRecipientAddress",
-      "amount_eth": "0.0001",
-      "tx_hash": "0xTransactionHash",
-      "explorer_url": "https://sepolia.etherscan.io/tx/0xTransactionHash"
-    }
-  }
-}
-```
+In the Lab 1 Google Classroom assignment, submit the Sepolia Etherscan transaction link and a short note with the recipient and amount. The sender must be the Ethereum address registered by the instructor.
 
 ---
 
@@ -122,7 +107,7 @@ The checker will verify:
 
 | Check | Requirement |
 |---|---|
-| JSON validity | submission.json must be valid JSON. |
+| Registry match | Sender must match the registered Ethereum address. |
 | Network | Transaction must be on Sepolia. |
 | Status | Transaction must be successful. |
 | Sender | Transaction sender must match submitted wallet. |
@@ -137,7 +122,7 @@ The checker will verify:
 | Transaction sent on Mainnet | Switch to Sepolia and repeat. |
 | Faucet does not send ETH | Try another faucet or wait. |
 | Wrong recipient | Verify first and last characters. |
-| Invalid JSON | Run python -m json.tool submission.json. |
+| Wallet not matched | Ask the instructor to confirm the registered address. |
 
 ---
 

@@ -175,32 +175,7 @@ At the end of this lab you should have reserve data for DEX Alpha and DEX Beta, 
 
 ## Submission
 
-```json
-{
-  "labs": {
-    "lab7": {
-      "network": "sepolia_or_private_testnet",
-      "wallet": "0xYourWalletAddress",
-      "dex_alpha": "0xDexAlpha",
-      "dex_beta": "0xDexBeta",
-      "alpha_reserves": {
-        "test": "1000",
-        "usdc": "5000"
-      },
-      "beta_reserves": {
-        "test": "800",
-        "usdc": "4800"
-      },
-      "strategy": "Buy TEST on Alpha, sell TEST on Beta",
-      "swap_txs": [
-        "0xSwapTx1",
-        "0xSwapTx2"
-      ],
-      "final_usdc_value": "123.45"
-    }
-  }
-}
-```
+Submit the GitHub repository in Google Classroom. Your report must identify both DEX contracts, initial reserves, chosen strategy, both swap transactions, and the final portfolio value. Use Sepolia or the instructor-approved private testnet only.
 
 ---
 

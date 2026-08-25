@@ -126,20 +126,7 @@ At the end of this lab you should have an AssetHub/XCM-related extrinsic hash, s
 
 ## Submission
 
-```json
-{
-  "labs": {
-    "lab9": {
-      "source_chain": "Westend",
-      "destination_chain": "AssetHub",
-      "polkadot_wallet": "5YourAddress",
-      "extrinsic_hash": "0xExtrinsicHash",
-      "explorer_url": "https://...",
-      "explanation": "The message starts on ... and is executed on ..."
-    }
-  }
-}
-```
+Submit the explorer link and your report or notebook in Google Classroom. State the source chain, destination chain, extrinsic hash, registered wallet, and a short explanation of where the XCM message starts and executes.
 
 ---
 

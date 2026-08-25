@@ -112,23 +112,7 @@ At the end of the assignment you should have several completed Ethernaut levels,
 
 ## Submission
 
-```json
-{
-  "assignments": {
-    "assignment2": {
-      "network": "sepolia",
-      "ethernaut_wallet": "0xYourWalletAddress",
-      "target_complexity": 10,
-      "claimed_levels": [
-        "Fallback",
-        "Fallout",
-        "Coin Flip"
-      ],
-      "notes": "Short explanation of solved levels"
-    }
-  }
-}
-```
+Push a short write-up for each solved level to the registered GitHub repository and submit that repository link in Google Classroom. Complete and submit all levels from the Ethereum address stored in the protected course registry. The checker reads on-chain completion events; an automatic pass requires verified complexity of at least 10.
 
 ---
 
@@ -149,7 +133,7 @@ At the end of the assignment you should have several completed Ethernaut levels,
 
 | Mistake | Fix |
 |---|---|
-| Using wrong wallet | Complete levels with the same wallet submitted in JSON. |
+| Using wrong wallet | Complete levels with the wallet registered in the course registry. |
 | Creating instance but not submitting | Always click `Submit instance` after solving. |
 | Solving on wrong network | Use Sepolia. |
 | Claiming level without completion event | Verify event in Etherscan. |

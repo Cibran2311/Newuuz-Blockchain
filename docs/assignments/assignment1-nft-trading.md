@@ -53,7 +53,7 @@ After completing this assignment you will be able to:
 ## Requirements
 
 1. Use Ethereum Sepolia.
-2. Use the same wallet submitted in `submission.json`.
+2. Use the same wallet registered in the protected course registry.
 3. Receive or buy the professor NFT.
 4. Return or sell the professor NFT back according to instructor rules.
 5. Mint your own ERC721 NFT.
@@ -137,26 +137,7 @@ Submit:
 
 ## Submission Format
 
-```json
-{
-  "assignments": {
-    "assignment1": {
-      "network": "sepolia",
-      "wallet": "0xYourWallet",
-      "professor_nft_contract": "0xProfessorNft",
-      "professor_token_id": "1",
-      "professor_receive_tx": "0x...",
-      "professor_return_tx": "0x...",
-      "personal_nft_contract": "0xPersonalNft",
-      "personal_token_id": "1",
-      "personal_mint_tx": "0x...",
-      "special_contract": "0xSpecialContract",
-      "approval_tx": "0x...",
-      "transfer_to_special_contract_tx": "0x..."
-    }
-  }
-}
-```
+Submit the GitHub repository and relevant Sepolia Etherscan links in Google Classroom. Include the professor NFT receive/return transactions, personal NFT contract and token ID, mint transaction, special contract, approval transaction, and transfer transaction.
 
 ---
 
@@ -182,7 +163,7 @@ Submit:
 | Professor NFT flow | 25% | Correct receive/buy and return/sell evidence. |
 | Personal NFT mint | 20% | Correct NFT contract and token ID. |
 | Special contract interaction | 30% | Approval and transfer to correct contract. |
-| Evidence quality | 15% | JSON, hashes, and explorer links are correct. |
+| Evidence quality | 15% | Classroom links, hashes, and explorer evidence are correct. |
 | Explanation | 10% | Student can explain ownership flow. |
 
 ---
@@ -196,4 +177,4 @@ Submit:
 - [ ] Special contract address is correct.
 - [ ] NFT was approved if required.
 - [ ] NFT was transferred to special contract.
-- [ ] `submission.json` is valid.
+- [ ] Repository and explorer links are submitted in Google Classroom.

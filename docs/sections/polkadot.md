@@ -1,4 +1,4 @@
-# Section 3 — Polkadot and Cross-chain Systems
+# Section 3A — Polkadot and Cross-chain Systems
 
 This section introduces Polkadot and cross-chain architecture.
 

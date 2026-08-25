@@ -45,6 +45,7 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.highlight
   - pymdownx.inlinehilite
+  - pymdownx.magiclink
   - pymdownx.tabbed:
       alternate_style: true
 
@@ -67,7 +68,9 @@ nav:
       - Lab 5 / Mission 5 — Launch Your Token: labs/lab5-erc20-disperse.md
       - Lab 6 / Mission 6 — Create and Move NFTs: labs/lab6-nft-smart-contracts.md
       - Section 3 — Alternative Ecosystems: sections/alternative-ecosystems.md
+      - Section 3A — Polkadot: sections/polkadot.md
       - Lab 8 / Mission 8 — Enter Polkadot: labs/lab8-polkadot-transactions.md
+      - Section 3B — TON: sections/ton.md
       - Lab 10 / Mission 10 — Enter TON: labs/lab10-ton-transactions.md
   - Required Assignments:
       - Overview: assignments/index.md
@@ -83,9 +86,10 @@ nav:
       - Challenge Assignment — Security Arena: assignments/assignment2-ethernaut.md
   - Grading:
       - How to Submit: grading/how-to-submit.md
-      - submission.json: grading/submission-json.md
+      - Protected Google Sheets Registry: grading/google-sheets-registry.md
       - Auto-check System: grading/autocheck.md
-      - GitHub Classroom: grading/github-classroom.md
+      - Instructor Setup: grading/autotest-setup.md
+      - Classroom and GitHub: grading/github-classroom.md
       - Deadline-gated Checks: grading/deadline-gated-checks.md
   - References:
       - Reading Roadmap: references/reading-roadmap.md

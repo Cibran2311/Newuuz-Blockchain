@@ -1,33 +1,38 @@
 # Auto-check System
 
-The course uses automatic validation where possible.
+The instructor starts the checker with one button in GitHub Actions. Students do not run grading scripts.
 
-## Deterministic checks
+## Data flow
 
-The checker can verify:
+1. Google Classroom collects repository, notebook, report, and article links.
+2. The protected `COURSE_STUDENTS` worksheet stores student identity and registered public addresses.
+3. GitHub Actions runs `scripts/course_autotest.py` in `preview` or `final` mode.
+4. The script reads the registry and queries GitHub, Sepolia RPC, and explorer APIs.
+5. The script creates a new Google Spreadsheet; the source registry stays unchanged.
 
-- transaction existence;
-- transaction status;
-- wallet ownership;
-- ERC20 / ERC721 events;
-- Ethernaut `LevelCompletedLog`;
-- Polkadot extrinsics;
-- TON transactions.
+## Current deterministic checks
 
-## Semi-deterministic checks
+The first production version verifies:
 
-Some tasks require additional review:
+- Assignment 1 token activity;
+- Assignment 1 swap activity;
+- Assignment 1 NFT mint activity;
+- GitHub repository availability as supporting metadata;
+- Ethernaut on-chain completions and instructor-defined complexity.
 
-- written explanations;
-- article quality;
-- comparison notes;
-- diagrams and analysis.
+Assignment 1 is `PASS` only when token, swap, and NFT mint evidence are all present. Ethernaut is `PASS` at verified complexity 10 or higher.
 
-## Main inputs
+## Result worksheets
 
-The checker reads:
+Every run creates `PREVIEW_AUTOTEST_<timestamp>` or `FINAL_AUTOTEST_<timestamp>` with:
 
-- `submission.json`;
-- blockchain RPC data;
-- explorer APIs;
-- GitHub repository files.
+| Worksheet | Contents |
+|---|---|
+| `Closed list` | One-row summary per active student |
+| `Autotest details` | Transaction hashes, contracts, counts, and diagnostic notes |
+| `Manual review` | Ambiguous, incomplete, or failed results requiring attention |
+| `Errors` | RPC, API, spreadsheet, and per-student technical failures |
+
+## Manual checks
+
+Written explanations, article quality, diagrams, team contribution, and tasks not yet implemented in the checker remain instructor-reviewed. Google Classroom grades are not changed automatically in this version.

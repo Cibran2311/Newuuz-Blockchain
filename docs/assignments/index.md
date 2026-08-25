@@ -26,24 +26,14 @@ Assignment 3 combines:
 - deployment;
 - contract-to-contract interaction;
 - event verification;
-- JSON evidence;
+- evidence collected through Google Classroom;
 - Etherscan checking.
 
 It is the main practical checkpoint of the course.
 
 ## Submission
 
-Individual work is submitted through:
-
-```text
-submission.json
-```
-
-Assignment 3 also uses group evidence:
-
-```text
-group_submission.json
-```
+Individual work is submitted through its Google Classroom assignment. Assignment 3 uses one group repository and report link plus each student's short individual contribution note in Classroom.
 
 !!! warning
     Do not submit private keys, seed phrases, or mainnet transactions.
