@@ -40,7 +40,7 @@ After completing this lab you will be able to:
 |---|---|
 | MetaMask | Send transaction |
 | Sepolia Etherscan | Analyze transaction |
-| submission.json | Submit fields |
+| Google Classroom | Submit the explorer link and explanation |
 
 ---
 
@@ -73,34 +73,20 @@ Search by transaction hash.
 Find From, To, Nonce, Status, Gas Limit, Gas Used, and Transaction Fee.
 ### Step 4 — Explain gas
 Write a short explanation of gas limit vs gas used.
-### Step 5 — Update JSON
-Add transaction and gas data to submission.json.
+### Step 5 — Prepare evidence
+Copy the Etherscan link and write down the gas limit, gas used, fee, status, and your explanation.
 
 ---
 
 ## Expected Result
 
-At the end of the lab you should understand the main fields of an Ethereum transaction and have them recorded in JSON.
+At the end of the lab you should understand the main fields of an Ethereum transaction and have them recorded in your report or notebook.
 
 ---
 
 ## Submission
 
-Add this fragment to `submission.json`:
-
-```json
-{
-  "labs": {
-    "lab4": {
-      "tx_hash": "0x...",
-      "gas_limit": 21000,
-      "gas_used": 21000,
-      "status": "success",
-      "explanation": "Gas limit is ..."
-    }
-  }
-}
-```
+Submit the Sepolia Etherscan transaction link in Google Classroom. Add the gas limit, gas used, status, transaction fee, and your short explanation of gas limit versus gas used.
 
 ---
 

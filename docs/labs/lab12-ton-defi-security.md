@@ -94,13 +94,15 @@ After completing this lab you will be able to:
 
 ---
 
-## Track A — TON DeFi Swap
+## Step-by-Step Instructions
 
-### Step 1 — Prepare Wallet
+### Track A — TON DeFi Swap
+
+#### Step 1 — Prepare Wallet
 
 Make sure your testnet wallet has test TON and required jettons if needed.
 
-### Step 2 — Open STON.fi or SDK
+#### Step 2 — Open STON.fi or SDK
 
 Use instructor-provided interface or SDK instructions.
 
@@ -113,35 +115,35 @@ npm install @ston-fi/sdk
 
 Exact package may depend on current STON.fi SDK version.
 
-### Step 3 — Prepare Swap
+#### Step 3 — Prepare Swap
 
 Record input token, output token, amount, expected output, and pool/router if visible.
 
-### Step 4 — Execute Swap
+#### Step 4 — Execute Swap
 
 Submit swap transaction and confirm in wallet.
 
-### Step 5 — Inspect Trace
+#### Step 5 — Inspect Trace
 
 Open transaction in testnet Tonviewer and inspect wallet, router, pool, and token wallet messages.
 
 ---
 
-## Track B — TON Security Challenge
+### Track B — TON Security Challenge
 
-### Step 1 — Open Challenge
+#### Step 1 — Open Challenge
 
 Open HackTON or instructor-provided challenge.
 
-### Step 2 — Read Task
+#### Step 2 — Read Task
 
 Identify goal, vulnerable contract, required exploit, and proof condition.
 
-### Step 3 — Execute Solution
+#### Step 3 — Execute Solution
 
 Interact with contract according to challenge requirements.
 
-### Step 4 — Save Proof
+#### Step 4 — Save Proof
 
 Save proof transaction, challenge level, explanation, and wallet address.
 
@@ -155,40 +157,10 @@ At the end of this lab you should have either a TON DeFi swap trace or HackTON/s
 
 ## Submission
 
-For STON.fi swap:
+Submit one of these evidence sets in Google Classroom:
 
-```json
-{
-  "labs": {
-    "lab12": {
-      "mode": "stonfi_swap",
-      "network": "ton_testnet",
-      "ton_wallet": "kQYourWallet",
-      "input_token": "TON",
-      "output_token": "JETTON",
-      "tx_link": "https://testnet.tonviewer.com/...",
-      "script_file": "scripts/swap.ts"
-    }
-  }
-}
-```
-
-For HackTON:
-
-```json
-{
-  "labs": {
-    "lab12": {
-      "mode": "hackton",
-      "network": "ton_testnet",
-      "ton_wallet": "kQYourWallet",
-      "level": "introduction",
-      "proof_tx": "https://testnet.tonviewer.com/...",
-      "explanation": "..."
-    }
-  }
-}
-```
+- **STON.fi mode:** GitHub script link, registered TON wallet, input/output assets, and TON Testnet swap link.
+- **HackTON mode:** completed level, proof link or screenshot requested by the instructor, and a short explanation of the vulnerability.
 
 ---
 

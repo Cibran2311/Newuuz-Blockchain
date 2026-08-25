@@ -1,4 +1,4 @@
-# Section 4 — TON and Asynchronous Blockchain Architecture
+# Section 3B — TON and Asynchronous Blockchain Architecture
 
 This section introduces TON, an asynchronous and sharded blockchain ecosystem.
 

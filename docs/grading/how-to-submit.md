@@ -1,47 +1,38 @@
 # How to Submit
 
-Most course work is submitted through GitHub Classroom.
+All work is submitted through the assignment created in Google Classroom. There is no student submission JSON file.
 
-## Repository structure
+## Before the first submission
 
-A typical student repository should look like:
+Confirm with the instructor that the protected course registry contains your current:
 
-```text
-student-repo/
-├── submission.json
-├── notebooks/
-├── reports/
-├── scripts/
-└── README.md
-```
+- student ID and Classroom email;
+- GitHub profile or repository;
+- Sepolia wallet;
+- Polkadot and TON testnet wallets when a task uses them.
+
+Only activity from registered addresses can be matched automatically.
 
 ## Submission workflow
 
-1. Accept GitHub Classroom assignment.
-2. Clone or open the repository.
-3. Complete the lab or assignment.
-4. Save transaction hashes and explorer links.
-5. Update `submission.json`.
-6. Commit and push.
-7. Open GitHub Actions.
-8. Check whether the checker passed.
+1. Open the assignment in Google Classroom.
+2. Complete the lab in the required testnet.
+3. Push code, notebooks, and reports to the assigned GitHub repository.
+4. Attach or paste the repository, notebook, explorer, or article link requested by the task.
+5. Add a short note if the transaction used a newly registered wallet.
+6. Click **Turn in**.
 
-## Basic Git commands
+The instructor runs the course checker from GitHub Actions. It reads the protected registry, verifies available GitHub and on-chain evidence, and creates a new result spreadsheet.
 
-```bash
-git status
-git add submission.json
-git commit -m "submit lab evidence"
-git push
-```
+## If the result needs review
 
-## If GitHub Actions fails
+The instructor checks the `Manual review` and `Errors` worksheets. Common reasons are:
 
-Read the error message. Common causes:
+- the wallet or GitHub repository is not registered;
+- the wrong testnet was used;
+- an explorer or RPC service was temporarily unavailable;
+- the evidence is qualitative and cannot be graded safely by a script;
+- the transaction has not been indexed yet.
 
-- invalid JSON;
-- missing field;
-- wrong transaction hash;
-- wrong network;
-- transaction not found yet;
-- wallet mismatch.
+!!! danger
+    Never submit a seed phrase, private key, wallet password, or API key through Classroom, GitHub, or Google Sheets.

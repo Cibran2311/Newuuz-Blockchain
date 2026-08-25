@@ -113,25 +113,13 @@ Open https://westend.subscan.io/ and search by extrinsic hash or account address
 
 ## Expected Result
 
-At the end of this lab you should have a Polkadot.js account, Westend test balance, successful transfer extrinsic, Subscan link, and updated `submission.json`.
+At the end of this lab you should have a Polkadot.js account, Westend test balance, successful transfer extrinsic, and Subscan link.
 
 ---
 
 ## Submission
 
-```json
-{
-  "labs": {
-    "lab8": {
-      "network": "westend",
-      "polkadot_wallet": "5YourAddress",
-      "recipient": "5RecipientAddress",
-      "extrinsic_hash": "0xExtrinsicHash",
-      "explorer_url": "https://westend.subscan.io/extrinsic/0xExtrinsicHash"
-    }
-  }
-}
-```
+Submit the Westend Subscan extrinsic link in Google Classroom and state the recipient and amount. The signer must match the Polkadot address registered in the protected course registry.
 
 ---
 

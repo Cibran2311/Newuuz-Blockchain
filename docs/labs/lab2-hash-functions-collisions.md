@@ -87,21 +87,7 @@ At the end of the lab you should have two different inputs that produce the same
 
 ## Submission
 
-Add this fragment to `submission.json`:
-
-```json
-{
-  "labs": {
-    "lab2": {
-      "input_1": "123",
-      "input_2": "321",
-      "hash_1": "42",
-      "hash_2": "42",
-      "notebook_path": "notebooks/lab2.ipynb"
-    }
-  }
-}
-```
+Attach the Colab notebook or GitHub notebook link to the Lab 2 Google Classroom assignment. In the Classroom comment, include both different inputs, their equal weak-hash result, and one sentence explaining why SHA-256 collisions are much harder to find.
 
 ---
 

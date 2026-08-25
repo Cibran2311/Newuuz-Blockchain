@@ -186,32 +186,13 @@ Check that `ownerOf(tokenId)` is now the special contract address.
 
 ## Expected Result
 
-At the end of the lab you should have professor NFT interaction evidence, personal NFT contract address, personal token ID, approval transaction, transfer transaction to special contract, Etherscan links, and updated `submission.json`.
+At the end of the lab you should have professor NFT interaction evidence, personal NFT contract address, personal token ID, approval transaction, transfer transaction to the special contract, and Etherscan links.
 
 ---
 
 ## Submission
 
-```json
-{
-  "labs": {
-    "lab6": {
-      "network": "sepolia",
-      "wallet": "0xYourWalletAddress",
-      "professor_nft_contract": "0xProfessorNftContract",
-      "professor_token_id": "1",
-      "professor_nft_receive_tx": "0x...",
-      "professor_nft_return_tx": "0x...",
-      "personal_nft_contract": "0xPersonalNftContract",
-      "personal_token_id": "1",
-      "mint_tx": "0x...",
-      "special_contract": "0xSpecialContract",
-      "approval_tx": "0x...",
-      "transfer_to_special_contract_tx": "0x..."
-    }
-  }
-}
-```
+Submit the GitHub repository and personal NFT contract link in Google Classroom. Also include the professor NFT receive/return transactions, personal mint transaction, approval transaction, transfer-to-special-contract transaction, and personal token ID.
 
 ---
 

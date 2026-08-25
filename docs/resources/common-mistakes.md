@@ -2,7 +2,7 @@
 
 ## General
 
-- submitting invalid JSON;
+- submitting a repository or explorer link that the instructor cannot open;
 - using wrong network;
 - submitting someone else's transaction;
 - losing seed phrase;

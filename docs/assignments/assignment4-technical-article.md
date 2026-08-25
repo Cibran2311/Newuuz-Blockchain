@@ -41,25 +41,13 @@ You are a technical author. Your task is to explain one blockchain topic clearly
 2. Include technical analysis.
 3. Include diagrams, code snippets, formulas, or transaction examples where useful.
 4. Reference blockchain evidence where appropriate.
-5. Submit article URL in `submission.json`.
+5. Submit the article URL in Google Classroom.
 
 ---
 
 ## Submission Format
 
-```json
-{
-  "assignments": {
-    "assignment4": {
-      "article_url": "https://...",
-      "topic": "Ethereum vs TON architecture",
-      "abstract": "...",
-      "related_tx_hashes": ["0x..."],
-      "related_contracts": ["0x..."]
-    }
-  }
-}
-```
+Submit the published article URL in Google Classroom. Add the topic, a short abstract, and any related testnet transaction or contract links in the Classroom comment.
 
 ---
 

@@ -87,21 +87,7 @@ At the end of the lab you should have a valid Merkle root and a nonce that produ
 
 ## Submission
 
-Add this fragment to `submission.json`:
-
-```json
-{
-  "labs": {
-    "lab3": {
-      "transactions": ["tx1", "tx2", "tx3"],
-      "merkle_root": "...",
-      "nonce": 12345,
-      "block_hash": "...",
-      "difficulty": "000"
-    }
-  }
-}
-```
+Attach the Colab notebook or GitHub repository link to the Lab 3 Google Classroom assignment. The notebook must show the input transactions, Merkle root, chosen difficulty, discovered nonce, and resulting block hash.
 
 ---
 

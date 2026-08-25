@@ -108,19 +108,7 @@ At the end of this lab you should have TON testnet wallet, test TON balance, suc
 
 ## Submission
 
-```json
-{
-  "labs": {
-    "lab10": {
-      "network": "ton_testnet",
-      "ton_wallet": "kQYourWallet",
-      "recipient": "kQRecipient",
-      "amount_ton": "0.01",
-      "tx_link": "https://testnet.tonviewer.com/..."
-    }
-  }
-}
-```
+Submit the TON Testnet explorer transaction link in Google Classroom and state the recipient and amount. The sender must match the TON address registered in the protected course registry.
 
 ---
 

@@ -106,7 +106,7 @@ Required contracts:
 | Entry Owner | Deploys or configures `ChainEntry`. |
 | Link Owner | Deploys one `ChainLink`. |
 | Terminal Owner | Deploys or configures `ChainTerminal`. |
-| Reporter | Prepares evidence and checks JSON validity. |
+| Reporter | Prepares the shared report and verifies all evidence links. |
 
 A student may have more than one role, but every student must have a visible personal contribution.
 
@@ -328,101 +328,13 @@ Each group must provide:
 
 ## Group Submission
 
-The group submits one shared file:
-
-```text
-group_submission.json
-```
-
-Example:
-
-```json
-{
-  "assignment": "assignment3",
-  "title": "Group Chain of Contracts",
-  "network": "sepolia",
-  "group": {
-    "group_id": "G1",
-    "members": [
-      {
-        "student_id": "001",
-        "name": "Student A",
-        "wallet": "0xA...",
-        "role": "ChainEntry",
-        "owned_contract": "0xEntry...",
-        "deployment_tx": "0xDeployEntry..."
-      },
-      {
-        "student_id": "002",
-        "name": "Student B",
-        "wallet": "0xB...",
-        "role": "ChainLink1",
-        "owned_contract": "0xLink1...",
-        "deployment_tx": "0xDeployLink1..."
-      }
-    ]
-  },
-  "chain": {
-    "chain_entry": "0xEntry...",
-    "chain_links": [
-      "0xLink1...",
-      "0xLink2...",
-      "0xLink3..."
-    ],
-    "chain_terminal": "0xTerminal...",
-    "connection_txs": [
-      "0xSetNextEntry...",
-      "0xSetNextLink1...",
-      "0xSetNextLink2...",
-      "0xSetNextLink3..."
-    ],
-    "start_chain_tx": "0xStartChain...",
-    "explorer_url": "https://sepolia.etherscan.io/tx/0xStartChain...",
-    "input_data": "0x...",
-    "expected_event_order": [
-      "ChainStarted",
-      "EntryExecuted",
-      "LinkExecuted",
-      "LinkExecuted",
-      "LinkExecuted",
-      "FinalReceived",
-      "ChainCompleted"
-    ],
-    "final_result": "0x..."
-  },
-  "report": {
-    "repository_url": "https://github.com/your-group/assignment3-chain-of-contracts",
-    "report_path": "reports/assignment3-report.md",
-    "notes": "Short explanation of the implementation."
-  }
-}
-```
+One coordinator submits the shared GitHub repository and group report in the Assignment 3 Google Classroom task. The Classroom comment must contain the group ID, member names, registered wallets, roles, contract addresses, deployment and connection transactions, start transaction, and final result.
 
 ---
 
 ## Individual Submission
 
-Each student also adds a short individual part to their own `submission.json`.
-
-Example:
-
-```json
-{
-  "assignments": {
-    "assignment3": {
-      "mode": "group",
-      "network": "sepolia",
-      "group_id": "G1",
-      "wallet": "0xA...",
-      "role": "ChainEntry",
-      "owned_contract": "0xEntry...",
-      "deployment_tx": "0xDeployEntry...",
-      "group_start_chain_tx": "0xStartChain...",
-      "personal_contribution": "Deployed ChainEntry, configured the first link, and started the chain."
-    }
-  }
-}
-```
+Each student opens the same Classroom assignment and submits a short individual contribution note: group ID, role, owned contract, deployment transaction, and what they personally implemented or tested.
 
 ---
 
@@ -467,7 +379,7 @@ The checker can verify:
 | Event order | Events match expected chain logic. |
 | Final result | Terminal contract exposes or emits result. |
 | Individual contribution | Each student has wallet, role, owned contract, and tx. |
-| JSON validity | `group_submission.json` is valid JSON. |
+| Evidence access | Repository, report, contracts, and transactions are accessible. |
 
 ---
 
@@ -480,7 +392,7 @@ The checker can verify:
 | Individual contribution | 20% | Each student owns or clearly contributes to one part. |
 | Deployment and configuration quality | 10% | Contracts are connected cleanly and reproducibly. |
 | Report quality | 10% | Report explains addresses, txs, screenshots, and problems. |
-| JSON quality | 5% | Submission files are valid and complete. |
+| Evidence quality | 5% | Classroom submission and report links are complete. |
 
 ---
 
@@ -492,7 +404,7 @@ The checker can verify:
 | No successful start transaction | Up to -35% |
 | No event evidence | Up to -20% |
 | Contracts not connected | Up to -30% |
-| Invalid JSON | Up to -10% |
+| Missing or inaccessible evidence | Up to -10% |
 | Mainnet transaction used | Assignment may be rejected |
 
 ---
@@ -524,5 +436,5 @@ The checker can verify:
 - [ ] Events prove the execution order.
 - [ ] Terminal contract stores or emits final result.
 - [ ] Group report is ready.
-- [ ] `group_submission.json` is valid.
-- [ ] Every student updated individual `submission.json`.
+- [ ] Shared repository and report were submitted in Google Classroom.
+- [ ] Every student submitted an individual contribution note.
