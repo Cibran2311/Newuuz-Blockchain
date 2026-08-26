@@ -13,6 +13,24 @@ Use this sequence before adding the real class roster. The goal is to prove that
 
 Run **Blockchain Autotest** with `mode = preview` and `scope = assignment1` after each checkpoint.
 
+For the first live test, compile `contracts/NewuuzAssignment1Test.sol` in Remix with Solidity `0.8.24` or newer. Deploy:
+
+1. `NewuuzProfessorNFT` from the instructor wallet;
+2. `NewuuzSpecialNFTReceiver` from the instructor wallet;
+3. `NewuuzStudentNFT` from the registered test-student wallet.
+
+Put the first contract address, the instructor wallet, and the second contract address into `ASSIGNMENT1_CONFIG`. A fresh test wallet can use `Start Block = 0`.
+
+Then perform this exact flow:
+
+1. from the instructor wallet, call `NewuuzProfessorNFT.mintTo(testStudent)`;
+2. from the student wallet, call `NewuuzProfessorNFT.safeTransferFrom(testStudent, instructor, 1)`;
+3. from the student wallet, call `NewuuzStudentNFT.mint()`;
+4. from the student wallet, call `NewuuzStudentNFT.approve(specialReceiver, 1)`;
+5. from the student wallet, call `NewuuzStudentNFT.safeTransferFrom(testStudent, specialReceiver, 1)`.
+
+Do not use `NewuuzSpecialNFTReceiver.returnNFT` during the test. It is an instructor-only recovery helper for returning an NFT after validation.
+
 | Checkpoint | Expected result |
 |---|---|
 | No new transactions | `FAIL` |
