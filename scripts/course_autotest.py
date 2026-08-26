@@ -50,10 +50,7 @@ KEYWORDS_A2 = [
     "puzzlewallet",
     "motorbike",
 ]
-A1_TOKEN_CONTRACT = "0x4efF872d9bd5924C3862566075af7D6E180075a1"
-A1_START_BLOCK = 10320000
-A1_END_BLOCK = 10435000
-A1_LOG_STEP = 10000
+A1_DEFAULT_END_BLOCK = 99999999
 A2_PASS_COMPLEXITY = 10
 A2_BONUS_LEVELS = 15
 
@@ -71,25 +68,37 @@ class Student:
     active: bool = True
 
 
+@dataclass(frozen=True)
+class Assignment1Config:
+    professor_nft_contract: str
+    professor_return_address: str
+    special_contract: str
+    start_block: int = 0
+    end_block: int = A1_DEFAULT_END_BLOCK
+    require_approval: bool = True
+
+
 @dataclass
 class Assignment1Result:
     status: str = "-"
     repo: str = ""
     github_ok: bool = False
     commits_ok: bool = False
-    erc20_address: str = ""
-    erc721_address: str = ""
-    erc20_ok: bool = False
-    erc721_ok: bool = False
-    token_ok: bool = False
-    swap_ok: bool = False
-    nft_ok: bool = False
-    token_tx_count: int = 0
-    swap_tx_count: int = 0
-    nft_tx_count: int = 0
-    token_tx_hashes: list[str] = field(default_factory=list)
-    swap_tx_hashes: list[str] = field(default_factory=list)
-    nft_tx_hashes: list[str] = field(default_factory=list)
+    professor_received_ok: bool = False
+    professor_returned_ok: bool = False
+    personal_mint_ok: bool = False
+    approval_ok: bool = False
+    transfer_to_special_ok: bool = False
+    approval_required: bool = True
+    professor_nft_contract: str = ""
+    professor_token_id: str = ""
+    personal_nft_contract: str = ""
+    personal_token_id: str = ""
+    professor_receive_tx_hash: str = ""
+    professor_return_tx_hash: str = ""
+    personal_mint_tx_hash: str = ""
+    approval_tx_hash: str = ""
+    transfer_to_special_tx_hash: str = ""
     note: str = ""
 
 
@@ -303,7 +312,7 @@ def read_ethernaut_config_from_google_sheet(
     address_to_name: dict[str, str] = {}
     for row in rows:
         name = row_value(row, "Level", "Name", "Level name")
-        address = row_value(row, "Address", "Level address")
+        address = row_value(row, "Address", "Level address").lstrip("'")
         complexity_raw = row_value(row, "Complexity", "Score")
         if not name:
             continue
@@ -314,6 +323,70 @@ def read_ethernaut_config_from_google_sheet(
         if ETH_RE.fullmatch(address):
             address_to_name[address.lower()] = name
     return complexity_by_name, address_to_name
+
+
+def read_assignment1_config_from_google_sheet(
+    client: gspread.Client,
+    spreadsheet_id: str,
+    worksheet_name: str,
+) -> Assignment1Config:
+    """Read the instructor-controlled addresses for the current NFT Quest."""
+    rows = (
+        client.open_by_key(spreadsheet_id)
+        .worksheet(worksheet_name)
+        .get_all_records(default_blank="")
+    )
+    if not rows:
+        raise ValueError(f"Worksheet '{worksheet_name}' must contain one config row")
+
+    row = rows[0]
+
+    def address(*names: str) -> str:
+        value = row_value(row, *names).lstrip("'")
+        if not ETH_RE.fullmatch(value):
+            raise ValueError(
+                f"Worksheet '{worksheet_name}': '{names[0]}' must be a valid 0x address"
+            )
+        return value.lower()
+
+    def block_number(default: int, *names: str) -> int:
+        value = row_value(row, *names)
+        if not value:
+            return default
+        try:
+            number = int(float(value))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"Worksheet '{worksheet_name}': '{names[0]}' must be an integer"
+            ) from exc
+        if number < 0:
+            raise ValueError(
+                f"Worksheet '{worksheet_name}': '{names[0]}' cannot be negative"
+            )
+        return number
+
+    start_block = block_number(0, "Start Block", "Start block")
+    end_block = block_number(A1_DEFAULT_END_BLOCK, "End Block", "End block")
+    if end_block < start_block:
+        raise ValueError(
+            f"Worksheet '{worksheet_name}': End Block cannot be smaller than Start Block"
+        )
+
+    approval_raw = row_value(row, "Require Approval", "Approval required")
+    require_approval = is_active_value(approval_raw) if approval_raw else True
+
+    return Assignment1Config(
+        professor_nft_contract=address(
+            "Professor NFT Contract", "Professor NFT", "Course NFT Contract"
+        ),
+        professor_return_address=address(
+            "Professor Return Address", "Professor Wallet", "Return Address"
+        ),
+        special_contract=address("Special Contract", "NFT Receiver Contract"),
+        start_block=start_block,
+        end_block=end_block,
+        require_approval=require_approval,
+    )
 
 
 def score_repo_candidate(repo: dict[str, Any]) -> int:
@@ -402,116 +475,6 @@ def collect_repo_texts(
         except Exception:
             continue
     return texts
-
-
-def infer_contracts_from_repo_texts(
-    texts: dict[str, str], w3: Web3, student_wallets: list[str]
-) -> tuple[Assignment1Result, list[str]]:
-    result = Assignment1Result()
-    all_addresses: list[str] = []
-    for text in texts.values():
-        all_addresses.extend(extract_addresses(text))
-
-    unique_addresses = []
-    seen = set()
-    for addr in all_addresses:
-        if addr not in seen:
-            seen.add(addr)
-            unique_addresses.append(addr)
-
-    checksummed_wallets = []
-    for wallet in student_wallets:
-        try:
-            checksummed_wallets.append(Web3.to_checksum_address(wallet))
-        except Exception:
-            continue
-
-    for addr in unique_addresses:
-        try:
-            c = w3.eth.contract(
-                address=Web3.to_checksum_address(addr),
-                abi=[
-                    {
-                        "constant": True,
-                        "inputs": [],
-                        "name": "totalSupply",
-                        "outputs": [{"name": "", "type": "uint256"}],
-                        "stateMutability": "view",
-                        "type": "function",
-                    },
-                    {
-                        "constant": True,
-                        "inputs": [],
-                        "name": "decimals",
-                        "outputs": [{"name": "", "type": "uint8"}],
-                        "stateMutability": "view",
-                        "type": "function",
-                    },
-                    {
-                        "constant": True,
-                        "inputs": [{"name": "", "type": "address"}],
-                        "name": "balanceOf",
-                        "outputs": [{"name": "", "type": "uint256"}],
-                        "stateMutability": "view",
-                        "type": "function",
-                    },
-                ],
-            )
-            total_supply = c.functions.totalSupply().call()
-            decimals = c.functions.decimals().call()
-            balances = [c.functions.balanceOf(w).call() for w in checksummed_wallets]
-            if (
-                total_supply == 1_000_000 * 10**18
-                and decimals == 18
-                and any(b > 0 for b in balances)
-            ):
-                result.erc20_address = Web3.to_checksum_address(addr)
-                result.erc20_ok = True
-                break
-        except Exception:
-            pass
-
-    for addr in unique_addresses:
-        try:
-            c = w3.eth.contract(
-                address=Web3.to_checksum_address(addr),
-                abi=[
-                    {
-                        "constant": True,
-                        "inputs": [{"name": "tokenId", "type": "uint256"}],
-                        "name": "tokenURI",
-                        "outputs": [{"name": "", "type": "string"}],
-                        "stateMutability": "view",
-                        "type": "function",
-                    },
-                    {
-                        "constant": True,
-                        "inputs": [{"name": "tokenId", "type": "uint256"}],
-                        "name": "ownerOf",
-                        "outputs": [{"name": "", "type": "address"}],
-                        "stateMutability": "view",
-                        "type": "function",
-                    },
-                ],
-            )
-            uri = c.functions.tokenURI(1).call()
-            owner = c.functions.ownerOf(1).call()
-            owner_low = str(owner).lower()
-            wallet_lows = {w.lower() for w in student_wallets}
-            if (
-                isinstance(uri, str)
-                and uri.strip()
-                and isinstance(owner, str)
-                and owner.startswith("0x")
-                and owner_low in wallet_lows
-            ):
-                result.erc721_address = Web3.to_checksum_address(addr)
-                result.erc721_ok = True
-                break
-        except Exception:
-            pass
-
-    return result, unique_addresses
 
 
 def fetch_sepolia_level_map(
@@ -848,205 +811,24 @@ def _topic_addr(topic_hex: str) -> str:
     return "0x" + topic_hex[-40:].lower()
 
 
-def check_nft_etherscan(wallet: str) -> dict:
-    api_key = os.getenv("ETHERSCAN_API_KEY")
-
-    url = "https://api.etherscan.io/v2/api"
-
-    params = {
-        "chainid": "11155111",  # Sepolia
-        "module": "account",
-        "action": "tokennfttx",
-        "address": wallet,
-        "startblock": 0,
-        "endblock": 99999999,
-        "sort": "asc",
-        "apikey": api_key,
-    }
-
-    try:
-        r = requests.get(url, params=params, timeout=15)
-        data = r.json()
-    except Exception as e:
-        print(f"[WARN] NFT API error {wallet}: {e}")
-        return {"ok": False, "count": 0, "txs": []}
-
-    if data.get("status") != "1":
-        print(f"[WARN] NFT API bad response wallet={wallet}: {data.get('message')}")
-        return {"ok": False, "count": 0, "txs": []}
-
-    nft_txs = []
-
-    for tx in data["result"]:
-        # mint = from zero address
-        if tx["from"].lower() == "0x0000000000000000000000000000000000000000":
-            nft_txs.append(tx["hash"])
-
-    return {
-        "ok": len(nft_txs) > 0,
-        "count": len(nft_txs),
-        "txs": nft_txs,
-    }
-
-
-def check_token_swap(
-    w3: Web3,
-    wallets: list[str],
-    token: str = A1_TOKEN_CONTRACT,
-    start_block: int = A1_START_BLOCK,
-    end_block: int = A1_END_BLOCK,
-) -> dict[str, Any]:
-    """Return token+swap evidence using the same logic as the earlier working check.py."""
-    transfer_topic = w3.keccak(text="Transfer(address,address,uint256)").hex().lower()
-    swap_v3_topic = (
-        w3.keccak(text="Swap(address,address,int256,int256,uint160,uint128,int24)")
-        .hex()
-        .lower()
-    )
-    swap_v2_topic = (
-        w3.keccak(text="Swap(address,uint256,uint256,uint256,uint256,address)")
-        .hex()
-        .lower()
-    )
-
-    wallet_set = {w.lower() for w in wallets if w}
-    if not wallet_set:
-        return {
-            "has_token": False,
-            "has_swap": False,
-            "token_tx_hashes": set(),
-            "swap_tx_hashes": set(),
-        }
-
-    logs = []
-    rpc_errors: list[str] = []
-    current = start_block
-    token_checksum = Web3.to_checksum_address(token)
-
-    while current <= end_block:
-        chunk_end = min(current + A1_LOG_STEP - 1, end_block)
-        try:
-            part = w3.eth.get_logs(
-                {
-                    "address": token_checksum,
-                    "fromBlock": current,
-                    "toBlock": chunk_end,
-                }
-            )
-            logs.extend(part)
-        except Exception as exc:
-            print(f"[WARN] A1 token logs error {current}-{chunk_end}: {exc}")
-            rpc_errors.append(f"{current}-{chunk_end}: {exc}")
-        current = chunk_end + 1
-        time.sleep(0.15)
-
-    if rpc_errors:
-        raise RuntimeError(
-            f"Incomplete A1 token log scan ({len(rpc_errors)} failed ranges)"
-        )
-
-    candidate_txs: set[str] = set()
-    for log in logs:
-        topics = log["topics"]
-        if len(topics) < 3:
-            continue
-        if topics[0].hex().lower() != transfer_topic:
-            continue
-        from_addr = _topic_addr(topics[1].hex())
-        to_addr = _topic_addr(topics[2].hex())
-        tx_hash = log["transactionHash"].hex()
-        if from_addr in wallet_set or to_addr in wallet_set:
-            candidate_txs.add(tx_hash)
-
-    token_tx_hashes: set[str] = set()
-    swap_tx_hashes: set[str] = set()
-    receipt_errors: list[str] = []
-    for tx_hash in candidate_txs:
-        try:
-            receipt = w3.eth.get_transaction_receipt(tx_hash)
-        except Exception as exc:
-            print(f"[WARN] A1 receipt error {tx_hash}: {exc}")
-            receipt_errors.append(f"{tx_hash}: {exc}")
-            continue
-        token_wallets_in_tx: set[str] = set()
-        for log in receipt["logs"]:
-            topics = log["topics"]
-            if len(topics) < 3:
-                continue
-            topic0 = topics[0].hex().lower()
-            if topic0 == transfer_topic and log["address"].lower() == token.lower():
-                from_addr = _topic_addr(topics[1].hex())
-                to_addr = _topic_addr(topics[2].hex())
-                if from_addr in wallet_set:
-                    token_wallets_in_tx.add(from_addr)
-                    token_tx_hashes.add(tx_hash)
-                if to_addr in wallet_set:
-                    token_wallets_in_tx.add(to_addr)
-                    token_tx_hashes.add(tx_hash)
-        if token_wallets_in_tx:
-            for log in receipt["logs"]:
-                topics = log["topics"]
-                if len(topics) < 3:
-                    continue
-                topic0 = topics[0].hex().lower()
-                if topic0 in {swap_v2_topic, swap_v3_topic}:
-                    sender = _topic_addr(topics[1].hex())
-                    recipient = _topic_addr(topics[2].hex())
-                    for wallet in token_wallets_in_tx:
-                        if wallet in (sender, recipient):
-                            swap_tx_hashes.add(tx_hash)
-    if receipt_errors:
-        raise RuntimeError(
-            f"Incomplete A1 receipt scan ({len(receipt_errors)} failed transactions)"
-        )
-
-    return {
-        "has_token": len(token_tx_hashes) > 0,
-        "has_swap": len(swap_tx_hashes) > 0,
-        "token_tx_hashes": token_tx_hashes,
-        "swap_tx_hashes": swap_tx_hashes,
-    }
-
-
-def _ensure_0x_topic(value: str) -> str:
-    value = value.lower()
-    return value if value.startswith("0x") else "0x" + value
-
-
 def _address_to_topic(address: str) -> str:
     return "0x" + address.lower().replace("0x", "").rjust(64, "0")
 
 
-def check_nft_mint_to_wallet(
-    w3: Web3,
-    wallets: list[str],
-    start_block: int = A1_START_BLOCK,
-    end_block: int = A1_END_BLOCK,
-) -> dict[str, Any]:
-    """Find ERC721 mint events to student wallets via Etherscan Sepolia API.
-
-    Public RPC endpoints often reject eth_getLogs without an address filter.
-    Since students deploy different ERC721 contracts, we use Etherscan's indexed
-    NFT transfer endpoint and check for mint transfers:
-      from = 0x0000000000000000000000000000000000000000
-      to   = student wallet
-
-    Set ETHERSCAN_API_KEY in PowerShell before running:
-      $env:ETHERSCAN_API_KEY="..."
-    """
+def fetch_nft_transfers_for_wallets(
+    wallets: list[str], start_block: int, end_block: int
+) -> list[dict[str, Any]]:
+    """Load indexed ERC721 transfers for registered wallets from Etherscan."""
     api_key = os.getenv("ETHERSCAN_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError(
             "ETHERSCAN_API_KEY is required for the Assignment 1 NFT check"
         )
 
-    wallet_set = {w.lower() for w in wallets if w}
-    nft_tx_hashes: set[str] = set()
-    nft_contracts: set[str] = set()
-    zero_addr = "0x0000000000000000000000000000000000000000"
+    transfers: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str, str]] = set()
     url = "https://api.etherscan.io/v2/api"
-
-    for wallet in sorted(wallet_set):
+    for wallet in sorted({wallet.lower() for wallet in wallets if wallet}):
         params = {
             "chainid": "11155111",
             "module": "account",
@@ -1058,9 +840,9 @@ def check_nft_mint_to_wallet(
             "apikey": api_key,
         }
         try:
-            resp = requests.get(url, params=params, timeout=20)
-            resp.raise_for_status()
-            data = resp.json()
+            response = requests.get(url, params=params, timeout=20)
+            response.raise_for_status()
+            data = response.json()
         except Exception as exc:
             raise RuntimeError(
                 f"A1 NFT Etherscan request failed for {wallet}: {exc}"
@@ -1068,77 +850,239 @@ def check_nft_mint_to_wallet(
 
         status = str(data.get("status", ""))
         message = str(data.get("message", ""))
-        result = data.get("result", [])
-
-        # Etherscan often returns status=0 with 'No transactions found' for empty wallets.
+        rows = data.get("result", [])
         if status != "1":
             if "No transactions found" not in message:
                 raise RuntimeError(
-                    f"A1 NFT Etherscan response for {wallet}: {message} | {result}"
+                    f"A1 NFT Etherscan response for {wallet}: {message} | {rows}"
                 )
             time.sleep(0.25)
             continue
+        if not isinstance(rows, list):
+            raise RuntimeError(f"A1 NFT Etherscan returned invalid rows for {wallet}")
 
-        if not isinstance(result, list):
-            time.sleep(0.25)
-            continue
-
-        for tx in result:
-            from_addr = str(tx.get("from", "")).lower()
-            to_addr = str(tx.get("to", "")).lower()
-            tx_hash = str(tx.get("hash", ""))
-            contract = str(tx.get("contractAddress", "")).lower()
-
-            # Mint to the student's wallet. This matches the Etherscan NFT Transfers view.
-            if from_addr == zero_addr and to_addr == wallet:
-                if tx_hash:
-                    nft_tx_hashes.add(tx_hash)
-                if contract:
-                    nft_contracts.add(contract)
-
-        # Avoid hammering the free API.
+        for raw in rows:
+            item = dict(raw)
+            for key in ("from", "to", "contractAddress"):
+                item[key] = str(item.get(key, "")).lower()
+            item["tokenID"] = str(item.get("tokenID", ""))
+            item["hash"] = str(item.get("hash", ""))
+            dedupe_key = (
+                item["hash"],
+                item["contractAddress"],
+                item["tokenID"],
+                item["from"],
+                item["to"],
+            )
+            if dedupe_key not in seen:
+                seen.add(dedupe_key)
+                transfers.append(item)
         time.sleep(0.25)
 
+    return sorted(transfers, key=_nft_transfer_order)
+
+
+def _int_field(item: dict[str, Any], name: str) -> int:
+    try:
+        value = str(item.get(name, "0"))
+        return int(value, 16 if value.lower().startswith("0x") else 10)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _nft_transfer_order(item: dict[str, Any]) -> tuple[int, int, int]:
+    return (
+        _int_field(item, "blockNumber"),
+        _int_field(item, "transactionIndex"),
+        _int_field(item, "logIndex"),
+    )
+
+
+def evaluate_assignment1_transfers(
+    transfers: list[dict[str, Any]],
+    wallets: list[str],
+    config: Assignment1Config,
+) -> dict[str, Any]:
+    """Match the two required ERC721 flows while preserving transaction order."""
+    wallet_set = {wallet.lower() for wallet in wallets if wallet}
+    zero_address = "0x0000000000000000000000000000000000000000"
+    ordered = sorted(transfers, key=_nft_transfer_order)
+
+    professor_receives = [
+        item
+        for item in ordered
+        if item.get("contractAddress") == config.professor_nft_contract
+        and item.get("to") in wallet_set
+    ]
+    professor_receive = professor_receives[0] if professor_receives else None
+    professor_return = None
+    for received in professor_receives:
+        received_order = _nft_transfer_order(received)
+        received_wallet = received.get("to")
+        for item in ordered:
+            if (
+                _nft_transfer_order(item) > received_order
+                and item.get("contractAddress") == config.professor_nft_contract
+                and item.get("tokenID") == received.get("tokenID")
+                and item.get("from") == received_wallet
+                and item.get("to") == config.professor_return_address
+            ):
+                professor_receive = received
+                professor_return = item
+                break
+        if professor_return:
+            break
+
+    personal_mints = [
+        item
+        for item in ordered
+        if item.get("from") == zero_address
+        and item.get("to") in wallet_set
+        and item.get("contractAddress") != config.professor_nft_contract
+    ]
+    personal_mint = personal_mints[0] if personal_mints else None
+    transfer_to_special = None
+    for minted in personal_mints:
+        minted_order = _nft_transfer_order(minted)
+        minted_wallet = minted.get("to")
+        for item in ordered:
+            if (
+                _nft_transfer_order(item) > minted_order
+                and item.get("contractAddress") == minted.get("contractAddress")
+                and item.get("tokenID") == minted.get("tokenID")
+                and item.get("from") == minted_wallet
+                and item.get("to") == config.special_contract
+            ):
+                personal_mint = minted
+                transfer_to_special = item
+                break
+        if transfer_to_special:
+            break
+
     return {
-        "has_nft": len(nft_tx_hashes) > 0,
-        "nft_tx_hashes": nft_tx_hashes,
-        "nft_contracts": nft_contracts,
+        "professor_receive": professor_receive,
+        "professor_return": professor_return,
+        "personal_mint": personal_mint,
+        "transfer_to_special": transfer_to_special,
     }
 
 
+def find_erc721_approval(
+    w3: Web3,
+    nft_contract: str,
+    owner: str,
+    approved_contract: str,
+    token_id: str,
+    start_block: int,
+    end_block: int,
+) -> str:
+    """Return a matching Approval/ApprovalForAll transaction hash, if present."""
+    if end_block < start_block:
+        return ""
+    contract = Web3.to_checksum_address(nft_contract)
+    owner_topic = _address_to_topic(owner)
+    approved_topic = _address_to_topic(approved_contract)
+    approval_topic = w3.keccak(
+        text="Approval(address,address,uint256)"
+    ).hex()
+    approval_for_all_topic = w3.keccak(
+        text="ApprovalForAll(address,address,bool)"
+    ).hex()
+    try:
+        token_number = int(
+            token_id, 16 if token_id.lower().startswith("0x") else 10
+        )
+        token_topic = "0x" + hex(token_number)[2:].rjust(64, "0")
+    except ValueError:
+        return ""
+
+    queries = [
+        [approval_topic, owner_topic, approved_topic, token_topic],
+        [approval_for_all_topic, owner_topic, approved_topic],
+    ]
+    for topics in queries:
+        logs = w3.eth.get_logs(
+            {
+                "address": contract,
+                "fromBlock": start_block,
+                "toBlock": end_block,
+                "topics": topics,
+            }
+        )
+        for log in logs:
+            if topics[0] == approval_for_all_topic:
+                raw_data = log.get("data", b"")
+                raw_hex = raw_data.hex() if hasattr(raw_data, "hex") else str(raw_data)
+                if int(raw_hex or "0", 16) == 0:
+                    continue
+            tx_hash = log["transactionHash"]
+            return tx_hash.hex() if hasattr(tx_hash, "hex") else str(tx_hash)
+    return ""
+
+
 def check_assignment1(
-    student: Student, gh: GitHubHelper, w3: Web3
+    student: Student,
+    gh: GitHubHelper,
+    w3: Web3,
+    config: Assignment1Config,
 ) -> Assignment1Result:
-    """Assignment 1 final on-chain rule: PASS = Token + Swap + NFT mint."""
-    res = Assignment1Result()
-    wallets = [a.lower() for a in student.eth_addresses if a]
+    """Validate the current NFT Quest against protected instructor settings."""
+    res = Assignment1Result(
+        approval_required=config.require_approval,
+        professor_nft_contract=config.professor_nft_contract,
+    )
+    wallets = [address.lower() for address in student.eth_addresses if address]
     if not wallets:
         res.status = "FAIL"
         res.note = "missing_eth_address"
         return res
 
-    token_swap = check_token_swap(w3=w3, wallets=wallets)
-    nft_mint = check_nft_mint_to_wallet(w3=w3, wallets=wallets)
+    transfers = fetch_nft_transfers_for_wallets(
+        wallets, config.start_block, config.end_block
+    )
+    evidence = evaluate_assignment1_transfers(transfers, wallets, config)
+    professor_receive = evidence["professor_receive"]
+    professor_return = evidence["professor_return"]
+    personal_mint = evidence["personal_mint"]
+    transfer_to_special = evidence["transfer_to_special"]
 
-    res.token_ok = bool(token_swap["has_token"])
-    res.swap_ok = bool(token_swap["has_swap"])
-    res.nft_ok = bool(nft_mint["has_nft"])
+    res.professor_received_ok = professor_receive is not None
+    res.professor_returned_ok = professor_return is not None
+    res.personal_mint_ok = personal_mint is not None
+    res.transfer_to_special_ok = transfer_to_special is not None
 
-    res.erc20_ok = res.token_ok
-    res.erc721_ok = res.nft_ok
-    res.erc20_address = A1_TOKEN_CONTRACT if res.token_ok else ""
-    # May be several NFT contracts because a wallet can mint more than one NFT.
-    res.erc721_address = ", ".join(sorted(nft_mint["nft_contracts"]))
+    if professor_receive:
+        res.professor_token_id = str(professor_receive.get("tokenID", ""))
+        res.professor_receive_tx_hash = str(professor_receive.get("hash", ""))
+    if professor_return:
+        res.professor_return_tx_hash = str(professor_return.get("hash", ""))
+    if personal_mint:
+        res.personal_nft_contract = str(personal_mint.get("contractAddress", ""))
+        res.personal_token_id = str(personal_mint.get("tokenID", ""))
+        res.personal_mint_tx_hash = str(personal_mint.get("hash", ""))
+    if transfer_to_special:
+        res.transfer_to_special_tx_hash = str(transfer_to_special.get("hash", ""))
 
-    res.token_tx_hashes = sorted(token_swap["token_tx_hashes"])
-    res.swap_tx_hashes = sorted(token_swap["swap_tx_hashes"])
-    res.nft_tx_hashes = sorted(nft_mint["nft_tx_hashes"])
+    if not config.require_approval:
+        res.approval_ok = True
+    elif personal_mint:
+        owner = str(personal_mint.get("to", ""))
+        approval_end_block = (
+            _int_field(transfer_to_special, "blockNumber")
+            if transfer_to_special
+            else min(config.end_block, w3.eth.block_number)
+        )
+        res.approval_tx_hash = find_erc721_approval(
+            w3=w3,
+            nft_contract=res.personal_nft_contract,
+            owner=owner,
+            approved_contract=config.special_contract,
+            token_id=res.personal_token_id,
+            start_block=max(config.start_block, _int_field(personal_mint, "blockNumber")),
+            end_block=approval_end_block,
+        )
+        res.approval_ok = bool(res.approval_tx_hash)
 
-    res.token_tx_count = len(res.token_tx_hashes)
-    res.swap_tx_count = len(res.swap_tx_hashes)
-    res.nft_tx_count = len(res.nft_tx_hashes)
-
-    # Keep light GitHub info only as metadata. It no longer controls Assignment 1 status.
     if student.github_raw:
         try:
             owner, repo, _ = resolve_repo(student.github_raw, gh)
@@ -1150,23 +1094,39 @@ def check_assignment1(
         except Exception as exc:
             res.note = f"github_metadata_error={exc}"
 
-    if res.token_ok and res.swap_ok and res.nft_ok:
+    required_checks = [
+        res.professor_received_ok,
+        res.professor_returned_ok,
+        res.personal_mint_ok,
+        res.approval_ok,
+        res.transfer_to_special_ok,
+    ]
+    if all(required_checks):
         res.status = "PASS"
-    elif res.token_ok and res.swap_ok:
+    elif any(
+        [
+            res.professor_received_ok,
+            res.professor_returned_ok,
+            res.personal_mint_ok,
+            bool(res.approval_tx_hash),
+            res.transfer_to_special_ok,
+        ]
+    ):
         res.status = "PARTIAL"
     else:
         res.status = "FAIL"
 
     note_parts = [
-        f"token={'PASS' if res.token_ok else 'FAIL'}",
-        f"swap={'PASS' if res.swap_ok else 'FAIL'}",
-        f"nft={'PASS' if res.nft_ok else 'FAIL'}",
-        f"token_txs={res.token_tx_count}",
-        f"swap_txs={res.swap_tx_count}",
-        f"nft_txs={res.nft_tx_count}",
+        f"professor_receive={'PASS' if res.professor_received_ok else 'FAIL'}",
+        f"professor_return={'PASS' if res.professor_returned_ok else 'FAIL'}",
+        f"personal_mint={'PASS' if res.personal_mint_ok else 'FAIL'}",
+        (
+            "approval=NOT_REQUIRED"
+            if not res.approval_required
+            else f"approval={'PASS' if res.approval_ok else 'FAIL'}"
+        ),
+        f"special_transfer={'PASS' if res.transfer_to_special_ok else 'FAIL'}",
     ]
-    if res.erc721_address:
-        note_parts.append(f"nft_contracts={res.erc721_address}")
     if res.note:
         note_parts.append(res.note)
     res.note = "; ".join(note_parts)
@@ -1413,9 +1373,11 @@ def write_google_results(
             "Polkadot",
             "TON",
             "Group",
-            "Token",
-            "Swap",
-            "NFT",
+            "Professor NFT received",
+            "Professor NFT returned",
+            "Personal NFT minted",
+            "Approval",
+            "Transferred to special contract",
             "Assignment 1",
             "Ethernaut",
             "A2 Complexity",
@@ -1433,18 +1395,21 @@ def write_google_results(
             "A1 repo",
             "GitHub reachable",
             "Commits found",
-            "Token",
-            "Swap",
-            "NFT",
+            "Professor NFT received",
+            "Professor NFT returned",
+            "Personal NFT minted",
+            "Approval",
+            "Transferred to special contract",
             "Assignment 1",
-            "A1 ERC20",
-            "A1 ERC721",
-            "Token tx count",
-            "Swap tx count",
-            "NFT tx count",
-            "Token tx hashes",
-            "Swap tx hashes",
-            "NFT tx hashes",
+            "Professor NFT contract",
+            "Professor token ID",
+            "Personal NFT contract",
+            "Personal token ID",
+            "Professor receive tx",
+            "Professor return tx",
+            "Personal mint tx",
+            "Approval tx",
+            "Transfer to special tx",
             "A1 note",
             "Ethernaut",
             "Matched wallet",
@@ -1475,9 +1440,20 @@ def write_google_results(
         a1_status = a1.status if scope in {"all", "assignment1"} else "NOT RUN"
         a2_status = a2.status if scope in {"all", "ethernaut"} else "NOT RUN"
         a1_selected = scope in {"all", "assignment1"}
-        token_status = "PASS" if a1.token_ok else ("FAIL" if a1_selected else "NOT RUN")
-        swap_status = "PASS" if a1.swap_ok else ("FAIL" if a1_selected else "NOT RUN")
-        nft_status = "PASS" if a1.nft_ok else ("FAIL" if a1_selected else "NOT RUN")
+
+        def a1_check_status(ok: bool) -> str:
+            return "PASS" if ok else ("FAIL" if a1_selected else "NOT RUN")
+
+        professor_receive_status = a1_check_status(a1.professor_received_ok)
+        professor_return_status = a1_check_status(a1.professor_returned_ok)
+        personal_mint_status = a1_check_status(a1.personal_mint_ok)
+        if not a1_selected:
+            approval_status = "NOT RUN"
+        elif not a1.approval_required:
+            approval_status = "NOT REQUIRED"
+        else:
+            approval_status = a1_check_status(a1.approval_ok)
+        special_transfer_status = a1_check_status(a1.transfer_to_special_ok)
 
         summary_rows.append(
             [
@@ -1490,9 +1466,11 @@ def write_google_results(
                 student.polkadot_address,
                 student.ton_address,
                 student.group,
-                token_status,
-                swap_status,
-                nft_status,
+                professor_receive_status,
+                professor_return_status,
+                personal_mint_status,
+                approval_status,
+                special_transfer_status,
                 a1_status,
                 a2_status,
                 a2.onchain_complexity,
@@ -1510,18 +1488,21 @@ def write_google_results(
                 a1.repo,
                 a1.github_ok,
                 a1.commits_ok,
-                token_status,
-                swap_status,
-                nft_status,
+                professor_receive_status,
+                professor_return_status,
+                personal_mint_status,
+                approval_status,
+                special_transfer_status,
                 a1_status,
-                a1.erc20_address,
-                a1.erc721_address,
-                a1.token_tx_count,
-                a1.swap_tx_count,
-                a1.nft_tx_count,
-                ", ".join(a1.token_tx_hashes),
-                ", ".join(a1.swap_tx_hashes),
-                ", ".join(a1.nft_tx_hashes),
+                a1.professor_nft_contract,
+                a1.professor_token_id,
+                a1.personal_nft_contract,
+                a1.personal_token_id,
+                a1.professor_receive_tx_hash,
+                a1.professor_return_tx_hash,
+                a1.personal_mint_tx_hash,
+                a1.approval_tx_hash,
+                a1.transfer_to_special_tx_hash,
                 a1.note,
                 a2_status,
                 a2.matched_wallet,
@@ -1651,6 +1632,10 @@ def main() -> None:
         default=os.getenv("ETHERNAUT_LEVELS_WORKSHEET", "ETHERNAUT_LEVELS"),
     )
     parser.add_argument(
+        "--assignment1-sheet",
+        default=os.getenv("ASSIGNMENT1_CONFIG_WORKSHEET", "ASSIGNMENT1_CONFIG"),
+    )
+    parser.add_argument(
         "--results-folder-id", default=os.getenv("GOOGLE_RESULTS_FOLDER_ID", "")
     )
     parser.add_argument(
@@ -1689,8 +1674,21 @@ def main() -> None:
     level_complexity, level_addr_to_name = read_ethernaut_config_from_google_sheet(
         client, args.spreadsheet_id, args.ethernaut_sheet
     )
+    assignment1_config: Assignment1Config | None = None
+    assignment1_config_error = ""
+    if args.scope in {"all", "assignment1"}:
+        try:
+            assignment1_config = read_assignment1_config_from_google_sheet(
+                client, args.spreadsheet_id, args.assignment1_sheet
+            )
+        except Exception as exc:
+            assignment1_config_error = str(exc)
     print(f"[INFO] Students loaded: {len(students)}")
     print(f"[INFO] Ethernaut level rules loaded: {len(level_complexity)}")
+    if assignment1_config:
+        print("[INFO] Assignment 1 NFT Quest settings loaded")
+    elif assignment1_config_error:
+        print(f"[WARN] Assignment 1 config is invalid: {assignment1_config_error}")
 
     gh = GitHubHelper(os.getenv("GITHUB_TOKEN"))
     errors: list[dict[str, str]] = []
@@ -1773,7 +1771,19 @@ def main() -> None:
         )
         a1 = Assignment1Result(status="NOT RUN")
         if args.scope in {"all", "assignment1"}:
-            if w3 is None:
+            if assignment1_config is None:
+                a1 = Assignment1Result(
+                    status="ERROR", note=assignment1_config_error or "missing config"
+                )
+                errors.append(
+                    {
+                        "student_id": student.student_id,
+                        "name": student.name,
+                        "stage": "Assignment 1 config",
+                        "error": assignment1_config_error or "missing config",
+                    }
+                )
+            elif w3 is None:
                 a1 = Assignment1Result(status="ERROR", note="Sepolia RPC unavailable")
                 errors.append(
                     {
@@ -1785,7 +1795,7 @@ def main() -> None:
                 )
             else:
                 try:
-                    a1 = check_assignment1(student, gh, w3)
+                    a1 = check_assignment1(student, gh, w3, assignment1_config)
                 except Exception as exc:
                     a1 = Assignment1Result(status="ERROR", note=str(exc))
                     errors.append(

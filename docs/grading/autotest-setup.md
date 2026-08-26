@@ -17,7 +17,10 @@ The credential file is used only as an encrypted GitHub secret. Students do not 
 Create these worksheets:
 
 - `COURSE_STUDENTS` with `Name`, `ID`, `Email`, `GitHub`, `Ethereum`, `Polkadot`, `TON`, `Group`, and `Active`;
+- `ASSIGNMENT1_CONFIG` with `Professor NFT Contract`, `Professor Return Address`, `Special Contract`, `Start Block`, `End Block`, and `Require Approval`;
 - `ETHERNAUT_LEVELS` with `Level`, `Address`, and `Complexity`.
+
+For the first run, keep only one fresh test wallet in `COURSE_STUDENTS`. Do not copy the historical result rows into the new source registry until the staged preview test passes.
 
 In Google Sheets, open **Data → Protect sheets and ranges** and restrict editing to instructors. The service account only needs viewer access to this source file. It needs editor access only to the separate results folder.
 
@@ -48,3 +51,5 @@ Never commit these values to the repository.
 7. Follow the printed result URL or open the configured Drive folder.
 
 The source spreadsheet is read-only from the script's point of view. Every run creates a new spreadsheet and never overwrites earlier results.
+
+Before the first class-wide run, follow [Test Run for the New Assignments](test-run-new-assignments.md).
