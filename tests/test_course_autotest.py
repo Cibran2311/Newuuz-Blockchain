@@ -3,6 +3,8 @@ from __future__ import annotations
 import unittest
 from unittest.mock import MagicMock
 
+from gspread.exceptions import WorksheetNotFound
+
 from scripts.course_autotest import (
     A2_PASS_COMPLEXITY,
     Assignment1Config,
@@ -60,16 +62,24 @@ class FakeOutputWorksheet:
     def update(self, values, range_name, value_input_option):
         self.values = values
 
+    def get_all_values(self):
+        return self.values
+
+    def append_row(self, values, value_input_option):
+        self.values.append(values)
+
 
 class FakeOutputSpreadsheet:
     def __init__(self):
         self.id = "result-sheet-id"
         self.sheet1 = FakeOutputWorksheet("Sheet1", 1)
         self.worksheets = [self.sheet1]
-        self.shared = []
 
-    def share(self, email, perm_type, role, notify):
-        self.shared.append(email)
+    def worksheet(self, title):
+        for worksheet in self.worksheets:
+            if worksheet.title == title:
+                return worksheet
+        raise WorksheetNotFound(title)
 
     def add_worksheet(self, title, rows, cols):
         worksheet = FakeOutputWorksheet(title, len(self.worksheets) + 1)
@@ -82,11 +92,11 @@ class FakeOutputSpreadsheet:
 
 class FakeOutputClient:
     def __init__(self):
-        self.created = None
+        self.opened = None
         self.spreadsheet = FakeOutputSpreadsheet()
 
-    def create(self, title, folder_id=None):
-        self.created = (title, folder_id)
+    def open_by_key(self, spreadsheet_id):
+        self.opened = spreadsheet_id
         return self.spreadsheet
 
 
@@ -303,14 +313,13 @@ class CourseAutotestTests(unittest.TestCase):
         self.assertEqual(status, "REVIEW")
         self.assertIn("instructor review", reason)
 
-    def test_result_writer_creates_four_new_worksheets(self):
+    def test_result_writer_updates_current_worksheets_and_appends_history(self):
         client = FakeOutputClient()
         student = Student("Ada", "101", "https://github.com/ada", ["0x" + "1" * 40])
 
         title, url = write_google_results(
             client=client,
-            results_folder_id="folder-id",
-            share_email="teacher@example.edu",
+            results_spreadsheet_id="result-sheet-id",
             students=[student],
             a1_results={
                 "101": Assignment1Result(
@@ -329,15 +338,41 @@ class CourseAutotestTests(unittest.TestCase):
         )
 
         self.assertTrue(title.startswith("FINAL_AUTOTEST_"))
-        self.assertEqual(client.created[1], "folder-id")
+        self.assertEqual(client.opened, "result-sheet-id")
         self.assertEqual(
             [worksheet.title for worksheet in client.spreadsheet.worksheets],
-            ["Closed list", "Autotest details", "Manual review", "Errors"],
+            [
+                "Closed list",
+                "Autotest details",
+                "Manual review",
+                "Errors",
+                "Run history",
+            ],
         )
-        self.assertEqual(client.spreadsheet.shared, ["teacher@example.edu"])
         self.assertEqual(url, "https://docs.google.com/spreadsheets/d/result-sheet-id")
         for worksheet in client.spreadsheet.worksheets[:2]:
             self.assertEqual(len(worksheet.values[0]), len(worksheet.values[1]))
+        history = client.spreadsheet.worksheet("Run history").values
+        self.assertEqual(history[0][0], "Run UTC")
+        self.assertEqual(history[1][1:4], ["FINAL", "assignment1", 1])
+        self.assertEqual(history[1][4], 1)
+
+        write_google_results(
+            client=client,
+            results_spreadsheet_id="result-sheet-id",
+            students=[student],
+            a1_results={"101": Assignment1Result(status="FAIL")},
+            a2_results={"101": EthernautResult(status="NOT RUN")},
+            errors=[],
+            run_mode="preview",
+            scope="assignment1",
+        )
+
+        self.assertEqual(len(client.spreadsheet.worksheets), 5)
+        history = client.spreadsheet.worksheet("Run history").values
+        self.assertEqual(len(history), 3)
+        self.assertEqual(history[2][1:4], ["PREVIEW", "assignment1", 1])
+        self.assertEqual(history[2][8], 1)
 
 
 if __name__ == "__main__":
