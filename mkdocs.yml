@@ -89,6 +89,7 @@ nav:
       - Protected Google Sheets Registry: grading/google-sheets-registry.md
       - Auto-check System: grading/autocheck.md
       - Instructor Setup: grading/autotest-setup.md
+      - Test Run for New Assignments: grading/test-run-new-assignments.md
       - Classroom and GitHub: grading/github-classroom.md
       - Deadline-gated Checks: grading/deadline-gated-checks.md
   - References:
