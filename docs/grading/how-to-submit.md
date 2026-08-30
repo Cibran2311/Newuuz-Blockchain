@@ -22,7 +22,7 @@ Only activity from registered addresses can be matched automatically.
 5. Add a short note if the transaction used a newly registered wallet.
 6. Click **Turn in**.
 
-The instructor runs the course checker from GitHub Actions. It reads the protected registry, verifies available GitHub and on-chain evidence, and creates a new result spreadsheet.
+The instructor runs the course checker from GitHub Actions. It reads the protected registry, verifies available GitHub and on-chain evidence, and updates the protected result spreadsheet.
 
 ## If the result needs review
 
