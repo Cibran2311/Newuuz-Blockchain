@@ -40,7 +40,7 @@ Ethernaut is an automatic `PASS` only when verified complexity is at least 10. A
 - Give students view access only if they need to confirm their registered data.
 - Never store private keys, seed phrases, passwords, or API tokens in the spreadsheet.
 
-The checker reads this spreadsheet and creates a separate result spreadsheet. It never writes into the source registry.
+The checker reads this spreadsheet and updates a separate instructor-owned result spreadsheet. It never writes into the source registry. The current result tabs are refreshed on every run, and `Run history` keeps a compact audit trail.
 
 ## Assignment 1 configuration worksheet
 
