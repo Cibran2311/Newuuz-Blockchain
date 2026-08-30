@@ -17,6 +17,7 @@ from typing import Any
 import gspread
 import requests
 from google.oauth2.service_account import Credentials
+from gspread.exceptions import WorksheetNotFound
 from web3 import Web3
 
 ETH_RE = re.compile(r"0x[a-fA-F0-9]{40}")
@@ -204,7 +205,6 @@ def extract_addresses(text: str | None) -> list[str]:
 
 GOOGLE_SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive",
 ]
 
 
@@ -1332,8 +1332,7 @@ def overall_status(
 
 def write_google_results(
     client: gspread.Client,
-    results_folder_id: str,
-    share_email: str,
+    results_spreadsheet_id: str,
     students: list[Student],
     a1_results: dict[str, Assignment1Result],
     a2_results: dict[str, EthernautResult],
@@ -1341,26 +1340,17 @@ def write_google_results(
     run_mode: str,
     scope: str,
 ) -> tuple[str, str]:
-    """Create a new result spreadsheet. The source spreadsheet is never edited."""
+    """Update the instructor-owned result spreadsheet.
+
+    Service accounts cannot own Google Drive files, so the instructor creates this
+    spreadsheet once and shares it with the service account as an editor. Current
+    result worksheets are replaced on every run, while ``Run history`` is appended.
+    The protected source spreadsheet is never edited.
+    """
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M%S")
     prefix = "FINAL_AUTOTEST" if run_mode == "final" else "PREVIEW_AUTOTEST"
     title = f"{prefix}_{timestamp}"
-    spreadsheet = client.create(title, folder_id=results_folder_id or None)
-
-    if share_email:
-        try:
-            spreadsheet.share(
-                share_email, perm_type="user", role="writer", notify=False
-            )
-        except Exception as exc:
-            errors.append(
-                {
-                    "student_id": "",
-                    "name": "",
-                    "stage": "share result spreadsheet",
-                    "error": str(exc),
-                }
-            )
+    spreadsheet = client.open_by_key(results_spreadsheet_id)
 
     summary_rows: list[list[Any]] = [
         [
@@ -1539,22 +1529,38 @@ def write_google_results(
         )
 
     worksheets = [
-        (spreadsheet.sheet1, "Closed list", summary_rows),
-        (None, "Autotest details", detail_rows),
-        (None, "Manual review", review_rows),
-        (None, "Errors", error_rows),
+        ("Closed list", summary_rows),
+        ("Autotest details", detail_rows),
+        ("Manual review", review_rows),
+        ("Errors", error_rows),
     ]
-    for existing, sheet_name, rows in worksheets:
+
+    def get_or_create_worksheet(
+        sheet_name: str, row_count: int, column_count: int, use_default: bool = False
+    ) -> Any:
+        try:
+            return spreadsheet.worksheet(sheet_name)
+        except WorksheetNotFound:
+            default_sheet = spreadsheet.sheet1
+            if use_default and default_sheet.title in {"Sheet1", "Лист1"}:
+                default_sheet.update_title(sheet_name)
+                return default_sheet
+            return spreadsheet.add_worksheet(
+                title=sheet_name,
+                rows=row_count,
+                cols=column_count,
+            )
+
+    for sheet_index, (sheet_name, rows) in enumerate(worksheets):
         column_count = max(len(rows[0]), 1)
         row_count = max(len(rows), 2)
-        worksheet = existing or spreadsheet.add_worksheet(
-            title=sheet_name,
-            rows=row_count,
-            cols=column_count,
+        worksheet = get_or_create_worksheet(
+            sheet_name,
+            row_count,
+            column_count,
+            use_default=sheet_index == 0,
         )
-        if existing:
-            worksheet.update_title(sheet_name)
-            worksheet.resize(rows=row_count, cols=column_count)
+        worksheet.resize(rows=row_count, cols=column_count)
         worksheet.update(
             values=[[result_cell(value) for value in row] for row in rows],
             range_name="A1",
@@ -1613,12 +1619,100 @@ def write_google_results(
             }
         )
 
+    history_header = [
+        "Run UTC",
+        "Mode",
+        "Scope",
+        "Students",
+        "Assignment 1 PASS",
+        "Ethernaut PASS",
+        "Overall PASS",
+        "Review",
+        "Fail",
+        "Error",
+    ]
+    overall_values = [str(row[18]).upper() for row in summary_rows[1:]]
+    history_row = [
+        datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        run_mode.upper(),
+        scope,
+        len(students),
+        sum(1 for result in a1_results.values() if result.status.upper() == "PASS"),
+        sum(1 for result in a2_results.values() if result.status.upper() == "PASS"),
+        overall_values.count("PASS"),
+        overall_values.count("REVIEW"),
+        overall_values.count("FAIL"),
+        overall_values.count("ERROR"),
+    ]
+    history_sheet = get_or_create_worksheet(
+        "Run history", row_count=2, column_count=len(history_header)
+    )
+    if not history_sheet.get_all_values():
+        history_sheet.update(
+            values=[history_header],
+            range_name="A1",
+            value_input_option="RAW",
+        )
+    history_sheet.append_row(history_row, value_input_option="RAW")
+    spreadsheet.batch_update(
+        {
+            "requests": [
+                {
+                    "updateSheetProperties": {
+                        "properties": {
+                            "sheetId": history_sheet.id,
+                            "gridProperties": {"frozenRowCount": 1},
+                        },
+                        "fields": "gridProperties.frozenRowCount",
+                    }
+                },
+                {
+                    "repeatCell": {
+                        "range": {
+                            "sheetId": history_sheet.id,
+                            "startRowIndex": 0,
+                            "endRowIndex": 1,
+                        },
+                        "cell": {
+                            "userEnteredFormat": {
+                                "backgroundColor": {
+                                    "red": 0.15,
+                                    "green": 0.45,
+                                    "blue": 0.30,
+                                },
+                                "textFormat": {
+                                    "foregroundColor": {
+                                        "red": 1,
+                                        "green": 1,
+                                        "blue": 1,
+                                    },
+                                    "bold": True,
+                                },
+                            }
+                        },
+                        "fields": "userEnteredFormat(backgroundColor,textFormat)",
+                    }
+                },
+                {
+                    "autoResizeDimensions": {
+                        "dimensions": {
+                            "sheetId": history_sheet.id,
+                            "dimension": "COLUMNS",
+                            "startIndex": 0,
+                            "endIndex": len(history_header),
+                        }
+                    }
+                },
+            ]
+        }
+    )
+
     return title, f"https://docs.google.com/spreadsheets/d/{spreadsheet.id}"
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Read the protected course roster and create a new Google Sheet with autotest results"
+        description="Read the protected course roster and update the instructor-owned Google Sheet with autotest results"
     )
     parser.add_argument(
         "--spreadsheet-id", default=os.getenv("COURSE_STUDENTS_SPREADSHEET_ID", "")
@@ -1636,10 +1730,8 @@ def main() -> None:
         default=os.getenv("ASSIGNMENT1_CONFIG_WORKSHEET", "ASSIGNMENT1_CONFIG"),
     )
     parser.add_argument(
-        "--results-folder-id", default=os.getenv("GOOGLE_RESULTS_FOLDER_ID", "")
-    )
-    parser.add_argument(
-        "--share-email", default=os.getenv("GOOGLE_RESULTS_SHARE_EMAIL", "")
+        "--results-spreadsheet-id",
+        default=os.getenv("GOOGLE_RESULTS_SPREADSHEET_ID", ""),
     )
     parser.add_argument("--mode", choices=["preview", "final"], default="preview")
     parser.add_argument(
@@ -1663,8 +1755,8 @@ def main() -> None:
         raise ValueError("GOOGLE_SERVICE_ACCOUNT_JSON is required")
     if not args.spreadsheet_id:
         raise ValueError("COURSE_STUDENTS_SPREADSHEET_ID is required")
-    if not args.results_folder_id:
-        raise ValueError("GOOGLE_RESULTS_FOLDER_ID is required")
+    if not args.results_spreadsheet_id:
+        raise ValueError("GOOGLE_RESULTS_SPREADSHEET_ID is required")
 
     client = google_client(service_account_json)
     print("[INFO] Loading active students from the protected Google Sheet...")
@@ -1845,11 +1937,10 @@ def main() -> None:
                     )
         a2_results[student.student_id] = a2
 
-    print("[INFO] Creating a new Google Sheet with results...")
+    print("[INFO] Updating the instructor-owned Google Sheet with results...")
     output_title, output_url = write_google_results(
         client=client,
-        results_folder_id=args.results_folder_id,
-        share_email=args.share_email,
+        results_spreadsheet_id=args.results_spreadsheet_id,
         students=students,
         a1_results=a1_results,
         a2_results=a2_results,
