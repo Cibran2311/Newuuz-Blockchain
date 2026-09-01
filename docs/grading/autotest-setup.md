@@ -1,56 +1,52 @@
 # Instructor Auto-check Setup
 
-This setup is completed once by the course owner. After that, the instructor runs the checker from the GitHub Actions interface without installing Python.
+This GitHub, MkDocs, and Google Sheets setup is completed once by the course owner.
 
 ## 1. Prepare Google Cloud access
 
 1. Create or select a Google Cloud project.
 2. Enable the Google Sheets API.
-3. Create a service account and download its credential file.
-4. Share the protected source spreadsheet with the service-account email as **Viewer**.
-5. Create one empty Google spreadsheet named `NewUUZ Autotest Results` and share it with the same service account as **Editor**.
+3. Create a service account and download its JSON credential file.
+4. Share the protected source spreadsheet with the service account as **Viewer**.
+5. Create an empty spreadsheet named `NewUUZ Autotest Results` and share it with the service account as **Editor**.
 
-The credential file is used only as an encrypted GitHub secret. Students do not create or submit JSON files.
+Keep the downloaded credential private. The service account updates an instructor-owned file because consumer service accounts cannot own new Drive files.
 
-## 2. Prepare the protected spreadsheet
+## 2. Prepare the source spreadsheet
 
-Create these worksheets:
+Create:
 
-- `COURSE_STUDENTS` with `Name`, `ID`, `Email`, `GitHub`, `Ethereum`, `Polkadot`, `TON`, `Group`, and `Active`;
-- `ASSIGNMENT1_CONFIG` with `Professor NFT Contract`, `Professor Return Address`, `Special Contract`, `Start Block`, `End Block`, and `Require Approval`;
-- `ETHERNAUT_LEVELS` with `Level`, `Address`, and `Complexity`.
+- `COURSE_STUDENTS`: `Name`, `ID`, `Email`, `GitHub`, `Ethereum`, `Polkadot`, `TON`, `Group`, `Active`;
+- `ASSIGNMENT1_CONFIG`: `Professor NFT Contract`, `Professor Return Address`, `Special Contract`, `Start Block`, `End Block`, `Require Approval`;
+- `ETHERNAUT_LEVELS`: `Level`, `Address`, `Complexity`.
 
-For the first run, keep only one fresh test wallet in `COURSE_STUDENTS`. Do not copy the historical result rows into the new source registry until the staged preview test passes.
+Give students a controlled registration period to fill only their own identity, repository, and public wallet fields. Then protect the source sheet. The service account needs viewer access only.
 
-In Google Sheets, open **Data → Protect sheets and ranges** and restrict editing to instructors. The service account only needs viewer access to this source file. It needs editor access only to the separate result spreadsheet.
+## 3. Configure GitHub Actions
 
-## 3. Configure the GitHub repository
-
-Open **Settings → Secrets and variables → Actions** and add:
+Under **Settings → Secrets and variables → Actions**, add:
 
 | Type | Name | Value |
 |---|---|---|
-| Secret | `GOOGLE_SERVICE_ACCOUNT_JSON` | Full contents of the downloaded service-account credential file |
-| Secret | `COURSE_STUDENTS_SPREADSHEET_ID` | ID between `/d/` and `/edit` in the source spreadsheet URL |
-| Secret | `GOOGLE_RESULTS_SPREADSHEET_ID` | ID between `/d/` and `/edit` in the result spreadsheet URL |
+| Secret | `GOOGLE_SERVICE_ACCOUNT_JSON` | Entire service-account credential JSON |
+| Secret | `COURSE_STUDENTS_SPREADSHEET_ID` | Source spreadsheet ID from its URL |
+| Secret | `GOOGLE_RESULTS_SPREADSHEET_ID` | Result spreadsheet ID from its URL |
 | Secret | `SEPOLIA_RPC_URL` | Reliable Sepolia RPC endpoint |
-| Secret | `ETHERSCAN_API_KEY` | Etherscan API key for indexed transaction checks |
-| Variable | `ETHERNAUT_START_BLOCK` | Optional first Sepolia block to scan; omit to scan from block 0 |
+| Secret | `ETHERSCAN_API_KEY` | Etherscan API key for indexed fallback checks |
+| Variable | `ETHERNAUT_START_BLOCK` | Optional first Sepolia block to scan |
 
-Never commit these values to the repository.
+Student repositories must be public in this version. The course workflow token can read public repositories but does not grant access to arbitrary private student repositories.
 
-## 4. Run the check
+## 4. Prepare student repositories
 
-1. Open **Actions** in GitHub.
-2. Select **Blockchain Autotest**.
-3. Click **Run workflow**.
-4. Select `preview` or `final`.
-5. Select `all`, `assignment1`, or `ethernaut`.
-6. Start the workflow and open its log when complete.
-7. Follow the printed result URL.
+Each registered repository must contain `submission.json` at its root. Students start from `submission.example.json`, use the exact Sheet `ID`, retain all 16 work sections, and change a work to `submitted` only when its report is ready.
 
-The source spreadsheet is read-only from the script's point of view. Every run refreshes the four current-result worksheets in the instructor-owned result spreadsheet and appends one audit row to `Run history`.
+## 5. Run the check
 
-This fixed result spreadsheet is required for consumer Google accounts: [service accounts have no Google Drive storage quota and cannot own newly created files](https://developers.google.com/workspace/drive/api/guides/handle-errors#storageQuotaExceeded).
+1. Open **Actions → Blockchain Autotest → Run workflow**.
+2. Choose `preview` or `final`.
+3. Choose the whole course, labs, assignments, or one work.
+4. Open the result workbook from the workflow summary.
+5. Download the audit artifact when a machine-readable snapshot must be archived separately.
 
-Before the first class-wide run, follow [Test Run for the New Assignments](test-run-new-assignments.md).
+Every run refreshes the current summaries and details, preserves instructor review columns, and appends one row to `Run history`.

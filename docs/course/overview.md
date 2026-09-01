@@ -27,25 +27,22 @@ By the end of the course, students should be able to:
 | Lab 4 | Ethereum transactions | Gas and transaction analysis |
 | Lab 5 | ERC20 token | Token evidence and transfers |
 | Lab 6 | NFT ownership | NFT address, token ID, approval/transfer evidence |
+| Lab 7 | DEX / AMM arbitrage | Swap transactions and portfolio calculation |
 | Lab 8 | Polkadot basics | Polkadot account and extrinsic evidence |
+| Lab 9 | AssetHub / XCM | Cross-chain extrinsic and route explanation |
 | Lab 10 | TON basics | TON testnet transaction evidence |
+| Lab 11 | TON jettons | Jetton contract and message analysis |
+| Lab 12 | TON DeFi / security | Swap or security challenge evidence |
 
 ## Required Assignments
 
 | Assignment | Topic | Main Output |
 |---|---|---|
+| Assignment 1 | NFT Quest | Complete NFT ownership and transfer flow |
+| Assignment 2 | Security Arena | Ethernaut completion evidence |
 | Assignment 3 | Group Chain of Contracts on Sepolia | Group contract chain, events, report |
 | Assignment 4 | Web3 Technical Article | Structured technical article |
 
 ## Additional Challenges
 
-Additional challenges are available for students who want more depth.
-
-| Challenge | Topic |
-|---|---|
-| Lab 7 | DEX / AMM arbitrage |
-| Lab 9 | Polkadot AssetHub / XCM |
-| Lab 11 | TON jetton transfer analysis |
-| Lab 12 | TON DeFi / security |
-| NFT Quest | Extended NFT workflow |
-| Security Arena | Ethernaut challenges |
+The current version keeps all 12 labs and all 4 assignments in the main block. Difficulty tiers and any future bonus/challenge placement will be decided later without deleting work from the catalog.

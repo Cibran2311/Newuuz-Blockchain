@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cibran2311.github.io/Newuuz-Blockchain/schemas/submission.schema.json",
+  "title": "NewUUZ Blockchain Course Submission",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "student_id",
+    "labs",
+    "assignments"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "student_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "labs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lab1",
+        "lab2",
+        "lab3",
+        "lab4",
+        "lab5",
+        "lab6",
+        "lab7",
+        "lab8",
+        "lab9",
+        "lab10",
+        "lab11",
+        "lab12"
+      ],
+      "properties": {
+        "lab1": {"$ref": "#/$defs/work"},
+        "lab2": {"$ref": "#/$defs/work"},
+        "lab3": {"$ref": "#/$defs/work"},
+        "lab4": {"$ref": "#/$defs/work"},
+        "lab5": {"$ref": "#/$defs/work"},
+        "lab6": {"$ref": "#/$defs/work"},
+        "lab7": {"$ref": "#/$defs/work"},
+        "lab8": {"$ref": "#/$defs/work"},
+        "lab9": {"$ref": "#/$defs/work"},
+        "lab10": {"$ref": "#/$defs/work"},
+        "lab11": {"$ref": "#/$defs/work"},
+        "lab12": {"$ref": "#/$defs/work"}
+      }
+    },
+    "assignments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assignment1",
+        "assignment2",
+        "assignment3",
+        "assignment4"
+      ],
+      "properties": {
+        "assignment1": {"$ref": "#/$defs/work"},
+        "assignment2": {"$ref": "#/$defs/work"},
+        "assignment3": {"$ref": "#/$defs/work"},
+        "assignment4": {"$ref": "#/$defs/work"}
+      }
+    }
+  },
+  "$defs": {
+    "work": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "network",
+        "evidence",
+        "links",
+        "answers",
+        "notes"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["draft", "submitted"]
+        },
+        "network": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "evidence": {
+          "type": "object"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "uniqueItems": true
+        },
+        "answers": {
+          "type": "object"
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 5000
+        }
+      }
+    }
+  }
+}

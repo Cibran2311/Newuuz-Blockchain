@@ -1,15 +1,15 @@
 # Mission 12 — Trade or Break on TON
 
-!!! note "Compact Course Status"
-    This lab is an additional challenge. Use it only for advanced TON work.
+!!! note "Current Course Status"
+    Lab 12 is currently part of the main block. Its later difficulty or bonus classification has not been decided.
 
 ## Difficulty Mode
 
 | Mode | Recommendation |
 |---|---|
-| Course track | Advanced |
+| Course track | To be classified |
 
-This is a additional challenge lab. Use it for stronger students or as a replacement for another advanced task.
+Complete the track assigned by the instructor. Difficulty variants may be redesigned later.
 
 ---
 
@@ -90,7 +90,7 @@ After completing this lab you will be able to:
     Do not use real TON or real jettons.
 
 !!! info "Choose assigned track"
-    Do not complete both tracks unless instructor allows additional challenge work.
+    Complete only the track assigned by the instructor unless both tracks are explicitly requested.
 
 ---
 
@@ -157,7 +157,7 @@ At the end of this lab you should have either a TON DeFi swap trace or HackTON/s
 
 ## Submission
 
-Submit one of these evidence sets in Google Classroom:
+Fill `labs.lab12` in `submission.json`, set its status to `submitted`, and provide one evidence set:
 
 - **STON.fi mode:** GitHub script link, registered TON wallet, input/output assets, and TON Testnet swap link.
 - **HackTON mode:** completed level, proof link or screenshot requested by the instructor, and a short explanation of the vulnerability.

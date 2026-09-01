@@ -12,14 +12,30 @@ on:
           - preview
           - final
       scope:
-        description: Checks to run
+        description: Labs or assignments to check
         required: true
         default: all
         type: choice
         options:
           - all
+          - labs
+          - assignments
+          - lab1
+          - lab2
+          - lab3
+          - lab4
+          - lab5
+          - lab6
+          - lab7
+          - lab8
+          - lab9
+          - lab10
+          - lab11
+          - lab12
           - assignment1
-          - ethernaut
+          - assignment2
+          - assignment3
+          - assignment4
 
 permissions:
   contents: read
@@ -46,7 +62,7 @@ jobs:
       - name: Install checker dependencies
         run: python -m pip install -r requirements-autotest.txt
 
-      - name: Read roster and update result spreadsheet
+      - name: Read roster, reports, and blockchain evidence
         id: autotest
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -61,6 +77,14 @@ jobs:
           --mode "${{ inputs.mode }}"
           --scope "${{ inputs.scope }}"
 
+      - name: Upload machine-readable audit trail
+        uses: actions/upload-artifact@v4
+        with:
+          name: autotest-${{ inputs.mode }}-${{ inputs.scope }}-${{ github.run_id }}
+          path: artifacts/*.json
+          if-no-files-found: error
+          retention-days: 90
+
       - name: Add result link to workflow summary
         env:
           RESULT_TITLE: ${{ steps.autotest.outputs.result_title }}
@@ -68,3 +92,4 @@ jobs:
         run: |
           echo "## $RESULT_TITLE" >> "$GITHUB_STEP_SUMMARY"
           echo "[Open the Google Sheet with results]($RESULT_URL)" >> "$GITHUB_STEP_SUMMARY"
+          echo "The workflow artifact contains the pinned input and result snapshots." >> "$GITHUB_STEP_SUMMARY"

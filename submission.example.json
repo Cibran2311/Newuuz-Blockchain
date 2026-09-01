@@ -1,0 +1,240 @@
+{
+  "schema_version": 2,
+  "student_id": "TEST-001",
+  "labs": {
+    "lab1": {
+      "status": "draft",
+      "network": "sepolia",
+      "evidence": {
+        "tx_hashes": [],
+        "recipient": "",
+        "amount_eth": ""
+      },
+      "links": [],
+      "answers": {},
+      "notes": ""
+    },
+    "lab2": {
+      "status": "draft",
+      "network": "offchain",
+      "evidence": {
+        "input_1": "",
+        "input_2": "",
+        "hash_1": "",
+        "hash_2": ""
+      },
+      "links": [],
+      "answers": {
+        "sha256_collision_explanation": ""
+      },
+      "notes": "Add the Colab notebook or script link to links."
+    },
+    "lab3": {
+      "status": "draft",
+      "network": "offchain",
+      "evidence": {
+        "transactions": [],
+        "merkle_root": "",
+        "difficulty": "",
+        "nonce": "",
+        "block_hash": ""
+      },
+      "links": [],
+      "answers": {},
+      "notes": "Add the notebook or repository link to links."
+    },
+    "lab4": {
+      "status": "draft",
+      "network": "sepolia",
+      "evidence": {
+        "tx_hashes": [],
+        "gas_limit": "",
+        "gas_used": "",
+        "transaction_fee_eth": ""
+      },
+      "links": [],
+      "answers": {
+        "gas_limit_vs_gas_used": ""
+      },
+      "notes": ""
+    },
+    "lab5": {
+      "status": "draft",
+      "network": "sepolia",
+      "evidence": {
+        "token_contract": "",
+        "disperse_tx": "",
+        "transfer_txs": []
+      },
+      "links": [],
+      "answers": {},
+      "notes": ""
+    },
+    "lab6": {
+      "status": "draft",
+      "network": "sepolia",
+      "evidence": {
+        "professor_receive_tx": "",
+        "professor_return_tx": "",
+        "personal_nft_contract": "",
+        "personal_token_id": "",
+        "personal_mint_tx": "",
+        "approval_tx": "",
+        "special_contract_transfer_tx": ""
+      },
+      "links": [],
+      "answers": {},
+      "notes": ""
+    },
+    "lab7": {
+      "status": "draft",
+      "network": "sepolia",
+      "evidence": {
+        "dex_contracts": [],
+        "swap_txs": [],
+        "initial_reserves": {},
+        "final_portfolio_value": ""
+      },
+      "links": [],
+      "answers": {
+        "strategy": ""
+      },
+      "notes": ""
+    },
+    "lab8": {
+      "status": "draft",
+      "network": "westend",
+      "evidence": {
+        "extrinsic_hashes": [],
+        "recipient": "",
+        "amount": ""
+      },
+      "links": [],
+      "answers": {},
+      "notes": ""
+    },
+    "lab9": {
+      "status": "draft",
+      "network": "westend-assethub",
+      "evidence": {
+        "xcm_extrinsic_hashes": [],
+        "source_chain": "",
+        "destination_chain": "",
+        "asset_id": "",
+        "treasury_call_hash": ""
+      },
+      "links": [],
+      "answers": {
+        "xcm_execution_explanation": ""
+      },
+      "notes": ""
+    },
+    "lab10": {
+      "status": "draft",
+      "network": "ton-testnet",
+      "evidence": {
+        "tx_hashes": [],
+        "recipient": "",
+        "amount_ton": ""
+      },
+      "links": [],
+      "answers": {},
+      "notes": ""
+    },
+    "lab11": {
+      "status": "draft",
+      "network": "ton-testnet",
+      "evidence": {
+        "tx_hashes": [],
+        "jetton_master": "",
+        "sender_jetton_wallet": "",
+        "recipient_jetton_wallet": ""
+      },
+      "links": [],
+      "answers": {
+        "jetton_architecture_explanation": ""
+      },
+      "notes": ""
+    },
+    "lab12": {
+      "status": "draft",
+      "network": "ton-testnet",
+      "evidence": {
+        "mode": "",
+        "tx_hashes": [],
+        "proof": ""
+      },
+      "links": [],
+      "answers": {
+        "security_explanation": ""
+      },
+      "notes": "Use stonfi_swap or hackton as mode."
+    }
+  },
+  "assignments": {
+    "assignment1": {
+      "status": "draft",
+      "network": "sepolia",
+      "evidence": {
+        "professor_receive_tx": "",
+        "professor_return_tx": "",
+        "personal_nft_contract": "",
+        "personal_token_id": "",
+        "personal_mint_tx": "",
+        "approval_tx": "",
+        "special_contract_transfer_tx": ""
+      },
+      "links": [],
+      "answers": {
+        "ownership_flow_explanation": ""
+      },
+      "notes": ""
+    },
+    "assignment2": {
+      "status": "draft",
+      "network": "sepolia",
+      "evidence": {
+        "completed_levels": [],
+        "instance_addresses": [],
+        "submit_tx_hashes": []
+      },
+      "links": [],
+      "answers": {
+        "level_writeups": {}
+      },
+      "notes": ""
+    },
+    "assignment3": {
+      "status": "draft",
+      "network": "sepolia",
+      "evidence": {
+        "group_id": "",
+        "role": "",
+        "owned_contract": "",
+        "deployment_tx": "",
+        "chain_contracts": [],
+        "connection_txs": [],
+        "start_chain_tx": "",
+        "event_order": [],
+        "final_result": ""
+      },
+      "links": [],
+      "answers": {
+        "individual_contribution": ""
+      },
+      "notes": ""
+    },
+    "assignment4": {
+      "status": "draft",
+      "network": "offchain",
+      "evidence": {
+        "article_url": "",
+        "topic": "",
+        "abstract": ""
+      },
+      "links": [],
+      "answers": {},
+      "notes": ""
+    }
+  }
+}
