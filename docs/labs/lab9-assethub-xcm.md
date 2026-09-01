@@ -1,15 +1,15 @@
 # Mission 9 — Send a Cross-chain Message
 
-!!! note "Compact Course Status"
-    This lab is an additional challenge. Use it as an advanced Polkadot/XCM task or instructor demo.
+!!! note "Current Course Status"
+    Lab 9 is currently part of the main block. Its later difficulty or bonus classification has not been decided.
 
 ## Difficulty Mode
 
 | Mode | Recommendation |
 |---|---|
-| Course track | Advanced by default |
+| Course track | To be classified |
 
-This lab is an additional challenge in the Core and Standard tracks unless the instructor has enough time for XCM. It is recommended as a demo or additional challenge task.
+Complete the guided AssetHub/XCM workflow assigned by the instructor. Difficulty variants may be redesigned later.
 
 ---
 
@@ -126,7 +126,7 @@ At the end of this lab you should have an AssetHub/XCM-related extrinsic hash, s
 
 ## Submission
 
-Submit the explorer link and your report or notebook in Google Classroom. State the source chain, destination chain, extrinsic hash, registered wallet, and a short explanation of where the XCM message starts and executes.
+In `submission.json`, fill `labs.lab9` with the XCM extrinsic, explorer/report links, source and destination chains, asset or treasury call evidence when used, and your execution explanation. Set its status to `submitted`; the signer must be registered in Google Sheets.
 
 ---
 

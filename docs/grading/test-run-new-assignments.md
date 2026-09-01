@@ -1,65 +1,46 @@
-# Test Run for the New Assignments
+# Test Run for the New Workflow
 
-Use this sequence before adding the real class roster. The goal is to prove that the checker detects the new tasks, not historical student activity.
+Use one fresh test student before enabling the real roster.
 
-## Prepare one test wallet
+## Prepare the test record
 
-1. Create a temporary `COURSE_STUDENTS` worksheet with one active row.
-2. Register one fresh Sepolia wallet in the `Ethereum` column.
-3. Fill and protect `ASSIGNMENT1_CONFIG`.
-4. Keep the old student workbook as an archive. Do not copy its result columns into the source registry.
+1. Put one active `TEST-001` row in `COURSE_STUDENTS`.
+2. Register its exact public GitHub repository and fresh testnet wallets.
+3. Copy `submission.example.json` to that repository as `submission.json`.
+4. Keep every work as `draft` and run `preview` with a small scope.
+
+The first run should show the selected work as `DRAFT`, store the pinned commit, and create `Lab summary`, `Assignment summary`, `Autotest details`, `Manual review`, `Errors`, and `Run history`.
 
 ## Assignment 1 — NFT Quest
 
-Run **Blockchain Autotest** with `mode = preview` and `scope = assignment1` after each checkpoint.
+Configure `ASSIGNMENT1_CONFIG`, change only `assignment1.status` to `submitted`, and record the contract, token, and transaction evidence in its JSON section. Compile `contracts/NewuuzAssignment1Test.sol` with Solidity 0.8.24 or newer and perform:
 
-For the first live test, compile `contracts/NewuuzAssignment1Test.sol` in Remix with Solidity `0.8.24` or newer. Deploy:
+1. professor NFT mint to the registered student wallet;
+2. return of the same professor NFT;
+3. personal NFT mint from the registered wallet;
+4. approval for the configured special contract;
+5. transfer of the same personal NFT to that contract.
 
-1. `NewuuzProfessorNFT` from the instructor wallet;
-2. `NewuuzSpecialNFTReceiver` from the instructor wallet;
-3. `NewuuzStudentNFT` from the registered test-student wallet.
-
-Put the first contract address, the instructor wallet, and the second contract address into `ASSIGNMENT1_CONFIG`. A fresh test wallet can use `Start Block = 0`.
-
-Then perform this exact flow:
-
-1. from the instructor wallet, call `NewuuzProfessorNFT.mintTo(testStudent)`;
-2. from the student wallet, call `NewuuzProfessorNFT.safeTransferFrom(testStudent, instructor, 1)`;
-3. from the student wallet, call `NewuuzStudentNFT.mint()`;
-4. from the student wallet, call `NewuuzStudentNFT.approve(specialReceiver, 1)`;
-5. from the student wallet, call `NewuuzStudentNFT.safeTransferFrom(testStudent, specialReceiver, 1)`.
-
-Do not use `NewuuzSpecialNFTReceiver.returnNFT` during the test. It is an instructor-only recovery helper for returning an NFT after validation.
-
-| Checkpoint | Expected result |
-|---|---|
-| No new transactions | `FAIL` |
-| Professor NFT received | `PARTIAL` |
-| Same professor NFT returned | `PARTIAL` |
-| Personal NFT minted | `PARTIAL` |
-| Special contract approved, when required | `PARTIAL` |
-| Same personal NFT transferred to the special contract | `PASS` |
-
-Verify that the generated `Autotest details` worksheet contains the correct contract addresses, token IDs, and transaction hashes. A result based on an older token/swap transaction is a test failure.
+Run `preview` with `scope = assignment1` after each checkpoint. Incomplete real activity should be `PARTIAL`/`REVIEW`; the complete ordered flow should be `PASS`.
 
 ## Assignment 2 — Ethernaut
 
-Run `preview` with `scope = ethernaut` on the same registered wallet.
+Set `assignment2.status` to `submitted` and list completed level names in `evidence.completed_levels`. Run `preview` with `scope = assignment2`.
 
-| Checkpoint | Expected result |
+| Evidence | Expected result |
 |---|---|
-| No completed configured levels | `FAIL` |
-| Real activity below complexity 10 | `TRIED` and manual review |
+| No registered-wallet completion | `FAIL` |
+| Real activity below configured complexity 10 | `REVIEW` |
 | Verified complexity 10 or higher | `PASS` |
 
-Check that every counted level address exists in `ETHERNAUT_LEVELS`. If an official Sepolia level address changes, update the protected worksheet and repeat the preview.
+The level names in JSON guide reporting; on-chain events from the registered wallet determine the automatic result.
 
-## Enable the class roster
+## Enable the roster
 
-Only after both preview scenarios behave as expected:
+After both targeted checks work:
 
-1. replace the temporary test row with the current class roster;
-2. protect all three source worksheets;
-3. run `preview` for the whole class;
-4. review `Errors` and `Manual review`;
-5. run `final` only after the preview is accepted.
+1. add the current class rows and protect the registry;
+2. confirm that every row points to an exact public repository;
+3. run `preview` with `scope = all`;
+4. review invalid/missing reports, technical errors, and the manual queue;
+5. use `final` only after accepting the preview.

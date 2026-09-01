@@ -4,9 +4,9 @@
 
 | Mode | Recommendation |
 |---|---|
-| Course track | Core / Standard / Advanced |
+| Course track | To be classified |
 
-Core: short structured article. Standard: full article. Advanced: public article with deeper technical comparison.
+Complete the full article described below. Difficulty variants may be redesigned later.
 
 ---
 
@@ -41,13 +41,13 @@ You are a technical author. Your task is to explain one blockchain topic clearly
 2. Include technical analysis.
 3. Include diagrams, code snippets, formulas, or transaction examples where useful.
 4. Reference blockchain evidence where appropriate.
-5. Submit the article URL in Google Classroom.
+5. Record the article URL in `assignments.assignment4` in `submission.json`.
 
 ---
 
 ## Submission Format
 
-Submit the published article URL in Google Classroom. Add the topic, a short abstract, and any related testnet transaction or contract links in the Classroom comment.
+Fill `assignments.assignment4` in `submission.json` with the published article URL, topic, short abstract, and any related testnet transaction or contract links. Set its status to `submitted`.
 
 ---
 

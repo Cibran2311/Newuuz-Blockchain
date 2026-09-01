@@ -1,69 +1,45 @@
 # Protected Google Sheets Registry
 
-The course uses one instructor-owned Google Spreadsheet as the source of truth. Students do not edit it.
+The instructor creates one source spreadsheet. Students fill only their assigned registration row; the spreadsheet is not a laboratory report.
 
-## Student worksheet
+## `COURSE_STUDENTS`
 
-The protected worksheet must be named `COURSE_STUDENTS` and use these columns:
+| Column | Filled by | Purpose |
+|---|---|---|
+| `Name` | Student | Name used in the course list |
+| `ID` | Instructor or student | Stable identifier; must match `submission.json` |
+| `Email` | Student | Course contact email |
+| `GitHub` | Student | Exact public repository URL containing `submission.json` |
+| `Ethereum` | Student | Sepolia address or comma-separated addresses |
+| `Polkadot` | Student | Registered Polkadot testnet address |
+| `TON` | Student | Registered TON Testnet address |
+| `Group` | Instructor | Assignment group |
+| `Active` | Instructor | Whether the row is checked |
 
-| Column | Purpose |
-|---|---|
-| `Name` | Student name |
-| `ID` | Stable student identifier |
-| `Email` | Google Classroom email |
-| `GitHub` | GitHub profile or repository URL |
-| `Ethereum` | Registered Sepolia address or addresses |
-| `Polkadot` | Registered testnet address |
-| `TON` | Registered TON Testnet address |
-| `Group` | Assignment group |
-| `Active` | Whether the row should be checked |
+The checker ignores empty rows and rows where `Active` is `false`, `no`, `inactive`, `нет`, `0`, or `-`.
 
-Use one header row. The checker ignores empty rows and rows where `Active` is `false`, `no`, `inactive`, `нет`, `0`, or `-`.
+## Registration and protection
 
-## Ethernaut worksheet
+1. The instructor creates the table and assigns one row per student.
+2. Students fill identity, repository, and public wallet fields during the registration window.
+3. The instructor checks duplicates and then protects the sheet or individual rows.
+4. Later changes are requested from the instructor, so an address cannot be silently replaced after completing a task.
 
-The protected worksheet `ETHERNAUT_LEVELS` defines the grading rule without a repository configuration file:
+Share the source spreadsheet with the GitHub Actions service account as **Viewer**. Share the separate result spreadsheet with it as **Editor**. Never give the service account ownership of either file.
 
-| Column | Purpose |
-|---|---|
-| `Level` | Ethernaut level name |
-| `Address` | Sepolia level contract address |
-| `Complexity` | Instructor-defined score |
+## Instructor configuration sheets
 
-Ethernaut is an automatic `PASS` only when verified complexity is at least 10. A student with real activity below the threshold is marked `TRIED` and sent to manual review.
-
-## Permissions
-
-- Give edit access only to instructors.
-- Give the GitHub Actions service account viewer access to the source spreadsheet.
-- Protect both worksheets and all identity/address columns.
-- Give students view access only if they need to confirm their registered data.
-- Never store private keys, seed phrases, passwords, or API tokens in the spreadsheet.
-
-The checker reads this spreadsheet and updates a separate instructor-owned result spreadsheet. It never writes into the source registry. The current result tabs are refreshed on every run, and `Run history` keeps a compact audit trail.
-
-## Assignment 1 configuration worksheet
-
-The protected worksheet `ASSIGNMENT1_CONFIG` contains exactly one data row. It makes the checker follow the current NFT Quest instead of historical ERC20/swap tasks.
+`ASSIGNMENT1_CONFIG` contains one row:
 
 | Column | Purpose |
 |---|---|
 | `Professor NFT Contract` | ERC721 contract used for the professor NFT flow |
-| `Professor Return Address` | Wallet or contract that must receive the professor NFT back |
-| `Special Contract` | Contract that must receive the student's personal NFT |
-| `Start Block` | First Sepolia block included in this course run |
-| `End Block` | Last block, or `99999999` while the assignment is open |
-| `Require Approval` | `TRUE` when a matching `Approval` or `ApprovalForAll` event is mandatory |
+| `Professor Return Address` | Address that must receive that NFT back |
+| `Special Contract` | Contract that receives the student's NFT |
+| `Start Block` | First Sepolia block included in the check |
+| `End Block` | Last included block |
+| `Require Approval` | Whether matching approval evidence is mandatory |
 
-All three addresses are required and must use the `0x...` format. Protect this worksheet and give the GitHub Actions service account viewer access.
+`ETHERNAUT_LEVELS` contains `Level`, `Address`, and `Complexity`. Assignment 2 automatically passes only when registered-wallet evidence reaches the configured complexity threshold.
 
-Assignment 1 becomes `PASS` only when the registered wallet has on-chain evidence for the same ordered flow:
-
-1. receive the professor NFT and return the same token to `Professor Return Address`;
-2. mint a personal NFT;
-3. approve `Special Contract` when approval is required;
-4. transfer the same personal token to `Special Contract`.
-
-## Safe first run
-
-Do not run the new checker against the historical class list first. Create a temporary `COURSE_STUDENTS` worksheet with one test wallet, run the workflow in `preview` mode, complete each new task, and run `preview` again. Copy the real class roster into the protected registry only after the test wallet changes from `FAIL` or `PARTIAL` to `PASS`.
+The checker never edits the source registry. It updates only the permanent instructor-owned result workbook.

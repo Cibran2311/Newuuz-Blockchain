@@ -18,9 +18,12 @@ import gspread
 import requests
 from google.oauth2.service_account import Credentials
 from gspread.exceptions import WorksheetNotFound
+from jsonschema import Draft202012Validator, FormatChecker
 from web3 import Web3
 
 ETH_RE = re.compile(r"0x[a-fA-F0-9]{40}")
+TX_RE = re.compile(r"0x[a-fA-F0-9]{64}")
+URL_RE = re.compile(r"https?://[^\s\"'<>]+", re.IGNORECASE)
 PROFILE_RE = re.compile(r"^https?://github\.com/([A-Za-z0-9_.-]+)/?$", re.IGNORECASE)
 REPO_RE = re.compile(
     r"^https?://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)/?$",
@@ -54,6 +57,31 @@ KEYWORDS_A2 = [
 A1_DEFAULT_END_BLOCK = 99999999
 A2_PASS_COMPLEXITY = 10
 A2_BONUS_LEVELS = 15
+SUBMISSION_FILE = "submission.json"
+SUBMISSION_SCHEMA_PATH = (
+    Path(__file__).resolve().parents[1] / "schemas" / "submission.schema.json"
+)
+LAB_IDS = tuple(f"lab{number}" for number in range(1, 13))
+ASSIGNMENT_IDS = tuple(f"assignment{number}" for number in range(1, 5))
+WORK_IDS = LAB_IDS + ASSIGNMENT_IDS
+WORK_TITLES = {
+    "lab1": "Lab 1 — Enter the Blockchain",
+    "lab2": "Lab 2 — Hash Detective",
+    "lab3": "Lab 3 — Mine Your First Block",
+    "lab4": "Lab 4 — Read the Chain",
+    "lab5": "Lab 5 — Launch Your Token",
+    "lab6": "Lab 6 — Create and Move NFTs",
+    "lab7": "Lab 7 — Trade Like a DeFi Bot",
+    "lab8": "Lab 8 — Enter Polkadot",
+    "lab9": "Lab 9 — Send a Cross-chain Message",
+    "lab10": "Lab 10 — Enter TON",
+    "lab11": "Lab 11 — Dissect a Jetton Transfer",
+    "lab12": "Lab 12 — Trade or Break on TON",
+    "assignment1": "Assignment 1 — NFT Quest",
+    "assignment2": "Assignment 2 — Ethernaut",
+    "assignment3": "Assignment 3 — Group Chain of Contracts",
+    "assignment4": "Assignment 4 — Web3 Technical Article",
+}
 
 
 @dataclass
@@ -125,6 +153,40 @@ class EthernautResult:
     note: str = ""
 
 
+@dataclass
+class WorkSubmission:
+    status: str = "draft"
+    network: str = ""
+    evidence: dict[str, Any] = field(default_factory=dict)
+    links: list[str] = field(default_factory=list)
+    answers: dict[str, Any] = field(default_factory=dict)
+    notes: str = ""
+
+
+@dataclass
+class SubmissionResult:
+    status: str = "NOT CHECKED"
+    repository: str = ""
+    commit_sha: str = ""
+    schema_version: int | None = None
+    works: dict[str, WorkSubmission] = field(default_factory=dict)
+    note: str = ""
+
+
+@dataclass
+class WorkOutcome:
+    work_id: str
+    report_status: str = "NOT CHECKED"
+    auto_status: str = "NOT RUN"
+    final_status: str = "NOT RUN"
+    network: str = ""
+    tx_hashes: list[str] = field(default_factory=list)
+    contract_addresses: list[str] = field(default_factory=list)
+    links: list[str] = field(default_factory=list)
+    commit_sha: str = ""
+    note: str = ""
+
+
 class GitHubHelper:
     def __init__(self, token: str | None = None) -> None:
         self.session = requests.Session()
@@ -183,6 +245,122 @@ class GitHubHelper:
         if download_url:
             return self._get(download_url).text
         return ""
+
+
+_SUBMISSION_VALIDATOR: Draft202012Validator | None = None
+
+
+def submission_validator() -> Draft202012Validator:
+    global _SUBMISSION_VALIDATOR
+    if _SUBMISSION_VALIDATOR is None:
+        schema = json.loads(SUBMISSION_SCHEMA_PATH.read_text(encoding="utf-8"))
+        _SUBMISSION_VALIDATOR = Draft202012Validator(
+            schema, format_checker=FormatChecker()
+        )
+    return _SUBMISSION_VALIDATOR
+
+
+def format_validation_path(error: Any) -> str:
+    path = ".".join(map(str, error.absolute_path))
+    return path or "<root>"
+
+
+def parse_submission_document(
+    text: str,
+    expected_student_id: str,
+) -> tuple[int, dict[str, WorkSubmission]]:
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"invalid JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}"
+        ) from exc
+
+    errors = sorted(
+        submission_validator().iter_errors(data),
+        key=lambda item: list(item.absolute_path),
+    )
+    if errors:
+        preview = "; ".join(
+            f"{format_validation_path(error)}: {error.message}"
+            for error in errors[:5]
+        )
+        if len(errors) > 5:
+            preview += f"; and {len(errors) - 5} more validation errors"
+        raise ValueError(preview)
+
+    document_student_id = normalize_student_id(str(data["student_id"]).strip())
+    if document_student_id != expected_student_id:
+        raise ValueError(
+            f"student_id mismatch: sheet has '{expected_student_id}', "
+            f"submission.json has '{document_student_id}'"
+        )
+
+    works: dict[str, WorkSubmission] = {}
+    for section_name in ("labs", "assignments"):
+        for work_id, raw in data[section_name].items():
+            works[work_id] = WorkSubmission(
+                status=str(raw.get("status", "draft")).strip().lower(),
+                network=str(raw.get("network", "")).strip(),
+                evidence=dict(raw.get("evidence", {})),
+                links=[str(value).strip() for value in raw.get("links", [])],
+                answers=dict(raw.get("answers", {})),
+                notes=str(raw.get("notes", "")).strip(),
+            )
+    return int(data["schema_version"]), works
+
+
+def iter_string_values(value: Any):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for nested in value.values():
+            yield from iter_string_values(nested)
+    elif isinstance(value, (list, tuple, set)):
+        for nested in value:
+            yield from iter_string_values(nested)
+
+
+def unique_matches(pattern: re.Pattern[str], values: list[str]) -> list[str]:
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        for match in pattern.findall(value):
+            normalized = match.rstrip(".,);]")
+            key = normalized.lower()
+            if key not in seen:
+                seen.add(key)
+                output.append(normalized)
+    return output
+
+
+def work_evidence_summary(
+    work: WorkSubmission,
+) -> tuple[list[str], list[str], list[str]]:
+    values = list(iter_string_values(work.evidence))
+    values.extend(iter_string_values(work.answers))
+    values.extend(work.links)
+    tx_hashes = unique_matches(TX_RE, values)
+    addresses = unique_matches(ETH_RE, values)
+    tx_prefixes = {value[:42].lower() for value in tx_hashes}
+    addresses = [value for value in addresses if value.lower() not in tx_prefixes]
+    links = unique_matches(URL_RE, values)
+    return tx_hashes, addresses, links
+
+
+def selected_work_ids(scope: str) -> tuple[str, ...]:
+    normalized = scope.strip().lower()
+    if normalized == "all":
+        return WORK_IDS
+    if normalized == "labs":
+        return LAB_IDS
+    if normalized == "assignments":
+        return ASSIGNMENT_IDS
+    if normalized == "ethernaut":
+        return ("assignment2",)
+    if normalized in WORK_IDS:
+        return (normalized,)
+    raise ValueError(f"Unknown scope: {scope}")
 
 
 def normalize_address(value: str) -> str:
@@ -433,6 +611,71 @@ def resolve_repo(github: str, gh: GitHubHelper) -> tuple[str, str, str]:
     ranked = sorted(repos, key=score_repo_candidate, reverse=True)
     top = ranked[0]
     return username, top["name"], f"repo_from_profile:{username}/{top['name']}"
+
+
+def fetch_student_submission(
+    student: Student,
+    gh: GitHubHelper,
+) -> SubmissionResult:
+    result = SubmissionResult()
+    if not student.github_raw:
+        result.status = "MISSING REPOSITORY"
+        result.note = "GitHub repository URL is empty in COURSE_STUDENTS"
+        return result
+    if PROFILE_RE.match(student.github_raw.strip()):
+        result.status = "INVALID REPORT"
+        result.note = (
+            "COURSE_STUDENTS must contain the exact GitHub repository URL, "
+            "not a profile URL"
+        )
+        return result
+
+    try:
+        owner, repo, source = resolve_repo(student.github_raw, gh)
+        result.repository = f"{owner}/{repo}"
+        repo_data = gh.get_repo(owner, repo)
+        default_branch = str(repo_data.get("default_branch") or "main")
+        commits = gh.list_commits(owner, repo, per_page=1)
+        if not commits:
+            result.status = "MISSING REPORT"
+            result.note = "repository has no commits"
+            return result
+        result.commit_sha = str(commits[0].get("sha", ""))
+        text = gh.get_content(
+            owner,
+            repo,
+            SUBMISSION_FILE,
+            ref=result.commit_sha or default_branch,
+        )
+        if not text.strip():
+            result.status = "MISSING REPORT"
+            result.note = f"{SUBMISSION_FILE} is empty"
+            return result
+        result.schema_version, result.works = parse_submission_document(
+            text,
+            expected_student_id=student.student_id,
+        )
+        result.status = "VALID"
+        result.note = source
+        return result
+    except requests.HTTPError as exc:
+        status_code = exc.response.status_code if exc.response is not None else None
+        if status_code == 404:
+            result.status = "MISSING REPORT"
+            location = result.repository or student.github_raw
+            result.note = f"{SUBMISSION_FILE} was not found in {location}"
+        else:
+            result.status = "ERROR"
+            result.note = f"GitHub API error: {exc}"
+        return result
+    except ValueError as exc:
+        result.status = "INVALID REPORT"
+        result.note = str(exc)
+        return result
+    except Exception as exc:
+        result.status = "ERROR"
+        result.note = f"Unable to read {SUBMISSION_FILE}: {exc}"
+        return result
 
 
 def collect_repo_texts(
@@ -1142,11 +1385,20 @@ def check_ethernaut(
     gh: GitHubHelper,
     repo_hint: str = "",
     tx_fallback_by_wallet: dict[str, dict[str, Any]] | None = None,
+    declared_levels_hint: list[str] | None = None,
 ) -> EthernautResult:
     res = EthernautResult()
 
+    known_levels = {
+        normalize_header(level): level for level in level_complexity.keys()
+    }
     declared_levels: list[str] = []
-    if repo_hint:
+    for level in declared_levels_hint or []:
+        canonical = known_levels.get(normalize_header(level))
+        if canonical and canonical not in declared_levels:
+            declared_levels.append(canonical)
+
+    if not declared_levels and repo_hint:
         try:
             owner, repo = repo_hint.split("/", 1)
             cache_key = f"{owner}/{repo}"
@@ -1156,7 +1408,7 @@ def check_ethernaut(
                 texts = collect_repo_texts(gh, owner, repo, repo_data["default_branch"])
                 repo_texts_cache[cache_key] = texts
             declared_levels = find_declared_levels_in_texts(
-                texts, list(level_complexity.keys())
+                texts, list(known_levels.values())
             )
         except Exception:
             pass
@@ -1235,15 +1487,24 @@ def check_ethernaut(
                         res.status = "TRIED"
                     else:
                         res.status = "-"
-                    res.note = "txlist+receipt fallback: submit txs found; complexity calculated from parsed LevelCompletedLog"
+                    res.note = (
+                        "txlist+receipt fallback: submit txs found; complexity "
+                        "calculated from parsed LevelCompletedLog"
+                    )
                 else:
                     res.status = "TRIED" if submit_count > 0 else "-"
-                    res.note = "txlist fallback: found real Submit Level Instance txs; level-name/complexity mapping unavailable"
+                    res.note = (
+                        "txlist fallback: found real Submit Level Instance txs; "
+                        "level-name/complexity mapping unavailable"
+                    )
                 return res
 
         if declared_levels:
             res.status = "DECLARED ONLY"
-            res.note = "repo has Ethernaut level names, but no completed logs matched student wallet"
+            res.note = (
+                "repo has Ethernaut level names, but no completed logs matched "
+                "student wallet"
+            )
         else:
             res.status = "-"
             res.note = "no matched Ethernaut activity"
@@ -1280,7 +1541,10 @@ def check_ethernaut(
             and res.onchain_unique_levels >= len(res.declared_levels)
         ):
             res.status = "PASS (declared+count)"
-            res.note = "complexity from repo-declared levels; on-chain cross-check by unique completed level count"
+            res.note = (
+                "complexity from repo-declared levels; on-chain cross-check by "
+                "unique completed level count"
+            )
         elif res.onchain_unique_levels > 0:
             res.status = "TRIED"
             res.note = (
@@ -1330,242 +1594,269 @@ def overall_status(
     return "FAIL", "Required evidence was not found"
 
 
+def report_status_for_work(
+    submission: SubmissionResult,
+    work_id: str,
+) -> str:
+    if submission.status == "VALID":
+        work = submission.works.get(work_id)
+        if work is None:
+            return "INVALID REPORT"
+        return "SUBMITTED" if work.status == "submitted" else "DRAFT"
+    if submission.status in {"MISSING REPOSITORY", "MISSING REPORT"}:
+        return "NOT SUBMITTED"
+    return submission.status
+
+
+def final_status_from_auto(auto_status: str) -> str:
+    normalized = auto_status.upper()
+    if normalized == "PASS":
+        return "PASS"
+    if normalized == "ERROR":
+        return "ERROR"
+    if normalized in {"PARTIAL", "TRIED", "DECLARED ONLY", "PASS (DECLARED+COUNT)"}:
+        return "REVIEW"
+    if normalized in {"-", "FAIL", "NOT RUN"}:
+        return "FAIL"
+    return "REVIEW"
+
+
+def build_work_outcomes(
+    students: list[Student],
+    selected: tuple[str, ...],
+    submissions: dict[str, SubmissionResult],
+    a1_results: dict[str, Assignment1Result],
+    a2_results: dict[str, EthernautResult],
+) -> dict[str, dict[str, WorkOutcome]]:
+    outcomes: dict[str, dict[str, WorkOutcome]] = {}
+    for student in students:
+        submission = submissions.get(student.student_id, SubmissionResult())
+        student_outcomes: dict[str, WorkOutcome] = {}
+        for work_id in selected:
+            report_status = report_status_for_work(submission, work_id)
+            work = submission.works.get(work_id, WorkSubmission())
+            tx_hashes, contract_addresses, links = work_evidence_summary(work)
+            outcome = WorkOutcome(
+                work_id=work_id,
+                report_status=report_status,
+                network=work.network,
+                tx_hashes=tx_hashes,
+                contract_addresses=contract_addresses,
+                links=links,
+                commit_sha=submission.commit_sha,
+            )
+
+            notes: list[str] = []
+            if work.notes:
+                notes.append(work.notes)
+            if submission.status != "VALID" and submission.note:
+                notes.append(submission.note)
+
+            if report_status != "SUBMITTED":
+                outcome.auto_status = "NOT RUN"
+                if report_status in {"NOT SUBMITTED", "DRAFT"}:
+                    outcome.final_status = report_status
+                elif report_status == "ERROR":
+                    outcome.final_status = "ERROR"
+                else:
+                    outcome.final_status = "INVALID REPORT"
+            elif work_id == "assignment1":
+                auto = a1_results.get(
+                    student.student_id, Assignment1Result(status="NOT RUN")
+                )
+                outcome.auto_status = auto.status
+                outcome.final_status = final_status_from_auto(auto.status)
+                if auto.note:
+                    notes.append(auto.note)
+            elif work_id == "assignment2":
+                auto = a2_results.get(
+                    student.student_id, EthernautResult(status="NOT RUN")
+                )
+                outcome.auto_status = auto.status
+                outcome.final_status = final_status_from_auto(auto.status)
+                if auto.note:
+                    notes.append(auto.note)
+            else:
+                outcome.auto_status = "MANUAL"
+                outcome.final_status = "REVIEW"
+                notes.append(
+                    "JSON report received; instructor or a dedicated validator "
+                    "must review this work"
+                )
+
+            outcome.note = "; ".join(dict.fromkeys(note for note in notes if note))
+            student_outcomes[work_id] = outcome
+        outcomes[student.student_id] = student_outcomes
+    return outcomes
+
+
+def write_json_artifacts(
+    output_dir: Path,
+    students: list[Student],
+    submissions: dict[str, SubmissionResult],
+    outcomes: dict[str, dict[str, WorkOutcome]],
+    run_mode: str,
+    scope: str,
+) -> tuple[Path, Path]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    generated_at = datetime.now(timezone.utc).isoformat()
+
+    input_snapshot = {
+        "schema_version": 1,
+        "generated_at": generated_at,
+        "mode": run_mode,
+        "scope": scope,
+        "students": [
+            {
+                "student_id": student.student_id,
+                "group": student.group,
+                "github": student.github_raw,
+                "ethereum": student.eth_addresses,
+                "polkadot": student.polkadot_address,
+                "ton": student.ton_address,
+                "submission_status": submissions.get(
+                    student.student_id, SubmissionResult()
+                ).status,
+                "submission_commit": submissions.get(
+                    student.student_id, SubmissionResult()
+                ).commit_sha,
+            }
+            for student in students
+        ],
+    }
+    result_snapshot = {
+        "schema_version": 1,
+        "generated_at": generated_at,
+        "mode": run_mode,
+        "scope": scope,
+        "results": [
+            {
+                "student_id": student_id,
+                "work_id": work_id,
+                "report_status": outcome.report_status,
+                "auto_status": outcome.auto_status,
+                "final_status": outcome.final_status,
+                "network": outcome.network,
+                "tx_hashes": outcome.tx_hashes,
+                "contract_addresses": outcome.contract_addresses,
+                "links": outcome.links,
+                "commit_sha": outcome.commit_sha,
+                "note": outcome.note,
+            }
+            for student_id, student_outcomes in outcomes.items()
+            for work_id, outcome in student_outcomes.items()
+        ],
+    }
+
+    input_path = output_dir / "input_snapshot.json"
+    result_path = output_dir / "results.json"
+    input_path.write_text(
+        json.dumps(input_snapshot, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    result_path.write_text(
+        json.dumps(result_snapshot, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+    return input_path, result_path
+
+
+
+
 def write_google_results(
     client: gspread.Client,
     results_spreadsheet_id: str,
     students: list[Student],
-    a1_results: dict[str, Assignment1Result],
-    a2_results: dict[str, EthernautResult],
+    submissions: dict[str, SubmissionResult],
+    outcomes: dict[str, dict[str, WorkOutcome]],
+    selected: tuple[str, ...],
     errors: list[dict[str, str]],
     run_mode: str,
     scope: str,
 ) -> tuple[str, str]:
-    """Update the instructor-owned result spreadsheet.
+    """Update the instructor-owned workbook for the Sheets + JSON workflow.
 
-    Service accounts cannot own Google Drive files, so the instructor creates this
-    spreadsheet once and shares it with the service account as an editor. Current
-    result worksheets are replaced on every run, while ``Run history`` is appended.
-    The protected source spreadsheet is never edited.
+    The roster remains the source of student identity, repositories, and wallets.
+    ``submission.json`` is the report index. Existing results for work outside the
+    selected scope and instructor review fields are preserved between runs.
     """
+    run_utc = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M%S")
     prefix = "FINAL_AUTOTEST" if run_mode == "final" else "PREVIEW_AUTOTEST"
     title = f"{prefix}_{timestamp}"
     spreadsheet = client.open_by_key(results_spreadsheet_id)
 
-    summary_rows: list[list[Any]] = [
-        [
-            "Run mode",
-            "Name",
-            "ID",
-            "Email",
-            "GitHub",
-            "Ethereum",
-            "Polkadot",
-            "TON",
-            "Group",
-            "Professor NFT received",
-            "Professor NFT returned",
-            "Personal NFT minted",
-            "Approval",
-            "Transferred to special contract",
-            "Assignment 1",
-            "Ethernaut",
-            "A2 Complexity",
-            "A2 Levels",
-            "Autotest status",
-            "Manual review",
-        ]
+    detail_header = [
+        "Run UTC",
+        "Mode",
+        "Name",
+        "ID",
+        "Group",
+        "GitHub",
+        "Work",
+        "Title",
+        "Report status",
+        "Auto status",
+        "Final status",
+        "Network",
+        "Transaction hashes",
+        "Contract addresses",
+        "Links",
+        "Repository",
+        "Commit SHA",
+        "Note",
     ]
-    detail_rows: list[list[Any]] = [
-        [
-            "Name",
-            "ID",
-            "GitHub",
-            "ETH addresses",
-            "A1 repo",
-            "GitHub reachable",
-            "Commits found",
-            "Professor NFT received",
-            "Professor NFT returned",
-            "Personal NFT minted",
-            "Approval",
-            "Transferred to special contract",
-            "Assignment 1",
-            "Professor NFT contract",
-            "Professor token ID",
-            "Personal NFT contract",
-            "Personal token ID",
-            "Professor receive tx",
-            "Professor return tx",
-            "Personal mint tx",
-            "Approval tx",
-            "Transfer to special tx",
-            "A1 note",
-            "Ethernaut",
-            "Matched wallet",
-            "Onchain unique levels",
-            "Onchain total submits",
-            "Onchain levels",
-            "Onchain complexity",
-            "A2 bonus",
-            "A2 submit tx hashes",
-            "A2 blocks",
-            "A2 instances",
-            "A2 level contracts",
-            "A2 level details",
-            "A2 methods",
-            "Declared levels",
-            "Declared complexity",
-            "A2 note",
-        ]
-    ]
-    review_rows: list[list[Any]] = [["Name", "ID", "Check", "Status", "Reason"]]
-
-    for student in students:
-        a1 = a1_results.get(student.student_id, Assignment1Result())
-        a2 = a2_results.get(student.student_id, EthernautResult())
-        final_status, review_reason = overall_status(
-            student.student_id, scope, a1, a2, errors
-        )
-        a1_status = a1.status if scope in {"all", "assignment1"} else "NOT RUN"
-        a2_status = a2.status if scope in {"all", "ethernaut"} else "NOT RUN"
-        a1_selected = scope in {"all", "assignment1"}
-
-        def a1_check_status(ok: bool) -> str:
-            return "PASS" if ok else ("FAIL" if a1_selected else "NOT RUN")
-
-        professor_receive_status = a1_check_status(a1.professor_received_ok)
-        professor_return_status = a1_check_status(a1.professor_returned_ok)
-        personal_mint_status = a1_check_status(a1.personal_mint_ok)
-        if not a1_selected:
-            approval_status = "NOT RUN"
-        elif not a1.approval_required:
-            approval_status = "NOT REQUIRED"
-        else:
-            approval_status = a1_check_status(a1.approval_ok)
-        special_transfer_status = a1_check_status(a1.transfer_to_special_ok)
-
-        summary_rows.append(
-            [
-                run_mode.upper(),
-                student.name,
-                student.student_id,
-                student.email,
-                student.github_raw,
-                ", ".join(student.eth_addresses),
-                student.polkadot_address,
-                student.ton_address,
-                student.group,
-                professor_receive_status,
-                professor_return_status,
-                personal_mint_status,
-                approval_status,
-                special_transfer_status,
-                a1_status,
-                a2_status,
-                a2.onchain_complexity,
-                a2.onchain_unique_levels,
-                final_status,
-                review_reason,
-            ]
-        )
-        detail_rows.append(
-            [
-                student.name,
-                student.student_id,
-                student.github_raw,
-                ", ".join(student.eth_addresses),
-                a1.repo,
-                a1.github_ok,
-                a1.commits_ok,
-                professor_receive_status,
-                professor_return_status,
-                personal_mint_status,
-                approval_status,
-                special_transfer_status,
-                a1_status,
-                a1.professor_nft_contract,
-                a1.professor_token_id,
-                a1.personal_nft_contract,
-                a1.personal_token_id,
-                a1.professor_receive_tx_hash,
-                a1.professor_return_tx_hash,
-                a1.personal_mint_tx_hash,
-                a1.approval_tx_hash,
-                a1.transfer_to_special_tx_hash,
-                a1.note,
-                a2_status,
-                a2.matched_wallet,
-                a2.onchain_unique_levels,
-                a2.onchain_total_submits,
-                ", ".join(a2.onchain_levels),
-                a2.onchain_complexity,
-                "YES" if a2.bonus_15_levels else "NO",
-                ", ".join(a2.submit_tx_hashes),
-                ", ".join(map(str, a2.submit_blocks)),
-                ", ".join(a2.submitted_instances),
-                ", ".join(a2.raw_level_addresses),
-                " || ".join(a2.level_details),
-                ", ".join(a2.methods),
-                ", ".join(a2.declared_levels),
-                a2.declared_complexity,
-                a2.note,
-            ]
-        )
-        if final_status != "PASS":
-            review_rows.append(
-                [student.name, student.student_id, scope, final_status, review_reason]
-            )
-
-    error_rows: list[list[Any]] = [["Name", "ID", "Stage", "Error"]]
-    for item in errors:
-        error_rows.append(
-            [
-                item.get("name", ""),
-                item.get("student_id", ""),
-                item.get("stage", ""),
-                item.get("error", ""),
-            ]
-        )
-
-    worksheets = [
-        ("Closed list", summary_rows),
-        ("Autotest details", detail_rows),
-        ("Manual review", review_rows),
-        ("Errors", error_rows),
+    review_header = [
+        "Name",
+        "ID",
+        "Work",
+        "Title",
+        "Final status",
+        "Reason",
+        "Evidence links",
+        "Instructor decision",
+        "Instructor score",
+        "Instructor comment",
     ]
 
     def get_or_create_worksheet(
-        sheet_name: str, row_count: int, column_count: int, use_default: bool = False
+        sheet_name: str,
+        row_count: int,
+        column_count: int,
+        use_default: bool = False,
     ) -> Any:
         try:
             return spreadsheet.worksheet(sheet_name)
         except WorksheetNotFound:
             default_sheet = spreadsheet.sheet1
-            if use_default and default_sheet.title in {"Sheet1", "Лист1"}:
+            reusable_titles = {"Sheet1", "Лист1", "Closed list"}
+            if use_default and default_sheet.title in reusable_titles:
                 default_sheet.update_title(sheet_name)
                 return default_sheet
             return spreadsheet.add_worksheet(
                 title=sheet_name,
-                rows=row_count,
-                cols=column_count,
+                rows=max(row_count, 2),
+                cols=max(column_count, 1),
             )
 
-    for sheet_index, (sheet_name, rows) in enumerate(worksheets):
-        column_count = max(len(rows[0]), 1)
-        row_count = max(len(rows), 2)
-        worksheet = get_or_create_worksheet(
-            sheet_name,
-            row_count,
-            column_count,
-            use_default=sheet_index == 0,
-        )
-        worksheet.resize(rows=row_count, cols=column_count)
-        worksheet.update(
-            values=[[result_cell(value) for value in row] for row in rows],
-            range_name="A1",
-            value_input_option="RAW",
-        )
+    def read_rows_by_key(
+        worksheet: Any,
+        expected_header: list[str],
+        key_columns: tuple[str, ...],
+    ) -> dict[tuple[str, ...], list[Any]]:
+        values = worksheet.get_all_values()
+        if not values or values[0] != expected_header:
+            return {}
+        positions = [expected_header.index(column) for column in key_columns]
+        rows: dict[tuple[str, ...], list[Any]] = {}
+        for raw_row in values[1:]:
+            row = list(raw_row) + [""] * (len(expected_header) - len(raw_row))
+            key = tuple(str(row[position]).strip() for position in positions)
+            if all(key):
+                rows[key] = row[: len(expected_header)]
+        return rows
+
+    def format_worksheet(worksheet: Any, column_count: int) -> None:
         spreadsheet.batch_update(
             {
                 "requests": [
@@ -1619,100 +1910,214 @@ def write_google_results(
             }
         )
 
+    def replace_worksheet(sheet_name: str, rows: list[list[Any]], use_default=False) -> Any:
+        column_count = max(len(rows[0]), 1)
+        worksheet = get_or_create_worksheet(
+            sheet_name,
+            row_count=max(len(rows), 2),
+            column_count=column_count,
+            use_default=use_default,
+        )
+        worksheet.resize(rows=max(len(rows), 2), cols=column_count)
+        worksheet.update(
+            values=[[result_cell(value) for value in row] for row in rows],
+            range_name="A1",
+            value_input_option="RAW",
+        )
+        format_worksheet(worksheet, column_count)
+        return worksheet
+
+    details_sheet = get_or_create_worksheet(
+        "Autotest details", row_count=2, column_count=len(detail_header)
+    )
+    detail_records = read_rows_by_key(details_sheet, detail_header, ("ID", "Work"))
+    active_ids = {student.student_id for student in students}
+    detail_records = {
+        key: row for key, row in detail_records.items() if key[0] in active_ids
+    }
+
+    for student in students:
+        submission = submissions.get(student.student_id, SubmissionResult())
+        report_url = ""
+        if submission.repository and submission.commit_sha:
+            report_url = (
+                f"https://github.com/{submission.repository}/blob/"
+                f"{submission.commit_sha}/{SUBMISSION_FILE}"
+            )
+        for work_id in selected:
+            outcome = outcomes[student.student_id][work_id]
+            links = list(outcome.links)
+            if report_url:
+                links.append(report_url)
+            detail_records[(student.student_id, work_id)] = [
+                run_utc,
+                run_mode.upper(),
+                student.name,
+                student.student_id,
+                student.group,
+                student.github_raw,
+                work_id,
+                WORK_TITLES[work_id],
+                outcome.report_status,
+                outcome.auto_status,
+                outcome.final_status,
+                outcome.network,
+                ", ".join(outcome.tx_hashes),
+                ", ".join(outcome.contract_addresses),
+                ", ".join(dict.fromkeys(links)),
+                submission.repository,
+                outcome.commit_sha,
+                outcome.note,
+            ]
+
+    roster_order = {student.student_id: index for index, student in enumerate(students)}
+    work_order = {work_id: index for index, work_id in enumerate(WORK_IDS)}
+    ordered_detail_rows = sorted(
+        detail_records.values(),
+        key=lambda row: (
+            roster_order.get(str(row[3]), len(roster_order)),
+            work_order.get(str(row[6]), len(work_order)),
+        ),
+    )
+
+    final_status_index = detail_header.index("Final status")
+
+    def status_for(student_id: str, work_id: str) -> str:
+        row = detail_records.get((student_id, work_id))
+        return str(row[final_status_index]) if row else "NOT RUN"
+
+    def summary_rows(work_ids: tuple[str, ...]) -> list[list[Any]]:
+        header = ["Name", "ID", "Group", "GitHub"] + [
+            WORK_TITLES[work_id] for work_id in work_ids
+        ]
+        header += ["PASS", "REVIEW", "FAIL", "NOT SUBMITTED", "INVALID/ERROR"]
+        rows: list[list[Any]] = [header]
+        for student in students:
+            statuses = [status_for(student.student_id, work_id) for work_id in work_ids]
+            rows.append(
+                [student.name, student.student_id, student.group, student.github_raw]
+                + statuses
+                + [
+                    statuses.count("PASS"),
+                    statuses.count("REVIEW"),
+                    statuses.count("FAIL"),
+                    statuses.count("NOT SUBMITTED") + statuses.count("DRAFT"),
+                    statuses.count("INVALID REPORT") + statuses.count("ERROR"),
+                ]
+            )
+        return rows
+
+    replace_worksheet("Lab summary", summary_rows(LAB_IDS), use_default=True)
+    replace_worksheet("Assignment summary", summary_rows(ASSIGNMENT_IDS))
+    replace_worksheet(
+        "Autotest details", [detail_header] + ordered_detail_rows
+    )
+
+    review_sheet = get_or_create_worksheet(
+        "Manual review", row_count=2, column_count=len(review_header)
+    )
+    existing_review = read_rows_by_key(
+        review_sheet, review_header, ("ID", "Work")
+    )
+    review_rows: list[list[Any]] = [review_header]
+    for row in ordered_detail_rows:
+        final_status = str(row[detail_header.index("Final status")])
+        if final_status in {"PASS", "NOT RUN"}:
+            continue
+        key = (str(row[detail_header.index("ID")]), str(row[detail_header.index("Work")]))
+        old = existing_review.get(key, [""] * len(review_header))
+        review_rows.append(
+            [
+                row[detail_header.index("Name")],
+                key[0],
+                key[1],
+                row[detail_header.index("Title")],
+                final_status,
+                row[detail_header.index("Note")],
+                row[detail_header.index("Links")],
+                old[review_header.index("Instructor decision")],
+                old[review_header.index("Instructor score")],
+                old[review_header.index("Instructor comment")],
+            ]
+        )
+    replace_worksheet("Manual review", review_rows)
+
+    error_rows: list[list[Any]] = [["Name", "ID", "Stage", "Error"]]
+    for item in errors:
+        error_rows.append(
+            [
+                item.get("name", ""),
+                item.get("student_id", ""),
+                item.get("stage", ""),
+                item.get("error", ""),
+            ]
+        )
+    replace_worksheet("Errors", error_rows)
+
     history_header = [
         "Run UTC",
         "Mode",
         "Scope",
         "Students",
-        "Assignment 1 PASS",
-        "Ethernaut PASS",
-        "Overall PASS",
-        "Review",
-        "Fail",
-        "Error",
+        "Works checked",
+        "Reports submitted",
+        "PASS",
+        "REVIEW",
+        "FAIL",
+        "NOT SUBMITTED",
+        "INVALID",
+        "ERROR",
     ]
-    overall_values = [str(row[18]).upper() for row in summary_rows[1:]]
+    selected_outcomes = [
+        outcome
+        for student_outcomes in outcomes.values()
+        for outcome in student_outcomes.values()
+    ]
     history_row = [
-        datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
+        run_utc,
         run_mode.upper(),
         scope,
         len(students),
-        sum(1 for result in a1_results.values() if result.status.upper() == "PASS"),
-        sum(1 for result in a2_results.values() if result.status.upper() == "PASS"),
-        overall_values.count("PASS"),
-        overall_values.count("REVIEW"),
-        overall_values.count("FAIL"),
-        overall_values.count("ERROR"),
+        len(selected_outcomes),
+        sum(1 for item in selected_outcomes if item.report_status == "SUBMITTED"),
+        sum(1 for item in selected_outcomes if item.final_status == "PASS"),
+        sum(1 for item in selected_outcomes if item.final_status == "REVIEW"),
+        sum(1 for item in selected_outcomes if item.final_status == "FAIL"),
+        sum(
+            1
+            for item in selected_outcomes
+            if item.final_status in {"NOT SUBMITTED", "DRAFT"}
+        ),
+        sum(1 for item in selected_outcomes if item.final_status == "INVALID REPORT"),
+        sum(1 for item in selected_outcomes if item.final_status == "ERROR"),
     ]
     history_sheet = get_or_create_worksheet(
         "Run history", row_count=2, column_count=len(history_header)
     )
-    if not history_sheet.get_all_values():
+    history_values = history_sheet.get_all_values()
+    if history_values and history_values[0] != history_header:
+        history_sheet.update_title(f"Run history legacy {timestamp}")
+        history_sheet = get_or_create_worksheet(
+            "Run history", row_count=2, column_count=len(history_header)
+        )
+        history_values = []
+    if not history_values:
+        history_sheet.resize(rows=1, cols=len(history_header))
         history_sheet.update(
-            values=[history_header],
-            range_name="A1",
-            value_input_option="RAW",
+            values=[history_header], range_name="A1", value_input_option="RAW"
         )
     history_sheet.append_row(history_row, value_input_option="RAW")
-    spreadsheet.batch_update(
-        {
-            "requests": [
-                {
-                    "updateSheetProperties": {
-                        "properties": {
-                            "sheetId": history_sheet.id,
-                            "gridProperties": {"frozenRowCount": 1},
-                        },
-                        "fields": "gridProperties.frozenRowCount",
-                    }
-                },
-                {
-                    "repeatCell": {
-                        "range": {
-                            "sheetId": history_sheet.id,
-                            "startRowIndex": 0,
-                            "endRowIndex": 1,
-                        },
-                        "cell": {
-                            "userEnteredFormat": {
-                                "backgroundColor": {
-                                    "red": 0.15,
-                                    "green": 0.45,
-                                    "blue": 0.30,
-                                },
-                                "textFormat": {
-                                    "foregroundColor": {
-                                        "red": 1,
-                                        "green": 1,
-                                        "blue": 1,
-                                    },
-                                    "bold": True,
-                                },
-                            }
-                        },
-                        "fields": "userEnteredFormat(backgroundColor,textFormat)",
-                    }
-                },
-                {
-                    "autoResizeDimensions": {
-                        "dimensions": {
-                            "sheetId": history_sheet.id,
-                            "dimension": "COLUMNS",
-                            "startIndex": 0,
-                            "endIndex": len(history_header),
-                        }
-                    }
-                },
-            ]
-        }
-    )
+    format_worksheet(history_sheet, len(history_header))
 
     return title, f"https://docs.google.com/spreadsheets/d/{spreadsheet.id}"
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Read the protected course roster and update the instructor-owned Google Sheet with autotest results"
+        description=(
+            "Read the protected course roster and update the instructor-owned "
+            "Google Sheet with autotest results"
+        )
     )
     parser.add_argument(
         "--spreadsheet-id", default=os.getenv("COURSE_STUDENTS_SPREADSHEET_ID", "")
@@ -1735,7 +2140,14 @@ def main() -> None:
     )
     parser.add_argument("--mode", choices=["preview", "final"], default="preview")
     parser.add_argument(
-        "--scope", choices=["all", "assignment1", "ethernaut"], default="all"
+        "--scope",
+        choices=["all", "labs", "assignments", *LAB_IDS, *ASSIGNMENT_IDS, "ethernaut"],
+        default="all",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=os.getenv("AUTOTEST_OUTPUT_DIR", "artifacts"),
+        help="Directory for the machine-readable input and result snapshots",
     )
     parser.add_argument(
         "--rpc",
@@ -1758,17 +2170,27 @@ def main() -> None:
     if not args.results_spreadsheet_id:
         raise ValueError("GOOGLE_RESULTS_SPREADSHEET_ID is required")
 
+    selected = selected_work_ids(args.scope)
+    needs_assignment1 = "assignment1" in selected
+    needs_ethernaut = "assignment2" in selected
+    needs_sepolia = needs_assignment1 or needs_ethernaut
+
     client = google_client(service_account_json)
     print("[INFO] Loading active students from the protected Google Sheet...")
     students = read_students_from_google_sheet(
         client, args.spreadsheet_id, args.students_sheet
     )
-    level_complexity, level_addr_to_name = read_ethernaut_config_from_google_sheet(
-        client, args.spreadsheet_id, args.ethernaut_sheet
-    )
+    level_complexity: dict[str, int] = {}
+    level_addr_to_name: dict[str, str] = {}
+    if needs_ethernaut:
+        level_complexity, level_addr_to_name = (
+            read_ethernaut_config_from_google_sheet(
+                client, args.spreadsheet_id, args.ethernaut_sheet
+            )
+        )
     assignment1_config: Assignment1Config | None = None
     assignment1_config_error = ""
-    if args.scope in {"all", "assignment1"}:
+    if needs_assignment1:
         try:
             assignment1_config = read_assignment1_config_from_google_sheet(
                 client, args.spreadsheet_id, args.assignment1_sheet
@@ -1784,21 +2206,46 @@ def main() -> None:
 
     gh = GitHubHelper(os.getenv("GITHUB_TOKEN"))
     errors: list[dict[str, str]] = []
-    w3: Web3 | None = None
-    try:
-        print("[INFO] Connecting to Sepolia RPC...")
-        w3 = build_web3(args.rpc)
-    except Exception as exc:
-        errors.append(
-            {"student_id": "", "name": "", "stage": "Sepolia RPC", "error": str(exc)}
+    submissions: dict[str, SubmissionResult] = {}
+    print("[INFO] Reading submission.json from each registered repository...")
+    for student in students:
+        submission = fetch_student_submission(student, gh)
+        submissions[student.student_id] = submission
+        print(
+            f"[INFO] {student.student_id}: report={submission.status} "
+            f"commit={submission.commit_sha[:12] or '-'}"
         )
-        print(f"[WARN] Sepolia RPC is unavailable: {exc}")
+        if submission.status == "ERROR":
+            errors.append(
+                {
+                    "student_id": student.student_id,
+                    "name": student.name,
+                    "stage": "Submission report",
+                    "error": submission.note,
+                }
+            )
+
+    w3: Web3 | None = None
+    if needs_sepolia:
+        try:
+            print("[INFO] Connecting to Sepolia RPC...")
+            w3 = build_web3(args.rpc)
+        except Exception as exc:
+            errors.append(
+                {
+                    "student_id": "",
+                    "name": "",
+                    "stage": "Sepolia RPC",
+                    "error": str(exc),
+                }
+            )
+            print(f"[WARN] Sepolia RPC is unavailable: {exc}")
 
     completed_by_wallet: dict[str, dict[str, Any]] = {}
     tx_fallback_by_wallet: dict[str, dict[str, Any]] = {}
     ethernaut_logs_available = False
     ethernaut_fallback_available = False
-    if args.scope in {"all", "ethernaut"}:
+    if needs_ethernaut:
         if w3 is not None:
             try:
                 print("[INFO] Downloading Ethernaut completed logs...")
@@ -1862,7 +2309,7 @@ def main() -> None:
             f"[INFO] [{idx}/{len(students)}] Checking {student.student_id} | {student.name}"
         )
         a1 = Assignment1Result(status="NOT RUN")
-        if args.scope in {"all", "assignment1"}:
+        if needs_assignment1:
             if assignment1_config is None:
                 a1 = Assignment1Result(
                     status="ERROR", note=assignment1_config_error or "missing config"
@@ -1901,7 +2348,7 @@ def main() -> None:
         a1_results[student.student_id] = a1
 
         a2 = EthernautResult(status="NOT RUN")
-        if args.scope in {"all", "ethernaut"}:
+        if needs_ethernaut:
             if not ethernaut_logs_available and not ethernaut_fallback_available:
                 message = "Both Ethernaut evidence sources are unavailable"
                 a2 = EthernautResult(status="ERROR", note=message)
@@ -1915,6 +2362,17 @@ def main() -> None:
                 )
             else:
                 try:
+                    submission = submissions.get(
+                        student.student_id, SubmissionResult()
+                    )
+                    assignment2_report = submission.works.get(
+                        "assignment2", WorkSubmission()
+                    )
+                    declared_levels = assignment2_report.evidence.get(
+                        "completed_levels", []
+                    )
+                    if not isinstance(declared_levels, list):
+                        declared_levels = []
                     a2 = check_ethernaut(
                         student=student,
                         completed_by_wallet=completed_by_wallet,
@@ -1922,8 +2380,9 @@ def main() -> None:
                         level_addr_to_name=level_addr_to_name,
                         repo_texts_cache=repo_texts_cache,
                         gh=gh,
-                        repo_hint=a1.repo,
+                        repo_hint=submission.repository or a1.repo,
                         tx_fallback_by_wallet=tx_fallback_by_wallet,
+                        declared_levels_hint=[str(value) for value in declared_levels],
                     )
                 except Exception as exc:
                     a2 = EthernautResult(status="ERROR", note=str(exc))
@@ -1937,13 +2396,30 @@ def main() -> None:
                     )
         a2_results[student.student_id] = a2
 
+    outcomes = build_work_outcomes(
+        students=students,
+        selected=selected,
+        submissions=submissions,
+        a1_results=a1_results,
+        a2_results=a2_results,
+    )
+    input_path, result_path = write_json_artifacts(
+        output_dir=Path(args.output_dir),
+        students=students,
+        submissions=submissions,
+        outcomes=outcomes,
+        run_mode=args.mode,
+        scope=args.scope,
+    )
+
     print("[INFO] Updating the instructor-owned Google Sheet with results...")
     output_title, output_url = write_google_results(
         client=client,
         results_spreadsheet_id=args.results_spreadsheet_id,
         students=students,
-        a1_results=a1_results,
-        a2_results=a2_results,
+        submissions=submissions,
+        outcomes=outcomes,
+        selected=selected,
         errors=errors,
         run_mode=args.mode,
         scope=args.scope,
@@ -1953,6 +2429,8 @@ def main() -> None:
     passed_a2 = sum(1 for x in a2_results.values() if x.status == "PASS")
     print(f"[OK] Assignment 1 PASS count: {passed_a1}")
     print(f"[OK] Ethernaut PASS count: {passed_a2}")
+    print(f"[OK] Input snapshot: {input_path}")
+    print(f"[OK] Result snapshot: {result_path}")
     print(f"[OK] Result spreadsheet: {output_title}")
     print(f"[OK] Result URL: {output_url}")
     github_output = os.getenv("GITHUB_OUTPUT", "").strip()
@@ -1960,9 +2438,10 @@ def main() -> None:
         with Path(github_output).open("a", encoding="utf-8") as output_file:
             output_file.write(f"result_title={output_title}\n")
             output_file.write(f"result_url={output_url}\n")
-    if not level_addr_to_name:
+    if needs_ethernaut and not level_addr_to_name:
         print(
-            "[WARN] ETHERNAUT_LEVELS has no address mapping; Ethernaut results may require manual review."
+            "[WARN] ETHERNAUT_LEVELS has no address mapping; Ethernaut results "
+            "may require manual review."
         )
 
 

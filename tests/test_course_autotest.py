@@ -11,14 +11,21 @@ from scripts.course_autotest import (
     Assignment1Result,
     EthernautResult,
     GitHubHelper,
+    SubmissionResult,
     Student,
+    WorkOutcome,
+    WorkSubmission,
+    build_work_outcomes,
     check_ethernaut,
     evaluate_assignment1_transfers,
     find_erc721_approval,
+    fetch_student_submission,
     overall_status,
+    parse_submission_document,
     read_assignment1_config_from_google_sheet,
     read_ethernaut_config_from_google_sheet,
     read_students_from_google_sheet,
+    selected_work_ids,
     write_google_results,
 )
 
@@ -101,6 +108,91 @@ class FakeOutputClient:
 
 
 class CourseAutotestTests(unittest.TestCase):
+    def test_submission_reader_requires_exact_repository_url(self):
+        student = Student(
+            "Ada", "101", "https://github.com/ada", ["0x" + "1" * 40]
+        )
+        github = MagicMock()
+
+        result = fetch_student_submission(student, github)
+
+        self.assertEqual(result.status, "INVALID REPORT")
+        self.assertIn("exact GitHub repository URL", result.note)
+        github.get_repo.assert_not_called()
+
+    def test_submission_json_requires_exact_student_id(self):
+        document = {
+            "schema_version": 2,
+            "student_id": "TEST-001",
+            "labs": {
+                f"lab{number}": {
+                    "status": "draft",
+                    "network": "testnet",
+                    "evidence": {},
+                    "links": [],
+                    "answers": {},
+                    "notes": "",
+                }
+                for number in range(1, 13)
+            },
+            "assignments": {
+                f"assignment{number}": {
+                    "status": "draft",
+                    "network": "testnet",
+                    "evidence": {},
+                    "links": [],
+                    "answers": {},
+                    "notes": "",
+                }
+                for number in range(1, 5)
+            },
+        }
+
+        import json
+
+        version, works = parse_submission_document(
+            json.dumps(document), expected_student_id="TEST-001"
+        )
+        self.assertEqual(version, 2)
+        self.assertEqual(len(works), 16)
+        with self.assertRaisesRegex(ValueError, "student_id mismatch"):
+            parse_submission_document(
+                json.dumps(document), expected_student_id="TEST-002"
+            )
+
+    def test_scopes_keep_all_twelve_labs_and_four_assignments(self):
+        self.assertEqual(len(selected_work_ids("labs")), 12)
+        self.assertEqual(len(selected_work_ids("assignments")), 4)
+        self.assertEqual(len(selected_work_ids("all")), 16)
+        self.assertEqual(selected_work_ids("lab7"), ("lab7",))
+
+    def test_unimplemented_work_is_reviewed_but_assignment1_can_pass(self):
+        student = Student(
+            "Ada", "101", "https://github.com/ada/course", ["0x" + "1" * 40]
+        )
+        submission = SubmissionResult(
+            status="VALID",
+            repository="ada/course",
+            commit_sha="a" * 40,
+            works={
+                "lab7": WorkSubmission(status="submitted", network="sepolia"),
+                "assignment1": WorkSubmission(
+                    status="submitted", network="sepolia"
+                ),
+            },
+        )
+
+        outcomes = build_work_outcomes(
+            students=[student],
+            selected=("lab7", "assignment1"),
+            submissions={"101": submission},
+            a1_results={"101": Assignment1Result(status="PASS")},
+            a2_results={},
+        )["101"]
+
+        self.assertEqual(outcomes["lab7"].final_status, "REVIEW")
+        self.assertEqual(outcomes["assignment1"].final_status, "PASS")
+
     def test_reads_only_active_students_and_normalizes_id(self):
         client = FakeClient(
             {
@@ -316,22 +408,29 @@ class CourseAutotestTests(unittest.TestCase):
     def test_result_writer_updates_current_worksheets_and_appends_history(self):
         client = FakeOutputClient()
         student = Student("Ada", "101", "https://github.com/ada", ["0x" + "1" * 40])
+        submission = SubmissionResult(
+            status="VALID", repository="ada/course", commit_sha="a" * 40
+        )
+        outcomes = {
+            "101": {
+                "assignment1": WorkOutcome(
+                    work_id="assignment1",
+                    report_status="SUBMITTED",
+                    auto_status="PASS",
+                    final_status="PASS",
+                    network="sepolia",
+                    commit_sha="a" * 40,
+                )
+            }
+        }
 
         title, url = write_google_results(
             client=client,
             results_spreadsheet_id="result-sheet-id",
             students=[student],
-            a1_results={
-                "101": Assignment1Result(
-                    status="PASS",
-                    professor_received_ok=True,
-                    professor_returned_ok=True,
-                    personal_mint_ok=True,
-                    approval_ok=True,
-                    transfer_to_special_ok=True,
-                )
-            },
-            a2_results={"101": EthernautResult(status="NOT RUN")},
+            submissions={"101": submission},
+            outcomes=outcomes,
+            selected=("assignment1",),
             errors=[],
             run_mode="final",
             scope="assignment1",
@@ -340,35 +439,50 @@ class CourseAutotestTests(unittest.TestCase):
         self.assertTrue(title.startswith("FINAL_AUTOTEST_"))
         self.assertEqual(client.opened, "result-sheet-id")
         self.assertEqual(
-            [worksheet.title for worksheet in client.spreadsheet.worksheets],
-            [
-                "Closed list",
+            {worksheet.title for worksheet in client.spreadsheet.worksheets},
+            {
+                "Lab summary",
+                "Assignment summary",
                 "Autotest details",
                 "Manual review",
                 "Errors",
                 "Run history",
-            ],
+            },
         )
         self.assertEqual(url, "https://docs.google.com/spreadsheets/d/result-sheet-id")
-        for worksheet in client.spreadsheet.worksheets[:2]:
+        for sheet_name in ("Lab summary", "Assignment summary", "Autotest details"):
+            worksheet = client.spreadsheet.worksheet(sheet_name)
             self.assertEqual(len(worksheet.values[0]), len(worksheet.values[1]))
         history = client.spreadsheet.worksheet("Run history").values
         self.assertEqual(history[0][0], "Run UTC")
         self.assertEqual(history[1][1:4], ["FINAL", "assignment1", 1])
-        self.assertEqual(history[1][4], 1)
+        self.assertEqual(history[1][4:7], [1, 1, 1])
 
+        failed_outcomes = {
+            "101": {
+                "assignment1": WorkOutcome(
+                    work_id="assignment1",
+                    report_status="SUBMITTED",
+                    auto_status="FAIL",
+                    final_status="FAIL",
+                    network="sepolia",
+                    commit_sha="b" * 40,
+                )
+            }
+        }
         write_google_results(
             client=client,
             results_spreadsheet_id="result-sheet-id",
             students=[student],
-            a1_results={"101": Assignment1Result(status="FAIL")},
-            a2_results={"101": EthernautResult(status="NOT RUN")},
+            submissions={"101": submission},
+            outcomes=failed_outcomes,
+            selected=("assignment1",),
             errors=[],
             run_mode="preview",
             scope="assignment1",
         )
 
-        self.assertEqual(len(client.spreadsheet.worksheets), 5)
+        self.assertEqual(len(client.spreadsheet.worksheets), 6)
         history = client.spreadsheet.worksheet("Run history").values
         self.assertEqual(len(history), 3)
         self.assertEqual(history[2][1:4], ["PREVIEW", "assignment1", 1])

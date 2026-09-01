@@ -119,7 +119,7 @@ At the end of this lab you should have a Polkadot.js account, Westend test balan
 
 ## Submission
 
-Submit the Westend Subscan extrinsic link in Google Classroom and state the recipient and amount. The signer must match the Polkadot address registered in the protected course registry.
+In `submission.json`, fill `labs.lab8` with the Westend extrinsic hash and Subscan link, recipient, and amount. Set its status to `submitted`. The signer must match the Polkadot address registered in Google Sheets.
 
 ---
 

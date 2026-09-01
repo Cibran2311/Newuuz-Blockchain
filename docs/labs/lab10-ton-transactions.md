@@ -108,7 +108,7 @@ At the end of this lab you should have TON testnet wallet, test TON balance, suc
 
 ## Submission
 
-Submit the TON Testnet explorer transaction link in Google Classroom and state the recipient and amount. The sender must match the TON address registered in the protected course registry.
+In `submission.json`, fill `labs.lab10` with the TON Testnet transaction hash and explorer link, recipient, and amount. Set its status to `submitted`. The sender must match the TON address registered in Google Sheets.
 
 ---
 
