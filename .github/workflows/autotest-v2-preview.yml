@@ -1,6 +1,11 @@
 name: Autotest v2 Sheets access smoke test
 
 on:
+  push:
+    branches:
+      - preview-test-run
+    paths:
+      - ".github/workflows/autotest-v2-preview.yml"
   pull_request:
     branches:
       - sheets-json-autotest-v2
