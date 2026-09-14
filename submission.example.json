@@ -162,6 +162,7 @@
       "evidence": {
         "mode": "",
         "tx_hashes": [],
+        "router_address": "",
         "proof": ""
       },
       "links": [],

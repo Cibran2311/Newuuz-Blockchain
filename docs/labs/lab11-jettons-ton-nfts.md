@@ -148,7 +148,7 @@ In `submission.json`, fill `labs.lab11` with the TON Testnet transaction and rep
 | Network | Evidence is from TON testnet. |
 | Jetton transfer | Transfer exists. |
 | Sender | Sender wallet matches submitted wallet. |
-| Jetton Master | Address is present. |
+| Jetton Master | Address matches `Lab 11 Jetton Master` from the protected course configuration. |
 | Jetton Wallets | Sender and recipient wallet addresses are present. |
 | Explanation | Architecture explanation is present. |
 

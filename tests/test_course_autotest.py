@@ -13,6 +13,7 @@ from scripts.course_autotest import (
     EthernautResult,
     GitHubHelper,
     Lab7Config,
+    LabRequirementsConfig,
     SubmissionResult,
     SubscanClient,
     Student,
@@ -30,6 +31,7 @@ from scripts.course_autotest import (
     read_assignment1_config_from_google_sheet,
     read_ethernaut_config_from_google_sheet,
     read_lab7_config_from_google_sheet,
+    read_lab_requirements_from_google_sheet,
     read_students_from_google_sheet,
     selected_work_ids,
     validate_lab1,
@@ -177,6 +179,20 @@ class CourseAutotestTests(unittest.TestCase):
                 json.dumps(document), expected_student_id="TEST-002"
             )
 
+    def test_legacy_solution_report_gets_actionable_schema_error(self):
+        import json
+
+        document = {
+            "student": {"student_id": "TEST-001"},
+            "wallets": {"ethereum_sepolia": "0x" + "1" * 40},
+            "labs": {},
+        }
+
+        with self.assertRaisesRegex(ValueError, "legacy submission format"):
+            parse_submission_document(
+                json.dumps(document), expected_student_id="TEST-001"
+            )
+
     def test_scopes_keep_all_twelve_labs_and_four_assignments(self):
         self.assertEqual(len(selected_work_ids("labs")), 12)
         self.assertEqual(len(selected_work_ids("assignments")), 4)
@@ -206,15 +222,43 @@ class CourseAutotestTests(unittest.TestCase):
         }
         w3.eth.get_transaction_receipt.return_value = {"status": 1}
 
-        result = validate_lab1(student, work, w3)
+        result = validate_lab1(student, work, w3, recipient)
 
         self.assertEqual(result.status, "PASS")
         self.assertIn(tx_hash, result.note)
 
         w3.eth.get_transaction.return_value["from"] = "0x" + "3" * 40
-        result = validate_lab1(student, work, w3)
+        result = validate_lab1(student, work, w3, recipient)
         self.assertEqual(result.status, "FAIL")
         self.assertIn("registered", result.note)
+
+    def test_lab1_known_transaction_without_receipt_is_provider_error(self):
+        wallet = "0x" + "1" * 40
+        tx_hash = "0x" + "a" * 64
+        work = WorkSubmission(
+            status="submitted",
+            network="sepolia",
+            evidence={
+                "tx_hashes": [tx_hash],
+                "recipient": "0x" + "2" * 40,
+                "amount_eth": "0.0001",
+            },
+        )
+        w3 = MagicMock()
+        w3.eth.chain_id = 11155111
+        w3.eth.get_transaction.return_value = {
+            "from": wallet,
+            "to": "0x" + "2" * 40,
+            "value": 100_000_000_000_000,
+        }
+        w3.eth.get_transaction_receipt.return_value = None
+
+        result = validate_lab1(
+            Student("Ada", "101", "", [wallet]), work, w3, "0x" + "2" * 40
+        )
+
+        self.assertEqual(result.status, "ERROR")
+        self.assertIn("receipt is temporarily unavailable", result.note)
 
     def test_lab4_cross_checks_gas_and_fee(self):
         wallet = "0x" + "1" * 40
@@ -272,19 +316,36 @@ class CourseAutotestTests(unittest.TestCase):
             text="Transfer(address,address,uint256)"
         )
         wallet_topic = bytes.fromhex("0" * 24 + wallet[2:])
-        transfer_log = {
-            "address": token,
-            "topics": [transfer_topic, wallet_topic, wallet_topic],
-        }
+        recipient_topics = [
+            bytes.fromhex("0" * 24 + character * 40)
+            for character in ("2", "3", "4")
+        ]
+
+        def receipt(tx_hash):
+            if tx_hash == disperse_tx:
+                logs = [
+                    {
+                        "address": token,
+                        "topics": [transfer_topic, wallet_topic, recipient_topic],
+                    }
+                    for recipient_topic in recipient_topics
+                ]
+            else:
+                recipient_topic = recipient_topics[transfer_txs.index(tx_hash)]
+                logs = [
+                    {
+                        "address": token,
+                        "topics": [transfer_topic, wallet_topic, recipient_topic],
+                    }
+                ]
+            return {"status": 1, "logs": logs}
+
         w3 = MagicMock()
         w3.eth.chain_id = 11155111
         w3.eth.get_code.return_value = b"\x60\x00"
         w3.eth.call.return_value = b"\x01"
         w3.eth.get_transaction.side_effect = lambda _tx_hash: {"from": wallet}
-        w3.eth.get_transaction_receipt.side_effect = lambda tx_hash: {
-            "status": 1,
-            "logs": [transfer_log] * (3 if tx_hash == disperse_tx else 1),
-        }
+        w3.eth.get_transaction_receipt.side_effect = receipt
 
         result = validate_lab5(student, work, w3)
 
@@ -378,10 +439,20 @@ class CourseAutotestTests(unittest.TestCase):
         self.assertEqual(result, {"success": True})
         session.post.assert_called_once_with(
             "https://westend.api.subscan.io/api/scan/extrinsic",
-            headers={"Content-Type": "application/json", "X-API-Key": "subscan-key"},
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "newuuz-course-checker",
+                "X-API-Key": "subscan-key",
+            },
             json={"hash": extrinsic_hash, "hide_events": False, "events_limit": 100},
             timeout=30,
         )
+
+    def test_subscan_client_requires_api_key(self):
+        with self.assertRaisesRegex(RuntimeError, "SUBSCAN_API_KEY"):
+            SubscanClient("", MagicMock()).get_extrinsic(
+                "westend", "0x" + "8" * 64
+            )
 
     def test_lab9_validates_registered_xcm_extrinsic(self):
         extrinsic_hash = "0x" + "9" * 64
@@ -414,7 +485,9 @@ class CourseAutotestTests(unittest.TestCase):
             "event": [{"module_id": "XcmPallet", "event_id": "Sent"}],
         }
 
-        result = validate_lab9(student, work, subscan)
+        result = validate_lab9(
+            student, work, subscan, "Westend", "Asset Hub Westend"
+        )
 
         self.assertEqual(result.status, "PASS")
         self.assertIn("XCM extrinsic", result.note)
@@ -441,21 +514,21 @@ class CourseAutotestTests(unittest.TestCase):
             {
                 "account": wallet,
                 "description": {"aborted": False},
-                "out_msgs": [{"destination": recipient, "value": 10_000_000}],
+                "out_msgs": [{"destination": recipient, "value": 9_933_333}],
             }
         ]
 
-        result = validate_lab10(student, work, toncenter)
+        result = validate_lab10(student, work, toncenter, recipient)
 
         self.assertEqual(result.status, "PASS")
-        self.assertIn("value=0.01 TON", result.note)
+        self.assertIn("received=0.009933333 TON", result.note)
 
     def test_toncenter_client_normalizes_user_friendly_address(self):
         friendly = "E" + "A" * 47
         response = MagicMock()
         response.json.return_value = {
             "ok": True,
-            "result": {"workchain": 0, "addr_hex": "A" * 64},
+            "result": "0:" + "A" * 64,
         }
         session = MagicMock()
         session.get.return_value = response
@@ -466,7 +539,11 @@ class CourseAutotestTests(unittest.TestCase):
         session.get.assert_called_once_with(
             "https://testnet.toncenter.com/api/v2/unpackAddress",
             params={"address": friendly},
-            headers={"Accept": "application/json", "X-API-Key": "ton-key"},
+            headers={
+                "Accept": "application/json",
+                "User-Agent": "newuuz-course-checker",
+                "X-API-Key": "ton-key",
+            },
             timeout=30,
         )
 
@@ -475,7 +552,7 @@ class CourseAutotestTests(unittest.TestCase):
         master = "0:" + "2" * 64
         sender_wallet = "0:" + "3" * 64
         recipient_wallet = "0:" + "4" * 64
-        tx_hash = "b" * 64
+        tx_hash = "8dcf2bad906389160556e7dccca54497cd1b8ca5b609456093c26384b83c2d56"
         student = Student("Ada", "101", "", [], ton_address=wallet)
         work = WorkSubmission(
             status="submitted",
@@ -499,7 +576,7 @@ class CourseAutotestTests(unittest.TestCase):
         )
         toncenter.jetton_transfers.return_value = [
             {
-                "transaction_hash": tx_hash,
+                "transaction_hash": "jc8rrZBjiRYFVufczKVEl80bjKW2CUVgk8JjhLg8LVY=",
                 "transaction_aborted": False,
                 "source": wallet,
                 "source_wallet": sender_wallet,
@@ -508,19 +585,24 @@ class CourseAutotestTests(unittest.TestCase):
         ]
         toncenter.traces.return_value = [{"messages": [{"destination": recipient_wallet}]}]
 
-        result = validate_lab11(student, work, toncenter)
+        result = validate_lab11(student, work, toncenter, master)
 
         self.assertEqual(result.status, "PASS")
         self.assertIn("jetton transfer", result.note)
 
     def test_lab12_validates_stonfi_swap_and_pinned_script(self):
         wallet = "0:" + "1" * 64
+        router = "0:" + "2" * 64
         tx_hash = "c" * 64
         student = Student("Ada", "101", "", [], ton_address=wallet)
         work = WorkSubmission(
             status="submitted",
             network="TON testnet",
-            evidence={"mode": "stonfi_swap", "tx_hashes": [tx_hash]},
+            evidence={
+                "mode": "stonfi_swap",
+                "tx_hashes": [tx_hash],
+                "router_address": router,
+            },
             links=["https://github.com/ada/course/blob/main/labs/lab12.ts"],
         )
         submission = SubmissionResult(
@@ -539,11 +621,13 @@ class CourseAutotestTests(unittest.TestCase):
                 "type": "JettonSwap",
                 "success": True,
                 "details": {"protocol": "STON.fi"},
-                "accounts": [wallet],
+                "accounts": [wallet, router],
             }
         ]
 
-        result = validate_lab12(student, work, submission, github, toncenter)
+        result = validate_lab12(
+            student, work, submission, github, toncenter, "stonfi_swap", router
+        )
 
         self.assertEqual(result.status, "PASS")
         github.get_repo_tree.assert_called_once_with("ada", "course", "d" * 40)
@@ -564,7 +648,13 @@ class CourseAutotestTests(unittest.TestCase):
         )
 
         result = validate_lab12(
-            student, work, SubmissionResult(), MagicMock(), MagicMock()
+            student,
+            work,
+            SubmissionResult(),
+            MagicMock(),
+            MagicMock(),
+            "hackton",
+            "",
         )
 
         self.assertEqual(result.status, "REVIEW")
@@ -806,6 +896,44 @@ class CourseAutotestTests(unittest.TestCase):
         )
 
         self.assertEqual(config, Lab7Config(dex_alpha=dex_alpha, dex_beta=dex_beta))
+
+    def test_reads_instructor_controlled_lab_requirements(self):
+        eth_recipient = "0x" + "a" * 40
+        ton_recipient = "E" + "A" * 47
+        jetton_master = "E" + "B" * 47
+        router = "E" + "C" * 47
+        client = FakeClient(
+            {
+                "LAB_REQUIREMENTS": [
+                    {
+                        "Lab 1 Recipient": eth_recipient,
+                        "Lab 9 Source Chain": "Westend",
+                        "Lab 9 Destination Chain": "Asset Hub Westend",
+                        "Lab 10 Recipient": ton_recipient,
+                        "Lab 11 Jetton Master": jetton_master,
+                        "Lab 12 Mode": "stonfi-swap",
+                        "Lab 12 STON.fi Router": router,
+                    }
+                ]
+            }
+        )
+
+        config = read_lab_requirements_from_google_sheet(
+            client, "sheet-id", "LAB_REQUIREMENTS"
+        )
+
+        self.assertEqual(
+            config,
+            LabRequirementsConfig(
+                lab1_recipient=eth_recipient,
+                lab9_source_chain="Westend",
+                lab9_destination_chain="Asset Hub Westend",
+                lab10_recipient=ton_recipient,
+                lab11_jetton_master=jetton_master,
+                lab12_mode="stonfi_swap",
+                lab12_stonfi_router=router,
+            ),
+        )
 
     def test_matches_new_assignment1_nft_flows_in_order(self):
         student = "0x" + "1" * 40

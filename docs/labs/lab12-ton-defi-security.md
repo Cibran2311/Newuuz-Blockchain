@@ -52,6 +52,7 @@ After completing this lab you will be able to:
 | TON documentation | https://docs.ton.org/ |
 | STON.fi docs | https://docs.ston.fi/ |
 | STON.fi SDK | https://docs.ston.fi/developer-section/dex/sdk |
+| Official testnet swap example | https://docs.ston.fi/developer-section/dex/sdk/v2/swap#testnet-swaps-manual-setup |
 | HackTON | https://www.hacktheton.com/en/level/introduction |
 | Testnet Tonviewer | https://testnet.tonviewer.com/ |
 
@@ -102,22 +103,30 @@ After completing this lab you will be able to:
 
 Make sure your testnet wallet has test TON and required jettons if needed.
 
-#### Step 2 — Open STON.fi or SDK
+#### Step 2 — Configure the Testnet SDK
 
-Use instructor-provided interface or SDK instructions.
+The public STON.fi REST API discovers mainnet routes. Do not use its returned routers for this laboratory. Testnet swaps use explicitly configured testnet contracts.
 
-If using SDK, prepare Node.js project:
+Prepare the Node.js project:
 
 ```bash
 npm init -y
-npm install @ston-fi/sdk
+npm install @ston-fi/sdk @ton/ton
 ```
 
-Exact package may depend on current STON.fi SDK version.
+Use the current instructor-provided contracts. Until they are replaced, the official STON.fi v2.1 testnet example provides:
+
+| Contract | Testnet address |
+|---|---|
+| CPI Router v2.1 | `kQALh-JBBIKK7gr0o4AVf9JZnEsFndqO0qTCyT-D-yBsWk0v` |
+| pTON v2.1 | `kQACS30DNoUQ7NfApPvzh7eBmSZ9L4ygJ-lkNWtba8TQT-Px` |
+| TesREED test jetton | `kQDLvsZol3juZyOAVG8tWsJntOxeEZWEaWCbbSjYakQpuYN5` |
+
+Testnet liquidity can be limited. If the official pool is unavailable, the instructor must provide a funded class pool rather than asking students to use mainnet.
 
 #### Step 3 — Prepare Swap
 
-Record input token, output token, amount, expected output, and pool/router if visible.
+Record input token, output token, amount, expected output, and the router address.
 
 #### Step 4 — Execute Swap
 
@@ -159,7 +168,7 @@ At the end of this lab you should have either a TON DeFi swap trace or HackTON/s
 
 Fill `labs.lab12` in `submission.json`, set its status to `submitted`, and provide one evidence set:
 
-- **STON.fi mode:** GitHub script link, registered TON wallet, input/output assets, and TON Testnet swap link.
+- **STON.fi mode:** GitHub script link, registered TON wallet, input/output assets, router address, and TON Testnet swap link.
 - **HackTON mode:** completed level, proof link or screenshot requested by the instructor, and a short explanation of the vulnerability.
 
 ---
@@ -172,7 +181,8 @@ Fill `labs.lab12` in `submission.json`, set its status to `submitted`, and provi
 | Network | Evidence is on TON testnet. |
 | Wallet | Submitted wallet is involved. |
 | Swap/proof | Transaction or proof exists. |
-| Script | Script file exists if SDK mode is used. |
+| Router | STON.fi mode uses the current instructor-approved testnet router. |
+| Script | A JavaScript/TypeScript SDK script exists at the pinned GitHub commit. |
 | Explanation | Explanation is present for HackTON mode. |
 
 ---
@@ -182,6 +192,8 @@ Fill `labs.lab12` in `submission.json`, set its status to `submitted`, and provi
 | Mistake | Fix |
 |---|---|
 | Using mainnet | Use testnet. |
+| Using a router returned by `api.ston.fi` | Use the explicitly configured testnet router. |
+| Testnet pool has no liquidity | Ask the instructor for the funded class pool. |
 | Missing script file | Commit script if SDK was used. |
 | Submitting wallet page only | Submit transaction/proof link. |
 | Confusing external and internal messages | Inspect trace carefully. |

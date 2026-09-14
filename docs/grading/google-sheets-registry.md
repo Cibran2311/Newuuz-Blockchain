@@ -51,4 +51,18 @@ Share the source spreadsheet with the GitHub Actions service account as **Viewer
 
 Both values must be different valid `0x` contract addresses. Lab 7 rejects submitted DEX addresses that do not exactly match this instructor-controlled pair.
 
+`LAB_REQUIREMENTS` contains one protected row with the course rules that must not come from a student report:
+
+| Column | Purpose |
+|---|---|
+| `Lab 1 Recipient` | Required Sepolia recipient |
+| `Lab 9 Source Chain` | Assigned XCM source chain |
+| `Lab 9 Destination Chain` | Assigned XCM destination chain |
+| `Lab 10 Recipient` | Required TON testnet recipient |
+| `Lab 11 Jetton Master` | Class Jetton Master contract |
+| `Lab 12 Mode` | `stonfi_swap` or `hackton` |
+| `Lab 12 STON.fi Router` | Approved testnet router when STON.fi mode is assigned |
+
+The checker returns `ERROR` when a requirement needed by the selected lab is absent. It returns `FAIL` when a submitted report or on-chain operation contradicts the configured requirement.
+
 The checker never edits the source registry. It updates only the permanent instructor-owned result workbook.

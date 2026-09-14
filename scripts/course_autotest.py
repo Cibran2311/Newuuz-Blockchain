@@ -66,6 +66,7 @@ A2_BONUS_LEVELS = 15
 SEPOLIA_CHAIN_ID = 11155111
 LAB1_AMOUNT_WEI = 100_000_000_000_000
 LAB10_AMOUNT_NANOTON = 10_000_000
+LAB10_MIN_RECEIVED_NANOTON = 9_900_000
 SUBSCAN_API_HOSTS = {
     "westend": "https://westend.api.subscan.io",
     "assethub-westend": "https://assethub-westend.api.subscan.io",
@@ -125,6 +126,17 @@ class Assignment1Config:
 class Lab7Config:
     dex_alpha: str
     dex_beta: str
+
+
+@dataclass(frozen=True)
+class LabRequirementsConfig:
+    lab1_recipient: str = ""
+    lab9_source_chain: str = ""
+    lab9_destination_chain: str = ""
+    lab10_recipient: str = ""
+    lab11_jetton_master: str = ""
+    lab12_mode: str = ""
+    lab12_stonfi_router: str = ""
 
 
 @dataclass
@@ -301,6 +313,16 @@ def parse_submission_document(
         raise ValueError(
             f"invalid JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}"
         ) from exc
+
+    if (
+        isinstance(data, dict)
+        and "schema_version" not in data
+        and {"student", "wallets", "labs"}.issubset(data)
+    ):
+        raise ValueError(
+            "legacy submission format detected; rebuild the report from "
+            "submission.example.json (schema_version 2)"
+        )
 
     errors = sorted(
         submission_validator().iter_errors(data),
@@ -624,6 +646,59 @@ def read_lab7_config_from_google_sheet(
     return Lab7Config(dex_alpha=dex_alpha, dex_beta=dex_beta)
 
 
+def read_lab_requirements_from_google_sheet(
+    client: gspread.Client,
+    spreadsheet_id: str,
+    worksheet_name: str,
+) -> LabRequirementsConfig:
+    """Read instructor-controlled lab recipients, route, token, and mode."""
+    rows = (
+        client.open_by_key(spreadsheet_id)
+        .worksheet(worksheet_name)
+        .get_all_records(default_blank="")
+    )
+    if not rows:
+        raise ValueError(f"Worksheet '{worksheet_name}' must contain one config row")
+    row = rows[0]
+
+    def optional_address(pattern: re.Pattern[str], *names: str) -> str:
+        value = row_value(row, *names).lstrip("'")
+        if value and not pattern.fullmatch(value):
+            raise ValueError(
+                f"Worksheet '{worksheet_name}': '{names[0]}' has an invalid address"
+            )
+        return value
+
+    mode = normalize_header(row_value(row, "Lab 12 Mode", "Lab12 Mode")).replace(
+        "-", "_"
+    )
+    if mode and mode not in {"stonfi_swap", "hackton"}:
+        raise ValueError(
+            f"Worksheet '{worksheet_name}': 'Lab 12 Mode' must be "
+            "stonfi_swap or hackton"
+        )
+
+    return LabRequirementsConfig(
+        lab1_recipient=optional_address(
+            ETH_RE, "Lab 1 Recipient", "Lab1 Recipient"
+        ).lower(),
+        lab9_source_chain=row_value(row, "Lab 9 Source Chain", "Lab9 Source Chain"),
+        lab9_destination_chain=row_value(
+            row, "Lab 9 Destination Chain", "Lab9 Destination Chain"
+        ),
+        lab10_recipient=optional_address(
+            TON_ADDRESS_RE, "Lab 10 Recipient", "Lab10 Recipient"
+        ),
+        lab11_jetton_master=optional_address(
+            TON_ADDRESS_RE, "Lab 11 Jetton Master", "Lab11 Jetton Master"
+        ),
+        lab12_mode=mode,
+        lab12_stonfi_router=optional_address(
+            TON_ADDRESS_RE, "Lab 12 STON.fi Router", "Lab12 STON.fi Router"
+        ),
+    )
+
+
 def score_repo_candidate(repo: dict[str, Any]) -> int:
     text = " ".join(
         [
@@ -863,7 +938,18 @@ def _hex_text(value: Any) -> str:
 
 def _transaction_and_receipt(w3: Web3, tx_hash: str) -> tuple[Any, Any]:
     transaction = w3.eth.get_transaction(tx_hash)
-    receipt = w3.eth.get_transaction_receipt(tx_hash)
+    if transaction is None:
+        raise TransactionNotFound(tx_hash)
+    try:
+        receipt = w3.eth.get_transaction_receipt(tx_hash)
+    except TransactionNotFound as exc:
+        raise RuntimeError(
+            f"receipt is temporarily unavailable for known transaction {tx_hash}"
+        ) from exc
+    if receipt is None:
+        raise RuntimeError(
+            f"receipt is temporarily unavailable for known transaction {tx_hash}"
+        )
     return transaction, receipt
 
 
@@ -877,6 +963,7 @@ def validate_lab1(
     student: Student,
     work: WorkSubmission,
     w3: Web3,
+    expected_recipient: str,
 ) -> WorkValidationResult:
     """Validate the student's first Sepolia transfer without trusting the report."""
     if not _is_sepolia_work(work):
@@ -892,6 +979,14 @@ def validate_lab1(
     recipient = str(work.evidence.get("recipient", "")).strip()
     if not ETH_RE.fullmatch(recipient):
         return WorkValidationResult("FAIL", "recipient must be a valid 0x address")
+    if not ETH_RE.fullmatch(expected_recipient):
+        return WorkValidationResult(
+            "ERROR", "Lab 1 Recipient is missing from LAB_REQUIREMENTS"
+        )
+    if recipient.lower() != expected_recipient.lower():
+        return WorkValidationResult(
+            "FAIL", "recipient does not match Lab 1 Recipient from LAB_REQUIREMENTS"
+        )
     try:
         declared_wei = _eth_to_wei(work.evidence.get("amount_eth", ""))
     except (InvalidOperation, TypeError, ValueError):
@@ -1111,6 +1206,7 @@ def validate_lab5(
             )
 
         transfer_log_count = 0
+        transfer_recipients: set[str] = set()
         for tx_hash in transfer_txs:
             transaction, receipt = _transaction_and_receipt(w3, tx_hash)
             if not _receipt_succeeded(receipt):
@@ -1132,7 +1228,17 @@ def validate_lab5(
                 return WorkValidationResult(
                     "FAIL", f"registered wallet is not the token sender in {tx_hash}"
                 )
+            transfer_recipients.update(
+                _indexed_topic_address(_item_value(log, "topics", ["", "", ""])[2])
+                for log in logs
+            )
             transfer_log_count += len(logs)
+
+        transfer_recipients.discard("")
+        if len(transfer_recipients) < 3:
+            return WorkValidationResult(
+                "FAIL", "individual transfers must reach at least three addresses"
+            )
 
         batch_transaction, batch_receipt = _transaction_and_receipt(w3, disperse_tx)
         if not _receipt_succeeded(batch_receipt):
@@ -1153,6 +1259,15 @@ def validate_lab5(
         ) < 3:
             return WorkValidationResult(
                 "FAIL", "registered wallet must fund the three Disperse token transfers"
+            )
+        batch_recipients = {
+            _indexed_topic_address(_item_value(log, "topics", ["", "", ""])[2])
+            for log in batch_logs
+        }
+        batch_recipients.discard("")
+        if len(batch_recipients) < 3:
+            return WorkValidationResult(
+                "FAIL", "Disperse transaction must reach at least three addresses"
             )
     except TransactionNotFound as exc:
         missing_hash = str(exc) or "one of the submitted hashes"
@@ -1337,10 +1452,11 @@ class SubscanClient:
         if not host:
             raise ValueError(f"unsupported Subscan network: {network}")
         if not self.api_key:
-            elapsed = time.monotonic() - self._last_request
-            if elapsed < 1.05:
-                time.sleep(1.05 - elapsed)
-        headers = {"Content-Type": "application/json"}
+            raise RuntimeError("SUBSCAN_API_KEY is required for Labs 8 and 9")
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "newuuz-course-checker",
+        }
         if self.api_key:
             headers["X-API-Key"] = self.api_key
         response = self.session.post(
@@ -1385,7 +1501,10 @@ class TonCenterClient:
             elapsed = time.monotonic() - self._last_request
             if elapsed < 1.05:
                 time.sleep(1.05 - elapsed)
-        headers = {"Accept": "application/json"}
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": "newuuz-course-checker",
+        }
         if self.api_key:
             headers["X-API-Key"] = self.api_key
         response = self.session.get(
@@ -1413,13 +1532,23 @@ class TonCenterClient:
         else:
             payload = self._get("/api/v2/unpackAddress", {"address": value})
             result = payload.get("result", {})
-            workchain = result.get("workchain")
-            address_hex = str(result.get("addr_hex", "")).lower()
-            if workchain not in {-1, 0, "-1", "0"} or not re.fullmatch(
-                r"[a-f0-9]{64}", address_hex
-            ):
+            unpacked_match = re.fullmatch(
+                r"(-1|0):([a-fA-F0-9]{64})", str(result).strip()
+            )
+            if unpacked_match:
+                canonical = (
+                    f"{unpacked_match.group(1)}:{unpacked_match.group(2).lower()}"
+                )
+            elif isinstance(result, dict):
+                workchain = result.get("workchain")
+                address_hex = str(result.get("addr_hex", "")).lower()
+                if workchain not in {-1, 0, "-1", "0"} or not re.fullmatch(
+                    r"[a-f0-9]{64}", address_hex
+                ):
+                    raise ValueError(f"invalid TON address: {value}")
+                canonical = f"{int(workchain)}:{address_hex}"
+            else:
                 raise ValueError(f"invalid TON address: {value}")
-            canonical = f"{int(workchain)}:{address_hex}"
         self._address_cache[value] = canonical
         return canonical
 
@@ -1654,6 +1783,8 @@ def validate_lab9(
     student: Student,
     work: WorkSubmission,
     subscan: SubscanClient,
+    expected_source_chain: str,
+    expected_destination_chain: str,
 ) -> WorkValidationResult:
     """Validate a signed Westend/Asset Hub XCM extrinsic."""
     if not student.polkadot_address:
@@ -1665,6 +1796,16 @@ def validate_lab9(
     ):
         return WorkValidationResult(
             "FAIL", "different source_chain and destination_chain values are required"
+        )
+    if not expected_source_chain or not expected_destination_chain:
+        return WorkValidationResult(
+            "ERROR", "Lab 9 source/destination are missing from LAB_REQUIREMENTS"
+        )
+    if normalize_header(source) != normalize_header(
+        expected_source_chain
+    ) or normalize_header(destination) != normalize_header(expected_destination_chain):
+        return WorkValidationResult(
+            "FAIL", "source/destination do not match the assigned Lab 9 route"
         )
     explanation = str(work.answers.get("xcm_execution_explanation", "")).strip()
     if len(explanation) < 40:
@@ -1715,9 +1856,20 @@ def _valid_ton_address(value: str) -> bool:
 
 
 def _ton_hash_equal(left: Any, right: Any) -> bool:
-    return str(left).strip().lower().removeprefix("0x") == str(right).strip().lower().removeprefix(
-        "0x"
-    )
+    def normalized(value: Any) -> str:
+        text = str(value).strip()
+        hex_value = text.lower().removeprefix("0x")
+        if re.fullmatch(r"[a-f0-9]{64}", hex_value):
+            return hex_value
+        try:
+            decoded = base64.b64decode(
+                text + "=" * (-len(text) % 4), altchars=b"-_", validate=True
+            )
+        except (ValueError, TypeError):
+            return text.lower()
+        return decoded.hex() if len(decoded) == 32 else text.lower()
+
+    return normalized(left) == normalized(right)
 
 
 def _ton_transaction_succeeded(transaction: dict[str, Any]) -> bool:
@@ -1739,6 +1891,7 @@ def validate_lab10(
     student: Student,
     work: WorkSubmission,
     toncenter: TonCenterClient,
+    expected_recipient: str,
 ) -> WorkValidationResult:
     """Validate the required 0.01 TON testnet transfer."""
     if "ton" not in normalize_header(work.network) or "testnet" not in normalize_header(
@@ -1754,6 +1907,10 @@ def validate_lab10(
     recipient = str(work.evidence.get("recipient", "")).strip()
     if not _valid_ton_address(recipient):
         return WorkValidationResult("FAIL", "recipient must be a valid TON address")
+    if not _valid_ton_address(expected_recipient):
+        return WorkValidationResult(
+            "ERROR", "Lab 10 Recipient is missing from LAB_REQUIREMENTS"
+        )
     try:
         declared_amount = _decimal_value(work.evidence.get("amount_ton", ""))
     except (InvalidOperation, TypeError, ValueError):
@@ -1762,6 +1919,10 @@ def validate_lab10(
         return WorkValidationResult("FAIL", "Lab 10 amount must be exactly 0.01 TON")
 
     try:
+        if not toncenter.addresses_equal(recipient, expected_recipient):
+            return WorkValidationResult(
+                "FAIL", "recipient does not match Lab 10 Recipient from LAB_REQUIREMENTS"
+            )
         transactions = toncenter.transactions(hashes[0])
         for transaction in transactions:
             if not toncenter.addresses_equal(str(transaction.get("account", "")), wallet):
@@ -1775,14 +1936,17 @@ def validate_lab10(
                     str(message.get("destination", "")), recipient
                 ):
                     continue
-                if _integer(message.get("value", -1)) != LAB10_AMOUNT_NANOTON:
+                received = _integer(message.get("value", -1))
+                if not LAB10_MIN_RECEIVED_NANOTON <= received <= LAB10_AMOUNT_NANOTON:
                     return WorkValidationResult(
-                        "FAIL", "on-chain transfer value is not 0.01 TON"
+                        "FAIL",
+                        "recipient value is outside the accepted 0.0099–0.01 TON range",
                     )
                 return WorkValidationResult(
                     "PASS",
                     f"TON testnet tx {hashes[0]}; account={transaction.get('account')}; "
-                    f"recipient={message.get('destination')}; value=0.01 TON",
+                    f"recipient={message.get('destination')}; "
+                    f"received={Decimal(received) / Decimal(10**9)} TON",
                 )
     except Exception as exc:
         return WorkValidationResult("ERROR", f"TON Center API error: {exc}")
@@ -1810,6 +1974,7 @@ def validate_lab11(
     student: Student,
     work: WorkSubmission,
     toncenter: TonCenterClient,
+    expected_jetton_master: str,
 ) -> WorkValidationResult:
     """Validate a testnet jetton transfer and its wallet-contract trace."""
     if "ton" not in normalize_header(work.network) or "testnet" not in normalize_header(
@@ -1827,6 +1992,10 @@ def validate_lab11(
         return WorkValidationResult(
             "FAIL", "registered wallet, Jetton Master, and both Jetton Wallets are required"
         )
+    if not _valid_ton_address(expected_jetton_master):
+        return WorkValidationResult(
+            "ERROR", "Lab 11 Jetton Master is missing from LAB_REQUIREMENTS"
+        )
     explanation = str(work.answers.get("jetton_architecture_explanation", "")).strip()
     if len(explanation) < 40:
         return WorkValidationResult(
@@ -1836,6 +2005,10 @@ def validate_lab11(
     if not hashes:
         return WorkValidationResult("FAIL", "jetton transaction hash is missing")
     try:
+        if not toncenter.addresses_equal(master, expected_jetton_master):
+            return WorkValidationResult(
+                "FAIL", "jetton_master does not match LAB_REQUIREMENTS"
+            )
         transfers = toncenter.jetton_transfers(wallet, master)
         transfer = next(
             (
@@ -1897,6 +2070,8 @@ def validate_lab12(
     submission: SubmissionResult,
     gh: GitHubHelper,
     toncenter: TonCenterClient,
+    expected_mode: str,
+    expected_stonfi_router: str,
 ) -> WorkValidationResult:
     """Validate the STON.fi track or safely precheck a HackTON report."""
     if "ton" not in normalize_header(work.network) or "testnet" not in normalize_header(
@@ -1909,6 +2084,15 @@ def validate_lab12(
     mode = normalize_header(work.evidence.get("mode", "")).replace("-", "_")
     if mode not in {"stonfi_swap", "hackton"}:
         return WorkValidationResult("FAIL", "mode must be stonfi_swap or hackton")
+    configured_mode = normalize_header(expected_mode).replace("-", "_")
+    if configured_mode not in {"stonfi_swap", "hackton"}:
+        return WorkValidationResult(
+            "ERROR", "Lab 12 Mode is missing from LAB_REQUIREMENTS"
+        )
+    if mode != configured_mode:
+        return WorkValidationResult(
+            "FAIL", f"Lab 12 requires the instructor-assigned {configured_mode} mode"
+        )
 
     if mode == "hackton":
         proof = str(work.evidence.get("proof", "")).strip()
@@ -1927,9 +2111,22 @@ def validate_lab12(
     hashes = _evidence_hashes(work, "tx_hashes", TON_HASH_RE)
     if not hashes:
         return WorkValidationResult("FAIL", "STON.fi swap transaction hash is missing")
+    router = str(work.evidence.get("router_address", "")).strip()
+    if not _valid_ton_address(router):
+        return WorkValidationResult(
+            "FAIL", "router_address must be the TON testnet router used for the swap"
+        )
+    if not _valid_ton_address(expected_stonfi_router):
+        return WorkValidationResult(
+            "ERROR", "Lab 12 STON.fi Router is missing from LAB_REQUIREMENTS"
+        )
     if not work.links:
         return WorkValidationResult("FAIL", "STON.fi report or script link is missing")
     try:
+        if not toncenter.addresses_equal(router, expected_stonfi_router):
+            return WorkValidationResult(
+                "FAIL", "router_address does not match LAB_REQUIREMENTS"
+            )
         if not _repository_has_code_artifact(
             gh, submission, {".js", ".ts", ".mjs", ".cjs"}
         ):
@@ -1949,8 +2146,12 @@ def validate_lab12(
             accounts = [str(value) for value in action.get("accounts", []) or []]
             if not any(toncenter.addresses_equal(account, wallet) for account in accounts):
                 continue
+            if not any(toncenter.addresses_equal(account, router) for account in accounts):
+                continue
             return WorkValidationResult(
-                "PASS", f"successful STON.fi swap action found for tx {hashes[0]}"
+                "PASS",
+                f"successful STON.fi swap action found for tx {hashes[0]}; "
+                f"router={router}",
             )
     except Exception as exc:
         return WorkValidationResult("ERROR", f"TON Center API error: {exc}")
@@ -3361,6 +3562,10 @@ def main() -> None:
         default=os.getenv("LAB7_CONFIG_WORKSHEET", "LAB7_CONFIG"),
     )
     parser.add_argument(
+        "--lab-requirements-sheet",
+        default=os.getenv("LAB_REQUIREMENTS_WORKSHEET", "LAB_REQUIREMENTS"),
+    )
+    parser.add_argument(
         "--results-spreadsheet-id",
         default=os.getenv("GOOGLE_RESULTS_SPREADSHEET_ID", ""),
     )
@@ -3400,6 +3605,9 @@ def main() -> None:
     needs_assignment1 = bool({"lab6", "assignment1"}.intersection(selected))
     needs_ethernaut = "assignment2" in selected
     needs_lab7 = "lab7" in selected
+    needs_lab_requirements = bool(
+        {"lab1", "lab9", "lab10", "lab11", "lab12"}.intersection(selected)
+    )
     needs_subscan = bool({"lab8", "lab9"}.intersection(selected))
     needs_toncenter = bool({"lab10", "lab11", "lab12"}.intersection(selected))
     needs_sepolia = (
@@ -3439,6 +3647,15 @@ def main() -> None:
             )
         except Exception as exc:
             lab7_config_error = str(exc)
+    lab_requirements: LabRequirementsConfig | None = None
+    lab_requirements_error = ""
+    if needs_lab_requirements:
+        try:
+            lab_requirements = read_lab_requirements_from_google_sheet(
+                client, args.spreadsheet_id, args.lab_requirements_sheet
+            )
+        except Exception as exc:
+            lab_requirements_error = str(exc)
     print(f"[INFO] Students loaded: {len(students)}")
     print(f"[INFO] Ethernaut level rules loaded: {len(level_complexity)}")
     if assignment1_config:
@@ -3449,6 +3666,10 @@ def main() -> None:
         print("[INFO] Lab 7 class DEX settings loaded")
     elif lab7_config_error:
         print(f"[WARN] Lab 7 config is invalid: {lab7_config_error}")
+    if lab_requirements:
+        print("[INFO] Instructor-controlled lab requirements loaded")
+    elif lab_requirements_error:
+        print(f"[WARN] Lab requirements are invalid: {lab_requirements_error}")
 
     gh = GitHubHelper(os.getenv("GITHUB_TOKEN"))
     subscan = (
@@ -3694,27 +3915,61 @@ def main() -> None:
                     )
                 elif work_id == "lab8":
                     validation = validate_lab8(student, work, subscan)
+                elif lab_requirements is None:
+                    validation = WorkValidationResult(
+                        "ERROR", lab_requirements_error or "LAB_REQUIREMENTS is missing"
+                    )
                 else:
-                    validation = validate_lab9(student, work, subscan)
+                    validation = validate_lab9(
+                        student,
+                        work,
+                        subscan,
+                        lab_requirements.lab9_source_chain,
+                        lab_requirements.lab9_destination_chain,
+                    )
             elif work_id in {"lab10", "lab11", "lab12"}:
                 if toncenter is None:
                     validation = WorkValidationResult(
                         "ERROR", "TON Center client is unavailable"
                     )
+                elif lab_requirements is None:
+                    validation = WorkValidationResult(
+                        "ERROR", lab_requirements_error or "LAB_REQUIREMENTS is missing"
+                    )
                 elif work_id == "lab10":
-                    validation = validate_lab10(student, work, toncenter)
+                    validation = validate_lab10(
+                        student, work, toncenter, lab_requirements.lab10_recipient
+                    )
                 elif work_id == "lab11":
-                    validation = validate_lab11(student, work, toncenter)
+                    validation = validate_lab11(
+                        student,
+                        work,
+                        toncenter,
+                        lab_requirements.lab11_jetton_master,
+                    )
                 else:
                     validation = validate_lab12(
-                        student, work, submission, gh, toncenter
+                        student,
+                        work,
+                        submission,
+                        gh,
+                        toncenter,
+                        lab_requirements.lab12_mode,
+                        lab_requirements.lab12_stonfi_router,
                     )
             elif w3 is None:
                 validation = WorkValidationResult(
                     "ERROR", "Sepolia RPC unavailable"
                 )
             elif work_id == "lab1":
-                validation = validate_lab1(student, work, w3)
+                if lab_requirements is None:
+                    validation = WorkValidationResult(
+                        "ERROR", lab_requirements_error or "LAB_REQUIREMENTS is missing"
+                    )
+                else:
+                    validation = validate_lab1(
+                        student, work, w3, lab_requirements.lab1_recipient
+                    )
             elif work_id == "lab4":
                 validation = validate_lab4(student, work, w3)
             else:
