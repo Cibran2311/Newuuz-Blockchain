@@ -192,7 +192,7 @@ At the end of the lab you should have professor NFT interaction evidence, person
 
 ## Submission
 
-Submit the GitHub repository and personal NFT contract link in Google Classroom. Also include the professor NFT receive/return transactions, personal mint transaction, approval transaction, transfer-to-special-contract transaction, and personal token ID.
+In `submission.json`, fill `labs.lab6` with the professor NFT receive/return transactions, personal NFT contract and token ID, mint transaction, approval transaction, special-contract transfer, and explorer links. Set its status to `submitted`.
 
 ---
 

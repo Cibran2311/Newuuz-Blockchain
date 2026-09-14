@@ -1,15 +1,15 @@
 # Mission 11 — Dissect a Jetton Transfer
 
-!!! note "Compact Course Status"
-    This lab is an additional challenge. Use it as a guided TON token-analysis task.
+!!! note "Current Course Status"
+    Lab 11 is currently part of the main block. Its later difficulty or bonus classification has not been decided.
 
 ## Difficulty Mode
 
 | Mode | Recommendation |
 |---|---|
-| Course track | Standard / Advanced |
+| Course track | To be classified |
 
-Core students may skip this lab. Standard students complete a guided jetton-transfer analysis. Advanced students compare traces and message flow in more detail.
+Complete the guided jetton-transfer analysis. Difficulty variants may be redesigned later.
 
 ---
 
@@ -137,7 +137,7 @@ At the end of this lab you should have Jetton Master address, sender Jetton Wall
 
 ## Submission
 
-Submit the TON Testnet explorer link and your report in Google Classroom. Identify the Jetton Master, sender and recipient Jetton Wallets, registered TON wallet, and explain the responsibility of each contract.
+In `submission.json`, fill `labs.lab11` with the TON Testnet transaction and report links, Jetton Master, sender and recipient Jetton Wallets, and your architecture explanation. Set its status to `submitted`; the TON wallet must be registered in Google Sheets.
 
 ---
 
@@ -148,7 +148,7 @@ Submit the TON Testnet explorer link and your report in Google Classroom. Identi
 | Network | Evidence is from TON testnet. |
 | Jetton transfer | Transfer exists. |
 | Sender | Sender wallet matches submitted wallet. |
-| Jetton Master | Address is present. |
+| Jetton Master | Address matches `Lab 11 Jetton Master` from the protected course configuration. |
 | Jetton Wallets | Sender and recipient wallet addresses are present. |
 | Explanation | Architecture explanation is present. |
 

@@ -1,12 +1,10 @@
 # Preview and Final Checks
 
-The GitHub Actions workflow has two instructor-selected modes.
-
 | Mode | Use |
 |---|---|
-| `preview` | Diagnose missing data, API failures, and incomplete evidence without treating the output as a final snapshot |
-| `final` | Update the result spreadsheet used for grading review |
+| `preview` | Diagnose missing reports, invalid JSON, wallet mismatches, API failures, and incomplete evidence |
+| `final` | Create the grading snapshot after the deadline |
 
-Both modes run the same evidence checks. The `Run mode` column and `Run history` worksheet keep preview and final runs distinguishable.
+Both modes run the same validators. The mode, pinned student-repository commit, run time, result rows, and downloadable workflow artifact distinguish one snapshot from another.
 
-The workflow does not contain a hard-coded course deadline. Google Classroom remains the source for due dates, late status, and whether a student turned in the assignment. The instructor starts the final check after the deadline and reviews exceptions before publishing grades.
+The workflow does not enforce a hard-coded deadline. The instructor announces the deadline, protects the registration sheet, and starts the final run. A work counts as submitted only when its JSON section is `submitted` in the pinned commit. Late exceptions remain an instructor decision recorded in `Manual review`.

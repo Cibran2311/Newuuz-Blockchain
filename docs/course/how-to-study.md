@@ -8,7 +8,7 @@
 4. Complete tasks step by step.
 5. Save all transaction hashes.
 6. Push code and reports to the assigned GitHub repository.
-7. Attach the requested link in Google Classroom.
+7. Update the matching section in `submission.json`, mark it `submitted`, and push the commit.
 8. Click **Turn in** and wait for instructor feedback.
 
 ## What to save

@@ -328,13 +328,13 @@ Each group must provide:
 
 ## Group Submission
 
-One coordinator submits the shared GitHub repository and group report in the Assignment 3 Google Classroom task. The Classroom comment must contain the group ID, member names, registered wallets, roles, contract addresses, deployment and connection transactions, start transaction, and final result.
+One coordinator maintains the shared GitHub report with the group ID, member roles, registered wallets, contract addresses, deployment and connection transactions, start transaction, event order, and final result. Every member links that report from `assignments.assignment3` in their own registered repository.
 
 ---
 
 ## Individual Submission
 
-Each student opens the same Classroom assignment and submits a short individual contribution note: group ID, role, owned contract, deployment transaction, and what they personally implemented or tested.
+Each student fills `assignments.assignment3` with the group ID, role, owned contract, deployment transaction, shared evidence, report links, and an individual contribution explanation. Set the section to `submitted`.
 
 ---
 
@@ -392,7 +392,7 @@ The checker can verify:
 | Individual contribution | 20% | Each student owns or clearly contributes to one part. |
 | Deployment and configuration quality | 10% | Contracts are connected cleanly and reproducibly. |
 | Report quality | 10% | Report explains addresses, txs, screenshots, and problems. |
-| Evidence quality | 5% | Classroom submission and report links are complete. |
+| Evidence quality | 5% | JSON evidence and report links are complete. |
 
 ---
 
@@ -436,5 +436,5 @@ The checker can verify:
 - [ ] Events prove the execution order.
 - [ ] Terminal contract stores or emits final result.
 - [ ] Group report is ready.
-- [ ] Shared repository and report were submitted in Google Classroom.
-- [ ] Every student submitted an individual contribution note.
+- [ ] Shared repository and report are linked from `submission.json`.
+- [ ] Every student marked Assignment 3 `submitted` with an individual contribution note.

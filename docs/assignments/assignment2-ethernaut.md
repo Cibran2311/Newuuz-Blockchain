@@ -1,15 +1,15 @@
 # Assignment 2 — Security Arena: Ethernaut
 
-!!! note "Compact Course Status"
-    This assignment is an additional challenge. It can be used as the security additional challenge track.
+!!! note "Current Course Status"
+    Assignment 2 is currently part of the main block. Its later difficulty or bonus classification has not been decided.
 
 ## Difficulty Mode
 
 | Mode | Recommendation |
 |---|---|
-| Course track | Standard / Advanced |
+| Course track | To be classified |
 
-Core: optional or 3–5 beginner levels. Standard: complexity score >= 6. Advanced: complexity score >= 10 or >= 15.
+The current automatic pass threshold is verified complexity 10. Difficulty variants may be redesigned later.
 
 ---
 
@@ -112,7 +112,7 @@ At the end of the assignment you should have several completed Ethernaut levels,
 
 ## Submission
 
-Push a short write-up for each solved level to the registered GitHub repository and submit that repository link in Google Classroom. Complete and submit all levels from the Ethereum address stored in the protected course registry. The checker reads on-chain completion events; an automatic pass requires verified complexity of at least 10.
+Push a short write-up for each solved level to the registered repository. In `submission.json`, fill `assignments.assignment2` with completed level names, instance addresses, submit transactions, and write-up links; then set its status to `submitted`. Complete all levels from an Ethereum address registered in Google Sheets. The checker reads on-chain completion events; an automatic pass requires verified complexity of at least 10.
 
 ---
 

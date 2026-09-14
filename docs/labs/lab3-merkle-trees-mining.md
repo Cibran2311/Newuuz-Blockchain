@@ -87,7 +87,7 @@ At the end of the lab you should have a valid Merkle root and a nonce that produ
 
 ## Submission
 
-Attach the Colab notebook or GitHub repository link to the Lab 3 Google Classroom assignment. The notebook must show the input transactions, Merkle root, chosen difficulty, discovered nonce, and resulting block hash.
+In `submission.json`, fill `labs.lab3` with the input transactions, Merkle root, chosen difficulty, nonce, block hash, and notebook or script link. Set its status to `submitted`.
 
 ---
 

@@ -98,7 +98,7 @@ At the end of the lab you should have an ERC20 token contract, at least three to
 
 ## Submission
 
-Submit the GitHub repository and Sepolia Etherscan token-contract link in Google Classroom. Include the Disperse transaction link and the three transfer transaction links. Use the Ethereum address registered in the protected course registry.
+In `submission.json`, fill `labs.lab5` with the token contract, Disperse transaction, three transfer transactions, and explorer links. Set its status to `submitted` and use the Ethereum address registered in Google Sheets.
 
 ---
 

@@ -40,7 +40,7 @@ After completing this lab you will be able to:
 |---|---|
 | MetaMask | Send transaction |
 | Sepolia Etherscan | Analyze transaction |
-| Google Classroom | Submit the explorer link and explanation |
+| GitHub repository | Store `submission.json`, evidence, and explanation |
 
 ---
 
@@ -86,7 +86,7 @@ At the end of the lab you should understand the main fields of an Ethereum trans
 
 ## Submission
 
-Submit the Sepolia Etherscan transaction link in Google Classroom. Add the gas limit, gas used, status, transaction fee, and your short explanation of gas limit versus gas used.
+In `submission.json`, fill `labs.lab4` with the Sepolia transaction hash and link, gas limit, gas used, transaction fee, and your gas-limit-versus-gas-used explanation. Set its status to `submitted`.
 
 ---
 
