@@ -111,6 +111,7 @@ The checker will verify:
 | Network | Transaction must be on Sepolia. |
 | Status | Transaction must be successful. |
 | Sender | Transaction sender must match submitted wallet. |
+| Recipient | Transaction recipient must match `Lab 1 Recipient` from the protected course configuration. |
 | Amount | Transaction value must be correct or within accepted range. |
 
 ---
