@@ -19,11 +19,17 @@ The workflow can run `all`, `labs`, `assignments`, one of `lab1`–`lab12`, or o
 
 The current production validators verify:
 
+- Lab 1 exact `0.0001 ETH` Sepolia transfer from a registered wallet;
+- Lab 4 transaction status, sender, gas limit, gas used, fee, and explanation;
+- Lab 5 deployed ERC20 metadata methods, three student transfers, `Transfer` events, and a batch Disperse transaction;
+- Lab 6 professor NFT receive/return and personal NFT mint/approve/transfer flow;
 - Assignment 1 professor NFT receive/return and personal NFT mint/approve/transfer flow;
 - Assignment 2 Ethernaut registered-wallet completions and configured complexity;
 - report schema, exact student ID, pinned GitHub commit, and evidence-link extraction for all 16 works.
 
-The other labs and assignments are retained in the main course and report schema. Until a dedicated deterministic validator is added, a valid submitted report is sent to `Manual review`; it is never automatically marked `PASS` merely because JSON claims success.
+Lab 2 and Lab 3 have safe prechecks for required values, code artifacts, collision/difficulty conditions, and explanations. They remain `REVIEW` because the course currently permits different implementation algorithms and the checker never executes untrusted student code.
+
+Lab 7–12 and Assignment 3–4 are retained in the main course and report schema. Until a dedicated deterministic validator is added, a valid submitted report is sent to `Manual review`; it is never automatically marked `PASS` merely because JSON claims success.
 
 ## Result worksheets
 

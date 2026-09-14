@@ -11,6 +11,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,7 @@ from google.oauth2.service_account import Credentials
 from gspread.exceptions import WorksheetNotFound
 from jsonschema import Draft202012Validator, FormatChecker
 from web3 import Web3
+from web3.exceptions import TransactionNotFound
 
 ETH_RE = re.compile(r"0x[a-fA-F0-9]{40}")
 TX_RE = re.compile(r"0x[a-fA-F0-9]{64}")
@@ -57,6 +59,8 @@ KEYWORDS_A2 = [
 A1_DEFAULT_END_BLOCK = 99999999
 A2_PASS_COMPLEXITY = 10
 A2_BONUS_LEVELS = 15
+SEPOLIA_CHAIN_ID = 11155111
+LAB1_AMOUNT_WEI = 100_000_000_000_000
 SUBMISSION_FILE = "submission.json"
 SUBMISSION_SCHEMA_PATH = (
     Path(__file__).resolve().parents[1] / "schemas" / "submission.schema.json"
@@ -184,6 +188,12 @@ class WorkOutcome:
     contract_addresses: list[str] = field(default_factory=list)
     links: list[str] = field(default_factory=list)
     commit_sha: str = ""
+    note: str = ""
+
+
+@dataclass
+class WorkValidationResult:
+    status: str = "NOT RUN"
     note: str = ""
 
 
@@ -743,6 +753,486 @@ def build_web3(rpc_url: str) -> Web3:
     if not w3.is_connected():
         raise RuntimeError(f"Unable to connect to RPC endpoint: {rpc_url}")
     return w3
+
+
+def _item_value(item: Any, name: str, default: Any = None) -> Any:
+    if isinstance(item, dict):
+        return item.get(name, default)
+    return getattr(item, name, default)
+
+
+def _integer(value: Any) -> int:
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    text = str(value).strip()
+    if text.lower().startswith("0x"):
+        return int(text, 16)
+    number = Decimal(text)
+    if number != number.to_integral_value():
+        raise ValueError(f"'{value}' is not an integer")
+    return int(number)
+
+
+def _eth_to_wei(value: Any) -> int:
+    text = str(value).strip().lower()
+    if text.endswith("eth"):
+        text = text[:-3].strip()
+    amount = Decimal(text)
+    wei = amount * Decimal(10**18)
+    if wei != wei.to_integral_value():
+        raise ValueError("ETH amount has more than 18 decimal places")
+    return int(wei)
+
+
+def _is_sepolia_work(work: WorkSubmission) -> bool:
+    return "sepolia" in normalize_header(work.network)
+
+
+def _is_sepolia_rpc(w3: Web3) -> bool:
+    return _integer(w3.eth.chain_id) == SEPOLIA_CHAIN_ID
+
+
+def _wallet_set(student: Student) -> set[str]:
+    return {address.lower() for address in student.eth_addresses if address}
+
+
+def _receipt_succeeded(receipt: Any) -> bool:
+    try:
+        return _integer(_item_value(receipt, "status", 0)) == 1
+    except (InvalidOperation, TypeError, ValueError):
+        return False
+
+
+def _hex_text(value: Any) -> str:
+    if hasattr(value, "hex"):
+        result = value.hex()
+        return result if str(result).startswith("0x") else f"0x{result}"
+    if isinstance(value, bytes):
+        return f"0x{value.hex()}"
+    return str(value)
+
+
+def _transaction_and_receipt(w3: Web3, tx_hash: str) -> tuple[Any, Any]:
+    transaction = w3.eth.get_transaction(tx_hash)
+    receipt = w3.eth.get_transaction_receipt(tx_hash)
+    return transaction, receipt
+
+
+def _missing_transaction_result(tx_hash: str) -> WorkValidationResult:
+    return WorkValidationResult(
+        status="FAIL", note=f"transaction was not found on Sepolia: {tx_hash}"
+    )
+
+
+def validate_lab1(
+    student: Student,
+    work: WorkSubmission,
+    w3: Web3,
+) -> WorkValidationResult:
+    """Validate the student's first Sepolia transfer without trusting the report."""
+    if not _is_sepolia_work(work):
+        return WorkValidationResult("FAIL", "labs.lab1.network must be Sepolia")
+    wallets = _wallet_set(student)
+    if not wallets:
+        return WorkValidationResult("FAIL", "no registered Ethereum address")
+
+    tx_hashes, _, _ = work_evidence_summary(work)
+    if not tx_hashes:
+        return WorkValidationResult("FAIL", "Sepolia transaction hash is missing")
+    tx_hash = tx_hashes[0]
+    recipient = str(work.evidence.get("recipient", "")).strip()
+    if not ETH_RE.fullmatch(recipient):
+        return WorkValidationResult("FAIL", "recipient must be a valid 0x address")
+    try:
+        declared_wei = _eth_to_wei(work.evidence.get("amount_eth", ""))
+    except (InvalidOperation, TypeError, ValueError):
+        return WorkValidationResult("FAIL", "amount_eth must be a valid ETH amount")
+    if declared_wei != LAB1_AMOUNT_WEI:
+        return WorkValidationResult("FAIL", "Lab 1 amount must be exactly 0.0001 ETH")
+
+    try:
+        if not _is_sepolia_rpc(w3):
+            return WorkValidationResult(
+                "ERROR", f"configured RPC chain ID is not {SEPOLIA_CHAIN_ID}"
+            )
+        transaction, receipt = _transaction_and_receipt(w3, tx_hash)
+    except TransactionNotFound:
+        return _missing_transaction_result(tx_hash)
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"Sepolia RPC error: {exc}")
+
+    sender = str(_item_value(transaction, "from", "")).lower()
+    actual_recipient = str(_item_value(transaction, "to", "")).lower()
+    try:
+        actual_value = _integer(_item_value(transaction, "value", -1))
+    except (InvalidOperation, TypeError, ValueError):
+        return WorkValidationResult("ERROR", "Sepolia RPC returned invalid tx value")
+
+    failures: list[str] = []
+    if not _receipt_succeeded(receipt):
+        failures.append("transaction reverted")
+    if sender not in wallets:
+        failures.append("sender does not match a registered Ethereum address")
+    if actual_recipient != recipient.lower():
+        failures.append("submitted recipient does not match the transaction")
+    if actual_value != LAB1_AMOUNT_WEI:
+        failures.append("on-chain value is not 0.0001 ETH")
+    if failures:
+        return WorkValidationResult("FAIL", "; ".join(failures))
+    return WorkValidationResult(
+        "PASS",
+        f"Sepolia tx {tx_hash}; sender={sender}; recipient={actual_recipient}; "
+        "value=0.0001 ETH",
+    )
+
+
+def validate_lab4(
+    student: Student,
+    work: WorkSubmission,
+    w3: Web3,
+) -> WorkValidationResult:
+    """Cross-check the gas fields in a Lab 4 report against a Sepolia receipt."""
+    if not _is_sepolia_work(work):
+        return WorkValidationResult("FAIL", "labs.lab4.network must be Sepolia")
+    wallets = _wallet_set(student)
+    if not wallets:
+        return WorkValidationResult("FAIL", "no registered Ethereum address")
+    tx_hashes, _, _ = work_evidence_summary(work)
+    if not tx_hashes:
+        return WorkValidationResult("FAIL", "Sepolia transaction hash is missing")
+    tx_hash = tx_hashes[0]
+
+    try:
+        declared_gas_limit = _integer(work.evidence.get("gas_limit", ""))
+        declared_gas_used = _integer(work.evidence.get("gas_used", ""))
+        declared_fee_wei = _eth_to_wei(
+            work.evidence.get("transaction_fee_eth", "")
+        )
+    except (InvalidOperation, TypeError, ValueError):
+        return WorkValidationResult(
+            "FAIL", "gas_limit, gas_used, and transaction_fee_eth must be numeric"
+        )
+
+    explanation = str(work.answers.get("gas_limit_vs_gas_used", "")).strip()
+    if len(explanation) < 20:
+        return WorkValidationResult(
+            "FAIL", "gas-limit-versus-gas-used explanation is missing or too short"
+        )
+
+    try:
+        if not _is_sepolia_rpc(w3):
+            return WorkValidationResult(
+                "ERROR", f"configured RPC chain ID is not {SEPOLIA_CHAIN_ID}"
+            )
+        transaction, receipt = _transaction_and_receipt(w3, tx_hash)
+        actual_gas_limit = _integer(_item_value(transaction, "gas", -1))
+        actual_gas_used = _integer(_item_value(receipt, "gasUsed", -1))
+        gas_price = _item_value(receipt, "effectiveGasPrice")
+        if gas_price is None:
+            gas_price = _item_value(transaction, "gasPrice", -1)
+        actual_fee_wei = actual_gas_used * _integer(gas_price)
+    except TransactionNotFound:
+        return _missing_transaction_result(tx_hash)
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"Sepolia RPC error: {exc}")
+
+    failures: list[str] = []
+    sender = str(_item_value(transaction, "from", "")).lower()
+    if sender not in wallets:
+        failures.append("sender does not match a registered Ethereum address")
+    if declared_gas_limit != actual_gas_limit:
+        failures.append(f"gas_limit must be {actual_gas_limit}")
+    if declared_gas_used != actual_gas_used:
+        failures.append(f"gas_used must be {actual_gas_used}")
+    if declared_fee_wei != actual_fee_wei:
+        failures.append(f"transaction fee must be {actual_fee_wei} wei")
+    if failures:
+        return WorkValidationResult("FAIL", "; ".join(failures))
+
+    evidence_note = (
+        f"Sepolia tx {tx_hash}; gas_limit={actual_gas_limit}; "
+        f"gas_used={actual_gas_used}; fee_wei={actual_fee_wei}"
+    )
+    if _receipt_succeeded(receipt):
+        return WorkValidationResult("PASS", evidence_note)
+    failure_explanation = " ".join(
+        [str(work.answers.get("failure_explanation", "")), work.notes]
+    ).strip()
+    if len(failure_explanation) >= 20:
+        return WorkValidationResult(
+            "REVIEW", f"transaction reverted; explanation needs review; {evidence_note}"
+        )
+    return WorkValidationResult(
+        "FAIL", "transaction reverted and no meaningful failure explanation was provided"
+    )
+
+
+def _erc20_transfer_logs(receipt: Any, token_contract: str) -> list[Any]:
+    transfer_topic = _hex_text(
+        Web3.keccak(text="Transfer(address,address,uint256)")
+    ).lower()
+    matching: list[Any] = []
+    for log in _item_value(receipt, "logs", []) or []:
+        if str(_item_value(log, "address", "")).lower() != token_contract.lower():
+            continue
+        topics = _item_value(log, "topics", []) or []
+        if len(topics) < 3:
+            continue
+        if _hex_text(topics[0]).lower() == transfer_topic:
+            matching.append(log)
+    return matching
+
+
+def _indexed_topic_address(topic: Any) -> str:
+    value = _hex_text(topic).lower().removeprefix("0x")
+    return f"0x{value[-40:]}" if len(value) >= 40 else ""
+
+
+def validate_lab5(
+    student: Student,
+    work: WorkSubmission,
+    w3: Web3,
+) -> WorkValidationResult:
+    """Validate ERC20 metadata, individual transfers, and a batch transfer."""
+    if not _is_sepolia_work(work):
+        return WorkValidationResult("FAIL", "labs.lab5.network must be Sepolia")
+    wallets = _wallet_set(student)
+    if not wallets:
+        return WorkValidationResult("FAIL", "no registered Ethereum address")
+
+    token_contract = str(work.evidence.get("token_contract", "")).strip()
+    if not ETH_RE.fullmatch(token_contract):
+        return WorkValidationResult("FAIL", "token_contract must be a valid address")
+    token_contract = token_contract.lower()
+    transfer_values = work.evidence.get("transfer_txs", [])
+    transfer_txs = (
+        [str(value) for value in transfer_values]
+        if isinstance(transfer_values, list)
+        else []
+    )
+    transfer_txs = list(
+        {
+            tx.lower(): tx
+            for tx in transfer_txs
+            if TX_RE.fullmatch(tx)
+        }.values()
+    )
+    if len(transfer_txs) < 3:
+        return WorkValidationResult(
+            "FAIL", "at least three distinct ERC20 transfer transaction hashes are required"
+        )
+    disperse_tx = str(work.evidence.get("disperse_tx", "")).strip()
+    if not TX_RE.fullmatch(disperse_tx):
+        return WorkValidationResult("FAIL", "disperse_tx must be a transaction hash")
+    if disperse_tx.lower() in {tx.lower() for tx in transfer_txs}:
+        return WorkValidationResult(
+            "FAIL", "disperse_tx must be separate from the three individual transfers"
+        )
+
+    try:
+        if not _is_sepolia_rpc(w3):
+            return WorkValidationResult(
+                "ERROR", f"configured RPC chain ID is not {SEPOLIA_CHAIN_ID}"
+            )
+        checksum_contract = Web3.to_checksum_address(token_contract)
+        code = w3.eth.get_code(checksum_contract)
+        if not code or _hex_text(code).lower() in {"0x", "0x0", "0x00"}:
+            return WorkValidationResult(
+                "FAIL", "token_contract has no deployed bytecode on Sepolia"
+            )
+
+        selectors = {
+            "name": "0x06fdde03",
+            "symbol": "0x95d89b41",
+            "decimals": "0x313ce567",
+            "totalSupply": "0x18160ddd",
+        }
+        missing_methods: list[str] = []
+        for method, selector in selectors.items():
+            try:
+                response = w3.eth.call({"to": checksum_contract, "data": selector})
+                if not response:
+                    missing_methods.append(method)
+            except Exception:
+                missing_methods.append(method)
+        if missing_methods:
+            return WorkValidationResult(
+                "FAIL",
+                "ERC20 metadata calls failed: " + ", ".join(missing_methods),
+            )
+
+        transfer_log_count = 0
+        for tx_hash in transfer_txs:
+            transaction, receipt = _transaction_and_receipt(w3, tx_hash)
+            if not _receipt_succeeded(receipt):
+                return WorkValidationResult("FAIL", f"transfer reverted: {tx_hash}")
+            if str(_item_value(transaction, "from", "")).lower() not in wallets:
+                return WorkValidationResult(
+                    "FAIL", f"student wallet did not send transfer tx {tx_hash}"
+                )
+            logs = _erc20_transfer_logs(receipt, token_contract)
+            if not logs:
+                return WorkValidationResult(
+                    "FAIL", f"no token Transfer event in {tx_hash}"
+                )
+            if not any(
+                _indexed_topic_address(_item_value(log, "topics", ["", ""])[1])
+                in wallets
+                for log in logs
+            ):
+                return WorkValidationResult(
+                    "FAIL", f"registered wallet is not the token sender in {tx_hash}"
+                )
+            transfer_log_count += len(logs)
+
+        batch_transaction, batch_receipt = _transaction_and_receipt(w3, disperse_tx)
+        if not _receipt_succeeded(batch_receipt):
+            return WorkValidationResult("FAIL", "Disperse transaction reverted")
+        if str(_item_value(batch_transaction, "from", "")).lower() not in wallets:
+            return WorkValidationResult(
+                "FAIL", "Disperse transaction sender is not a registered wallet"
+            )
+        batch_logs = _erc20_transfer_logs(batch_receipt, token_contract)
+        if len(batch_logs) < 3:
+            return WorkValidationResult(
+                "FAIL", "Disperse transaction must emit at least three token Transfer events"
+            )
+        if sum(
+            _indexed_topic_address(_item_value(log, "topics", ["", ""])[1])
+            in wallets
+            for log in batch_logs
+        ) < 3:
+            return WorkValidationResult(
+                "FAIL", "registered wallet must fund the three Disperse token transfers"
+            )
+    except TransactionNotFound as exc:
+        missing_hash = str(exc) or "one of the submitted hashes"
+        return _missing_transaction_result(missing_hash)
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"Sepolia RPC error: {exc}")
+
+    return WorkValidationResult(
+        "PASS",
+        f"ERC20 {token_contract}; {len(transfer_txs)} transfer txs; "
+        f"{transfer_log_count} individual Transfer events; "
+        f"{len(batch_logs)} Disperse Transfer events",
+    )
+
+
+def _repository_has_code_artifact(
+    gh: GitHubHelper,
+    submission: SubmissionResult,
+) -> bool:
+    if not submission.repository or "/" not in submission.repository:
+        return False
+    owner, repo = submission.repository.split("/", 1)
+    ref = submission.commit_sha or "main"
+    tree = gh.get_repo_tree(owner, repo, ref)
+    return any(
+        item.get("type") == "blob"
+        and Path(str(item.get("path", ""))).suffix.lower() in {".ipynb", ".py"}
+        for item in tree
+    )
+
+
+def validate_lab2_precheck(
+    work: WorkSubmission,
+    submission: SubmissionResult,
+    gh: GitHubHelper,
+) -> WorkValidationResult:
+    """Reject incomplete collision reports without executing untrusted code."""
+    evidence = work.evidence
+    input_1 = evidence.get("input_1")
+    input_2 = evidence.get("input_2")
+    hash_1 = evidence.get("hash_1")
+    hash_2 = evidence.get("hash_2")
+    failures: list[str] = []
+    if input_1 is None or input_1 == "" or input_2 is None or input_2 == "":
+        failures.append("both collision inputs are required")
+    elif json.dumps(input_1, sort_keys=True) == json.dumps(input_2, sort_keys=True):
+        failures.append("collision inputs must be different")
+    if hash_1 is None or hash_1 == "" or hash_2 is None or hash_2 == "":
+        failures.append("both weak-hash results are required")
+    elif str(hash_1) != str(hash_2):
+        failures.append("weak-hash results must be equal")
+    explanation = str(work.answers.get("sha256_collision_explanation", "")).strip()
+    if len(explanation) < 40:
+        failures.append("SHA-256 collision explanation is missing or too short")
+    if not work.links:
+        failures.append("notebook or script link is missing")
+    try:
+        if not _repository_has_code_artifact(gh, submission):
+            failures.append("repository has no .ipynb or .py artifact at the checked commit")
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"GitHub tree lookup failed: {exc}")
+    if failures:
+        return WorkValidationResult("FAIL", "; ".join(failures))
+    return WorkValidationResult(
+        "REVIEW",
+        "collision report precheck passed; instructor must review the weak-hash "
+        "implementation (student code was not executed)",
+    )
+
+
+def _difficulty_zero_count(value: Any) -> int:
+    text = str(value).strip().lower()
+    if re.fullmatch(r"0+", text):
+        return len(text)
+    count = _integer(value)
+    if not 1 <= count <= 64:
+        raise ValueError("difficulty must be from 1 to 64")
+    return count
+
+
+def validate_lab3_precheck(
+    work: WorkSubmission,
+    submission: SubmissionResult,
+    gh: GitHubHelper,
+) -> WorkValidationResult:
+    """Validate PoW report shape without executing a student's mining program."""
+    evidence = work.evidence
+    failures: list[str] = []
+    transactions = evidence.get("transactions", [])
+    if not isinstance(transactions, list) or len(transactions) < 2:
+        failures.append("at least two input transactions are required")
+    hex64 = re.compile(r"(?:0x)?[0-9a-fA-F]{64}")
+    merkle_root = str(evidence.get("merkle_root", "")).strip()
+    block_hash = str(evidence.get("block_hash", "")).strip()
+    if not hex64.fullmatch(merkle_root):
+        failures.append("merkle_root must be a 32-byte hex value")
+    if not hex64.fullmatch(block_hash):
+        failures.append("block_hash must be a 32-byte hex value")
+    try:
+        nonce = _integer(evidence.get("nonce", ""))
+        if nonce < 0:
+            failures.append("nonce cannot be negative")
+    except (InvalidOperation, TypeError, ValueError):
+        failures.append("nonce must be a non-negative integer")
+    try:
+        difficulty = _difficulty_zero_count(evidence.get("difficulty", ""))
+        normalized_hash = block_hash.lower().removeprefix("0x")
+        if hex64.fullmatch(block_hash) and not normalized_hash.startswith(
+            "0" * difficulty
+        ):
+            failures.append("block_hash does not satisfy submitted difficulty")
+    except (InvalidOperation, TypeError, ValueError):
+        failures.append("difficulty must be an integer from 1 to 64 or zero prefix")
+    if not work.links:
+        failures.append("notebook or script link is missing")
+    try:
+        if not _repository_has_code_artifact(gh, submission):
+            failures.append("repository has no .ipynb or .py artifact at the checked commit")
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"GitHub tree lookup failed: {exc}")
+    if failures:
+        return WorkValidationResult("FAIL", "; ".join(failures))
+    return WorkValidationResult(
+        "REVIEW",
+        "mining report precheck passed; instructor must review the Merkle/header "
+        "algorithm (student code was not executed)",
+    )
 
 
 def get_ethernaut_logs(
@@ -1627,7 +2117,9 @@ def build_work_outcomes(
     submissions: dict[str, SubmissionResult],
     a1_results: dict[str, Assignment1Result],
     a2_results: dict[str, EthernautResult],
+    validator_results: dict[str, dict[str, WorkValidationResult]] | None = None,
 ) -> dict[str, dict[str, WorkOutcome]]:
+    validator_results = validator_results or {}
     outcomes: dict[str, dict[str, WorkOutcome]] = {}
     for student in students:
         submission = submissions.get(student.student_id, SubmissionResult())
@@ -1660,7 +2152,7 @@ def build_work_outcomes(
                     outcome.final_status = "ERROR"
                 else:
                     outcome.final_status = "INVALID REPORT"
-            elif work_id == "assignment1":
+            elif work_id in {"lab6", "assignment1"}:
                 auto = a1_results.get(
                     student.student_id, Assignment1Result(status="NOT RUN")
                 )
@@ -1672,6 +2164,12 @@ def build_work_outcomes(
                 auto = a2_results.get(
                     student.student_id, EthernautResult(status="NOT RUN")
                 )
+                outcome.auto_status = auto.status
+                outcome.final_status = final_status_from_auto(auto.status)
+                if auto.note:
+                    notes.append(auto.note)
+            elif work_id in validator_results.get(student.student_id, {}):
+                auto = validator_results[student.student_id][work_id]
                 outcome.auto_status = auto.status
                 outcome.final_status = final_status_from_auto(auto.status)
                 if auto.note:
@@ -2171,9 +2669,13 @@ def main() -> None:
         raise ValueError("GOOGLE_RESULTS_SPREADSHEET_ID is required")
 
     selected = selected_work_ids(args.scope)
-    needs_assignment1 = "assignment1" in selected
+    needs_assignment1 = bool({"lab6", "assignment1"}.intersection(selected))
     needs_ethernaut = "assignment2" in selected
-    needs_sepolia = needs_assignment1 or needs_ethernaut
+    needs_sepolia = (
+        bool({"lab1", "lab4", "lab5"}.intersection(selected))
+        or needs_assignment1
+        or needs_ethernaut
+    )
 
     client = google_client(service_account_json)
     print("[INFO] Loading active students from the protected Google Sheet...")
@@ -2303,13 +2805,20 @@ def main() -> None:
     repo_texts_cache: dict[str, dict[str, str]] = {}
     a1_results: dict[str, Assignment1Result] = {}
     a2_results: dict[str, EthernautResult] = {}
+    validator_results: dict[str, dict[str, WorkValidationResult]] = {}
 
     for idx, student in enumerate(students, start=1):
         print(
             f"[INFO] [{idx}/{len(students)}] Checking {student.student_id} | {student.name}"
         )
+        submission = submissions.get(student.student_id, SubmissionResult())
         a1 = Assignment1Result(status="NOT RUN")
-        if needs_assignment1:
+        nft_report_submitted = any(
+            work_id in selected
+            and submission.works.get(work_id, WorkSubmission()).status == "submitted"
+            for work_id in ("lab6", "assignment1")
+        )
+        if needs_assignment1 and nft_report_submitted:
             if assignment1_config is None:
                 a1 = Assignment1Result(
                     status="ERROR", note=assignment1_config_error or "missing config"
@@ -2318,7 +2827,7 @@ def main() -> None:
                     {
                         "student_id": student.student_id,
                         "name": student.name,
-                        "stage": "Assignment 1 config",
+                        "stage": "Lab 6 / Assignment 1 config",
                         "error": assignment1_config_error or "missing config",
                     }
                 )
@@ -2328,7 +2837,7 @@ def main() -> None:
                     {
                         "student_id": student.student_id,
                         "name": student.name,
-                        "stage": "Assignment 1",
+                        "stage": "Lab 6 / Assignment 1",
                         "error": "Sepolia RPC unavailable",
                     }
                 )
@@ -2341,7 +2850,7 @@ def main() -> None:
                         {
                             "student_id": student.student_id,
                             "name": student.name,
-                            "stage": "Assignment 1",
+                            "stage": "Lab 6 / Assignment 1",
                             "error": str(exc),
                         }
                     )
@@ -2396,12 +2905,46 @@ def main() -> None:
                     )
         a2_results[student.student_id] = a2
 
+        student_validator_results: dict[str, WorkValidationResult] = {}
+        for work_id in ("lab1", "lab2", "lab3", "lab4", "lab5"):
+            if work_id not in selected:
+                continue
+            work = submission.works.get(work_id, WorkSubmission())
+            if submission.status != "VALID" or work.status != "submitted":
+                continue
+            if work_id == "lab2":
+                validation = validate_lab2_precheck(work, submission, gh)
+            elif work_id == "lab3":
+                validation = validate_lab3_precheck(work, submission, gh)
+            elif w3 is None:
+                validation = WorkValidationResult(
+                    "ERROR", "Sepolia RPC unavailable"
+                )
+            elif work_id == "lab1":
+                validation = validate_lab1(student, work, w3)
+            elif work_id == "lab4":
+                validation = validate_lab4(student, work, w3)
+            else:
+                validation = validate_lab5(student, work, w3)
+            student_validator_results[work_id] = validation
+            if validation.status == "ERROR":
+                errors.append(
+                    {
+                        "student_id": student.student_id,
+                        "name": student.name,
+                        "stage": WORK_TITLES[work_id],
+                        "error": validation.note,
+                    }
+                )
+        validator_results[student.student_id] = student_validator_results
+
     outcomes = build_work_outcomes(
         students=students,
         selected=selected,
         submissions=submissions,
         a1_results=a1_results,
         a2_results=a2_results,
+        validator_results=validator_results,
     )
     input_path, result_path = write_json_artifacts(
         output_dir=Path(args.output_dir),

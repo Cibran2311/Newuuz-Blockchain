@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from gspread.exceptions import WorksheetNotFound
+from web3 import Web3
 
 from scripts.course_autotest import (
     A2_PASS_COMPLEXITY,
@@ -15,6 +16,7 @@ from scripts.course_autotest import (
     Student,
     WorkOutcome,
     WorkSubmission,
+    WorkValidationResult,
     build_work_outcomes,
     check_ethernaut,
     evaluate_assignment1_transfers,
@@ -26,6 +28,11 @@ from scripts.course_autotest import (
     read_ethernaut_config_from_google_sheet,
     read_students_from_google_sheet,
     selected_work_ids,
+    validate_lab1,
+    validate_lab2_precheck,
+    validate_lab3_precheck,
+    validate_lab4,
+    validate_lab5,
     write_google_results,
 )
 
@@ -165,6 +172,220 @@ class CourseAutotestTests(unittest.TestCase):
         self.assertEqual(len(selected_work_ids("assignments")), 4)
         self.assertEqual(len(selected_work_ids("all")), 16)
         self.assertEqual(selected_work_ids("lab7"), ("lab7",))
+
+    def test_lab1_passes_only_for_registered_sepolia_transfer(self):
+        wallet = "0x" + "1" * 40
+        recipient = "0x" + "2" * 40
+        tx_hash = "0x" + "a" * 64
+        student = Student("Ada", "101", "", [wallet])
+        work = WorkSubmission(
+            status="submitted",
+            network="sepolia",
+            evidence={
+                "tx_hashes": [tx_hash],
+                "recipient": recipient,
+                "amount_eth": "0.0001",
+            },
+        )
+        w3 = MagicMock()
+        w3.eth.chain_id = 11155111
+        w3.eth.get_transaction.return_value = {
+            "from": wallet,
+            "to": recipient,
+            "value": 100_000_000_000_000,
+        }
+        w3.eth.get_transaction_receipt.return_value = {"status": 1}
+
+        result = validate_lab1(student, work, w3)
+
+        self.assertEqual(result.status, "PASS")
+        self.assertIn(tx_hash, result.note)
+
+        w3.eth.get_transaction.return_value["from"] = "0x" + "3" * 40
+        result = validate_lab1(student, work, w3)
+        self.assertEqual(result.status, "FAIL")
+        self.assertIn("registered", result.note)
+
+    def test_lab4_cross_checks_gas_and_fee(self):
+        wallet = "0x" + "1" * 40
+        tx_hash = "0x" + "b" * 64
+        student = Student("Ada", "101", "", [wallet])
+        work = WorkSubmission(
+            status="submitted",
+            network="sepolia",
+            evidence={
+                "tx_hashes": [tx_hash],
+                "gas_limit": "21000",
+                "gas_used": 21000,
+                "transaction_fee_eth": "0.000021",
+            },
+            answers={
+                "gas_limit_vs_gas_used": (
+                    "Gas limit is the maximum while gas used is the actual amount."
+                )
+            },
+        )
+        w3 = MagicMock()
+        w3.eth.chain_id = 11155111
+        w3.eth.get_transaction.return_value = {
+            "from": wallet,
+            "gas": 21000,
+            "gasPrice": 1_000_000_000,
+        }
+        w3.eth.get_transaction_receipt.return_value = {
+            "status": 1,
+            "gasUsed": 21000,
+            "effectiveGasPrice": 1_000_000_000,
+        }
+
+        result = validate_lab4(student, work, w3)
+
+        self.assertEqual(result.status, "PASS")
+        self.assertIn("fee_wei=21000000000000", result.note)
+
+    def test_lab5_requires_erc20_events_and_batch_transfer(self):
+        wallet = "0x" + "1" * 40
+        token = "0x" + "a" * 40
+        transfer_txs = ["0x" + character * 64 for character in ("1", "2", "3")]
+        disperse_tx = "0x" + "4" * 64
+        student = Student("Ada", "101", "", [wallet])
+        work = WorkSubmission(
+            status="submitted",
+            network="sepolia",
+            evidence={
+                "token_contract": token,
+                "transfer_txs": transfer_txs,
+                "disperse_tx": disperse_tx,
+            },
+        )
+        transfer_topic = Web3.keccak(
+            text="Transfer(address,address,uint256)"
+        )
+        wallet_topic = bytes.fromhex("0" * 24 + wallet[2:])
+        transfer_log = {
+            "address": token,
+            "topics": [transfer_topic, wallet_topic, wallet_topic],
+        }
+        w3 = MagicMock()
+        w3.eth.chain_id = 11155111
+        w3.eth.get_code.return_value = b"\x60\x00"
+        w3.eth.call.return_value = b"\x01"
+        w3.eth.get_transaction.side_effect = lambda _tx_hash: {"from": wallet}
+        w3.eth.get_transaction_receipt.side_effect = lambda tx_hash: {
+            "status": 1,
+            "logs": [transfer_log] * (3 if tx_hash == disperse_tx else 1),
+        }
+
+        result = validate_lab5(student, work, w3)
+
+        self.assertEqual(result.status, "PASS")
+        self.assertIn("3 Disperse Transfer events", result.note)
+
+    def test_lab2_precheck_never_executes_student_code(self):
+        work = WorkSubmission(
+            status="submitted",
+            network="offchain",
+            evidence={
+                "input_1": "alpha",
+                "input_2": "beta",
+                "hash_1": 42,
+                "hash_2": 42,
+            },
+            links=["https://github.com/ada/course/blob/main/lab2.py"],
+            answers={
+                "sha256_collision_explanation": (
+                    "A weak hash has a tiny output space, while SHA-256 makes a "
+                    "collision computationally infeasible."
+                )
+            },
+        )
+        submission = SubmissionResult(
+            status="VALID", repository="ada/course", commit_sha="a" * 40
+        )
+        github = MagicMock()
+        github.get_repo_tree.return_value = [
+            {"type": "blob", "path": "labs/lab2.py"}
+        ]
+
+        result = validate_lab2_precheck(work, submission, github)
+
+        self.assertEqual(result.status, "REVIEW")
+        github.get_repo_tree.assert_called_once_with("ada", "course", "a" * 40)
+
+    def test_lab3_precheck_rejects_hash_below_difficulty(self):
+        work = WorkSubmission(
+            status="submitted",
+            network="offchain",
+            evidence={
+                "transactions": ["one", "two"],
+                "merkle_root": "a" * 64,
+                "difficulty": 4,
+                "nonce": 10,
+                "block_hash": "000f" + "b" * 60,
+            },
+            links=["https://github.com/ada/course/blob/main/lab3.py"],
+        )
+        submission = SubmissionResult(
+            status="VALID", repository="ada/course", commit_sha="b" * 40
+        )
+        github = MagicMock()
+        github.get_repo_tree.return_value = [
+            {"type": "blob", "path": "labs/lab3.py"}
+        ]
+
+        result = validate_lab3_precheck(work, submission, github)
+
+        self.assertEqual(result.status, "FAIL")
+        self.assertIn("does not satisfy", result.note)
+
+    def test_dedicated_validator_result_is_used_in_work_outcome(self):
+        student = Student(
+            "Ada", "101", "https://github.com/ada/course", ["0x" + "1" * 40]
+        )
+        submission = SubmissionResult(
+            status="VALID",
+            repository="ada/course",
+            commit_sha="a" * 40,
+            works={"lab1": WorkSubmission(status="submitted", network="sepolia")},
+        )
+
+        outcome = build_work_outcomes(
+            students=[student],
+            selected=("lab1",),
+            submissions={"101": submission},
+            a1_results={},
+            a2_results={},
+            validator_results={
+                "101": {"lab1": WorkValidationResult("PASS", "on-chain proof")}
+            },
+        )["101"]["lab1"]
+
+        self.assertEqual(outcome.auto_status, "PASS")
+        self.assertEqual(outcome.final_status, "PASS")
+        self.assertIn("on-chain proof", outcome.note)
+
+    def test_lab6_reuses_nft_quest_onchain_result(self):
+        student = Student(
+            "Ada", "101", "https://github.com/ada/course", ["0x" + "1" * 40]
+        )
+        submission = SubmissionResult(
+            status="VALID",
+            repository="ada/course",
+            commit_sha="a" * 40,
+            works={"lab6": WorkSubmission(status="submitted", network="sepolia")},
+        )
+
+        outcome = build_work_outcomes(
+            students=[student],
+            selected=("lab6",),
+            submissions={"101": submission},
+            a1_results={"101": Assignment1Result(status="PASS", note="NFT flow")},
+            a2_results={},
+        )["101"]["lab6"]
+
+        self.assertEqual(outcome.auto_status, "PASS")
+        self.assertEqual(outcome.final_status, "PASS")
+        self.assertIn("NFT flow", outcome.note)
 
     def test_unimplemented_work_is_reviewed_but_assignment1_can_pass(self):
         student = Student(
