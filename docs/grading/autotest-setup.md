@@ -18,6 +18,7 @@ Create:
 
 - `COURSE_STUDENTS`: `Name`, `ID`, `Email`, `GitHub`, `Ethereum`, `Polkadot`, `TON`, `Group`, `Active`;
 - `ASSIGNMENT1_CONFIG`: `Professor NFT Contract`, `Professor Return Address`, `Special Contract`, `Start Block`, `End Block`, `Require Approval`;
+- `LAB7_CONFIG`: `DEX Alpha`, `DEX Beta`;
 - `ETHERNAUT_LEVELS`: `Level`, `Address`, `Complexity`.
 
 Give students a controlled registration period to fill only their own identity, repository, and public wallet fields. Then protect the source sheet. The service account needs viewer access only.
@@ -33,7 +34,11 @@ Under **Settings → Secrets and variables → Actions**, add:
 | Secret | `GOOGLE_RESULTS_SPREADSHEET_ID` | Result spreadsheet ID from its URL |
 | Secret | `SEPOLIA_RPC_URL` | Reliable Sepolia RPC endpoint |
 | Secret | `ETHERSCAN_API_KEY` | Etherscan API key for indexed fallback checks |
+| Secret | `SUBSCAN_API_KEY` | Subscan API key used by the Westend and Asset Hub checks |
+| Secret | `TONCENTER_API_KEY` | TON Center testnet API key used by Labs 10–12 |
 | Variable | `ETHERNAUT_START_BLOCK` | Optional first Sepolia block to scan |
+
+The Subscan and TON Center clients throttle anonymous requests, but API keys are strongly recommended for stable whole-course runs.
 
 Student repositories must be public in this version. The course workflow token can read public repositories but does not grant access to arbitrary private student repositories.
 

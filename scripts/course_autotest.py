@@ -25,6 +25,10 @@ from web3.exceptions import TransactionNotFound
 
 ETH_RE = re.compile(r"0x[a-fA-F0-9]{40}")
 TX_RE = re.compile(r"0x[a-fA-F0-9]{64}")
+TON_ADDRESS_RE = re.compile(
+    r"(?:(?:-1|0):[a-fA-F0-9]{64}|[A-Za-z0-9_+\-/]{48})"
+)
+TON_HASH_RE = re.compile(r"(?:(?:0x)?[a-fA-F0-9]{64}|[A-Za-z0-9_+\-/]{43}=?)")
 URL_RE = re.compile(r"https?://[^\s\"'<>]+", re.IGNORECASE)
 PROFILE_RE = re.compile(r"^https?://github\.com/([A-Za-z0-9_.-]+)/?$", re.IGNORECASE)
 REPO_RE = re.compile(
@@ -61,6 +65,12 @@ A2_PASS_COMPLEXITY = 10
 A2_BONUS_LEVELS = 15
 SEPOLIA_CHAIN_ID = 11155111
 LAB1_AMOUNT_WEI = 100_000_000_000_000
+LAB10_AMOUNT_NANOTON = 10_000_000
+SUBSCAN_API_HOSTS = {
+    "westend": "https://westend.api.subscan.io",
+    "assethub-westend": "https://assethub-westend.api.subscan.io",
+}
+TONCENTER_TESTNET_URL = "https://testnet.toncenter.com"
 SUBMISSION_FILE = "submission.json"
 SUBMISSION_SCHEMA_PATH = (
     Path(__file__).resolve().parents[1] / "schemas" / "submission.schema.json"
@@ -109,6 +119,12 @@ class Assignment1Config:
     start_block: int = 0
     end_block: int = A1_DEFAULT_END_BLOCK
     require_approval: bool = True
+
+
+@dataclass(frozen=True)
+class Lab7Config:
+    dex_alpha: str
+    dex_beta: str
 
 
 @dataclass
@@ -575,6 +591,37 @@ def read_assignment1_config_from_google_sheet(
         end_block=end_block,
         require_approval=require_approval,
     )
+
+
+def read_lab7_config_from_google_sheet(
+    client: gspread.Client,
+    spreadsheet_id: str,
+    worksheet_name: str,
+) -> Lab7Config:
+    """Read the protected pair of class DEX contracts for Lab 7."""
+    rows = (
+        client.open_by_key(spreadsheet_id)
+        .worksheet(worksheet_name)
+        .get_all_records(default_blank="")
+    )
+    if not rows:
+        raise ValueError(f"Worksheet '{worksheet_name}' must contain one config row")
+
+    row = rows[0]
+
+    def address(*names: str) -> str:
+        value = row_value(row, *names).lstrip("'")
+        if not ETH_RE.fullmatch(value):
+            raise ValueError(
+                f"Worksheet '{worksheet_name}': '{names[0]}' must be a valid 0x address"
+            )
+        return value.lower()
+
+    dex_alpha = address("DEX Alpha", "DEX Alpha Contract", "Alpha Contract")
+    dex_beta = address("DEX Beta", "DEX Beta Contract", "Beta Contract")
+    if dex_alpha == dex_beta:
+        raise ValueError(f"Worksheet '{worksheet_name}': DEX addresses must differ")
+    return Lab7Config(dex_alpha=dex_alpha, dex_beta=dex_beta)
 
 
 def score_repo_candidate(repo: dict[str, Any]) -> int:
@@ -1124,15 +1171,17 @@ def validate_lab5(
 def _repository_has_code_artifact(
     gh: GitHubHelper,
     submission: SubmissionResult,
+    extensions: set[str] | None = None,
 ) -> bool:
     if not submission.repository or "/" not in submission.repository:
         return False
     owner, repo = submission.repository.split("/", 1)
     ref = submission.commit_sha or "main"
     tree = gh.get_repo_tree(owner, repo, ref)
+    allowed = extensions or {".ipynb", ".py"}
     return any(
         item.get("type") == "blob"
-        and Path(str(item.get("path", ""))).suffix.lower() in {".ipynb", ".py"}
+        and Path(str(item.get("path", ""))).suffix.lower() in allowed
         for item in tree
     )
 
@@ -1232,6 +1281,681 @@ def validate_lab3_precheck(
         "REVIEW",
         "mining report precheck passed; instructor must review the Merkle/header "
         "algorithm (student code was not executed)",
+    )
+
+
+def _evidence_hashes(
+    work: WorkSubmission,
+    key: str,
+    pattern: re.Pattern[str],
+) -> list[str]:
+    raw = work.evidence.get(key, [])
+    values = raw if isinstance(raw, list) else [raw]
+    candidates = [str(value).strip() for value in values if str(value).strip()]
+    for link in work.links:
+        candidates.extend(pattern.findall(link))
+    return list(
+        {
+            candidate.lower(): candidate
+            for candidate in candidates
+            if pattern.fullmatch(candidate)
+        }.values()
+    )
+
+
+def _decimal_value(value: Any) -> Decimal:
+    text = str(value).strip().replace(",", ".")
+    text = re.sub(r"\s*(?:ETH|TON|WND|USDC|TEST)\s*$", "", text, flags=re.I)
+    return Decimal(text)
+
+
+def _positive_decimal_leaf_count(value: Any) -> int:
+    if isinstance(value, dict):
+        return sum(_positive_decimal_leaf_count(item) for item in value.values())
+    if isinstance(value, (list, tuple)):
+        return sum(_positive_decimal_leaf_count(item) for item in value)
+    try:
+        return int(_decimal_value(value) > 0)
+    except (InvalidOperation, TypeError, ValueError):
+        return 0
+
+
+class SubscanClient:
+    """Minimal client for the network-specific Subscan extrinsic endpoint."""
+
+    def __init__(
+        self,
+        api_key: str = "",
+        session: requests.Session | None = None,
+    ) -> None:
+        self.api_key = api_key.strip()
+        self.session = session or requests.Session()
+        self._last_request = 0.0
+
+    def get_extrinsic(self, network: str, extrinsic_hash: str) -> dict[str, Any] | None:
+        host = SUBSCAN_API_HOSTS.get(network)
+        if not host:
+            raise ValueError(f"unsupported Subscan network: {network}")
+        if not self.api_key:
+            elapsed = time.monotonic() - self._last_request
+            if elapsed < 1.05:
+                time.sleep(1.05 - elapsed)
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["X-API-Key"] = self.api_key
+        response = self.session.post(
+            f"{host}/api/scan/extrinsic",
+            headers=headers,
+            json={"hash": extrinsic_hash, "hide_events": False, "events_limit": 100},
+            timeout=30,
+        )
+        self._last_request = time.monotonic()
+        response.raise_for_status()
+        payload = response.json()
+        if not isinstance(payload, dict):
+            raise RuntimeError("Subscan returned a non-object response")
+        data = payload.get("data")
+        if payload.get("code") == 0 and isinstance(data, dict):
+            return data
+        message = str(payload.get("message", "Subscan request failed"))
+        if data is None and any(
+            marker in message.lower() for marker in ("not found", "not exist", "no data")
+        ):
+            return None
+        raise RuntimeError(f"Subscan API error: {message}")
+
+
+class TonCenterClient:
+    """TON Center v2/v3 testnet reader with canonical address comparison."""
+
+    def __init__(
+        self,
+        api_key: str = "",
+        session: requests.Session | None = None,
+        base_url: str = TONCENTER_TESTNET_URL,
+    ) -> None:
+        self.api_key = api_key.strip()
+        self.session = session or requests.Session()
+        self.base_url = base_url.rstrip("/")
+        self._address_cache: dict[str, str] = {}
+        self._last_request = 0.0
+
+    def _get(self, path: str, params: Any) -> dict[str, Any]:
+        if not self.api_key:
+            elapsed = time.monotonic() - self._last_request
+            if elapsed < 1.05:
+                time.sleep(1.05 - elapsed)
+        headers = {"Accept": "application/json"}
+        if self.api_key:
+            headers["X-API-Key"] = self.api_key
+        response = self.session.get(
+            f"{self.base_url}{path}", params=params, headers=headers, timeout=30
+        )
+        self._last_request = time.monotonic()
+        response.raise_for_status()
+        payload = response.json()
+        if not isinstance(payload, dict):
+            raise RuntimeError("TON Center returned a non-object response")
+        if payload.get("ok") is False or payload.get("error"):
+            raise RuntimeError(
+                f"TON Center API error: {payload.get('error') or payload.get('message')}"
+            )
+        return payload
+
+    def canonical_address(self, address: str) -> str:
+        value = str(address).strip()
+        cached = self._address_cache.get(value)
+        if cached:
+            return cached
+        raw_match = re.fullmatch(r"(-1|0):([a-fA-F0-9]{64})", value)
+        if raw_match:
+            canonical = f"{raw_match.group(1)}:{raw_match.group(2).lower()}"
+        else:
+            payload = self._get("/api/v2/unpackAddress", {"address": value})
+            result = payload.get("result", {})
+            workchain = result.get("workchain")
+            address_hex = str(result.get("addr_hex", "")).lower()
+            if workchain not in {-1, 0, "-1", "0"} or not re.fullmatch(
+                r"[a-f0-9]{64}", address_hex
+            ):
+                raise ValueError(f"invalid TON address: {value}")
+            canonical = f"{int(workchain)}:{address_hex}"
+        self._address_cache[value] = canonical
+        return canonical
+
+    def addresses_equal(self, left: str, right: str) -> bool:
+        return self.canonical_address(left) == self.canonical_address(right)
+
+    def transactions(self, tx_hash: str) -> list[dict[str, Any]]:
+        payload = self._get(
+            "/api/v3/transactions", {"hash": tx_hash, "limit": 10}
+        )
+        return [
+            item for item in payload.get("transactions", []) if isinstance(item, dict)
+        ]
+
+    def traces(self, tx_hash: str) -> list[dict[str, Any]]:
+        payload = self._get(
+            "/api/v3/traces",
+            [("tx_hash", tx_hash), ("include_actions", "true"), ("limit", 10)],
+        )
+        return [item for item in payload.get("traces", []) if isinstance(item, dict)]
+
+    def actions(self, tx_hash: str) -> list[dict[str, Any]]:
+        payload = self._get(
+            "/api/v3/actions",
+            [
+                ("tx_hash", tx_hash),
+                ("include_accounts", "true"),
+                ("include_transactions", "true"),
+                ("limit", 100),
+            ],
+        )
+        return [item for item in payload.get("actions", []) if isinstance(item, dict)]
+
+    def jetton_transfers(
+        self,
+        owner_address: str,
+        jetton_master: str,
+    ) -> list[dict[str, Any]]:
+        payload = self._get(
+            "/api/v3/jetton/transfers",
+            [
+                ("owner_address", owner_address),
+                ("jetton_master", jetton_master),
+                ("direction", "out"),
+                ("limit", 1000),
+            ],
+        )
+        return [
+            item
+            for item in payload.get("jetton_transfers", [])
+            if isinstance(item, dict)
+        ]
+
+
+def validate_lab7(
+    student: Student,
+    work: WorkSubmission,
+    w3: Web3 | None,
+    config: Lab7Config,
+) -> WorkValidationResult:
+    """Validate class DEX activity; leave the ambiguous valuation for review."""
+    wallets = _wallet_set(student)
+    if not wallets:
+        return WorkValidationResult("FAIL", "no registered Ethereum address")
+    dex_values = work.evidence.get("dex_contracts", [])
+    dex_contracts = (
+        [str(value).lower() for value in dex_values]
+        if isinstance(dex_values, list)
+        else []
+    )
+    expected = {config.dex_alpha, config.dex_beta}
+    if set(dex_contracts) != expected:
+        return WorkValidationResult(
+            "FAIL", "dex_contracts must match DEX Alpha and DEX Beta from LAB7_CONFIG"
+        )
+    swap_txs = _evidence_hashes(work, "swap_txs", TX_RE)
+    if not swap_txs:
+        return WorkValidationResult("FAIL", "at least one swap transaction is required")
+    strategy = str(work.answers.get("strategy", "")).strip()
+    if len(strategy) < 40:
+        return WorkValidationResult("FAIL", "arbitrage strategy is missing or too short")
+    initial_reserves = work.evidence.get("initial_reserves", {})
+    if not isinstance(initial_reserves, dict) or _positive_decimal_leaf_count(
+        initial_reserves
+    ) < 4:
+        return WorkValidationResult(
+            "FAIL", "initial_reserves must contain positive TEST/USDC reserves for both DEXes"
+        )
+    try:
+        final_value = _decimal_value(work.evidence.get("final_portfolio_value", ""))
+        if final_value < 0:
+            raise ValueError("negative final value")
+    except (InvalidOperation, TypeError, ValueError):
+        return WorkValidationResult(
+            "FAIL", "final_portfolio_value must be a non-negative number"
+        )
+
+    network = normalize_header(work.network)
+    if "private" in network:
+        return WorkValidationResult(
+            "REVIEW",
+            "private-network report is structurally complete; instructor must verify "
+            "the approved RPC and final portfolio calculation",
+        )
+    if "sepolia" not in network:
+        return WorkValidationResult(
+            "FAIL", "labs.lab7.network must be Sepolia or an approved private testnet"
+        )
+    if w3 is None:
+        return WorkValidationResult("ERROR", "Sepolia RPC unavailable")
+
+    try:
+        if not _is_sepolia_rpc(w3):
+            return WorkValidationResult(
+                "ERROR", f"configured RPC chain ID is not {SEPOLIA_CHAIN_ID}"
+            )
+        event_count = 0
+        for tx_hash in swap_txs:
+            transaction, receipt = _transaction_and_receipt(w3, tx_hash)
+            if not _receipt_succeeded(receipt):
+                return WorkValidationResult("FAIL", f"swap transaction reverted: {tx_hash}")
+            if str(_item_value(transaction, "from", "")).lower() not in wallets:
+                return WorkValidationResult(
+                    "FAIL", f"registered wallet did not send swap tx {tx_hash}"
+                )
+            tx_to = str(_item_value(transaction, "to", "")).lower()
+            logs = _item_value(receipt, "logs", []) or []
+            relevant_logs = [
+                log
+                for log in logs
+                if str(_item_value(log, "address", "")).lower() in expected
+                or (
+                    (_item_value(log, "topics", []) or [])
+                    and _hex_text((_item_value(log, "topics", []) or [""])[0]).lower()
+                    == _hex_text(
+                        Web3.keccak(text="Transfer(address,address,uint256)")
+                    ).lower()
+                )
+            ]
+            if tx_to not in expected and not relevant_logs:
+                return WorkValidationResult(
+                    "FAIL", f"no class DEX or token-transfer event in {tx_hash}"
+                )
+            event_count += len(relevant_logs)
+    except TransactionNotFound as exc:
+        return _missing_transaction_result(str(exc) or "submitted swap hash")
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"Sepolia RPC error: {exc}")
+
+    return WorkValidationResult(
+        "REVIEW",
+        f"{len(swap_txs)} successful class-DEX swap txs; {event_count} relevant events; "
+        f"declared final value={final_value}; valuation formula requires instructor review",
+    )
+
+
+def _subscan_amount_matches(declared: Any, chain_value: Any) -> bool:
+    try:
+        declared_value = _decimal_value(declared)
+        actual_value = _decimal_value(chain_value)
+    except (InvalidOperation, TypeError, ValueError):
+        return False
+    return actual_value == declared_value or actual_value == declared_value * Decimal(
+        10**12
+    )
+
+
+def validate_lab8(
+    student: Student,
+    work: WorkSubmission,
+    subscan: SubscanClient,
+) -> WorkValidationResult:
+    """Validate a Westend balance-transfer extrinsic through Subscan."""
+    if "westend" not in normalize_header(work.network) or "asset" in normalize_header(
+        work.network
+    ):
+        return WorkValidationResult("FAIL", "labs.lab8.network must be Westend")
+    if not student.polkadot_address:
+        return WorkValidationResult("FAIL", "no registered Polkadot address")
+    hashes = _evidence_hashes(work, "extrinsic_hashes", TX_RE)
+    if not hashes:
+        return WorkValidationResult("FAIL", "Westend extrinsic hash is missing")
+    recipient = str(work.evidence.get("recipient", "")).strip()
+    amount = work.evidence.get("amount", "")
+    if not recipient or str(amount).strip() == "":
+        return WorkValidationResult("FAIL", "recipient and amount are required")
+    try:
+        data = subscan.get_extrinsic("westend", hashes[0])
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"Subscan API error: {exc}")
+    if not data:
+        return WorkValidationResult("FAIL", "extrinsic was not found on Westend")
+    if data.get("success") is not True:
+        return WorkValidationResult("FAIL", "Westend extrinsic was not successful")
+    if str(data.get("account_id", "")) != student.polkadot_address:
+        return WorkValidationResult(
+            "FAIL", "extrinsic signer does not match the registered Polkadot address"
+        )
+    transfer = data.get("transfer")
+    if not isinstance(transfer, dict) or transfer.get("success") is not True:
+        return WorkValidationResult("FAIL", "extrinsic is not a successful transfer")
+    if str(transfer.get("to", "")) != recipient:
+        return WorkValidationResult(
+            "FAIL", "submitted recipient does not match the Westend transfer"
+        )
+    if not _subscan_amount_matches(amount, transfer.get("amount")):
+        return WorkValidationResult(
+            "FAIL", "submitted amount does not match the Westend transfer"
+        )
+    return WorkValidationResult(
+        "PASS",
+        f"Westend extrinsic {hashes[0]}; block={data.get('block_num')}; "
+        f"method={data.get('call_module')}.{data.get('call_module_function')}",
+    )
+
+
+def _extrinsic_action_text(data: dict[str, Any]) -> str:
+    parts: list[str] = [
+        str(data.get("call_module", "")),
+        str(data.get("call_module_function", "")),
+        json.dumps(data.get("params", []), sort_keys=True, default=str),
+    ]
+    for event in data.get("event", []) or []:
+        if isinstance(event, dict):
+            parts.extend(
+                [str(event.get("module_id", "")), str(event.get("event_id", ""))]
+            )
+    return " ".join(parts).lower()
+
+
+def validate_lab9(
+    student: Student,
+    work: WorkSubmission,
+    subscan: SubscanClient,
+) -> WorkValidationResult:
+    """Validate a signed Westend/Asset Hub XCM extrinsic."""
+    if not student.polkadot_address:
+        return WorkValidationResult("FAIL", "no registered Polkadot address")
+    source = str(work.evidence.get("source_chain", "")).strip()
+    destination = str(work.evidence.get("destination_chain", "")).strip()
+    if not source or not destination or normalize_header(source) == normalize_header(
+        destination
+    ):
+        return WorkValidationResult(
+            "FAIL", "different source_chain and destination_chain values are required"
+        )
+    explanation = str(work.answers.get("xcm_execution_explanation", "")).strip()
+    if len(explanation) < 40:
+        return WorkValidationResult("FAIL", "XCM explanation is missing or too short")
+    hashes = _evidence_hashes(work, "xcm_extrinsic_hashes", TX_RE)
+    if not hashes:
+        return WorkValidationResult("FAIL", "XCM extrinsic hash is missing")
+    source_key = normalize_header(source)
+    network = "assethub-westend" if "asset" in source_key else "westend"
+    if "westend" not in source_key and "asset" not in source_key:
+        return WorkValidationResult(
+            "FAIL", "source_chain must identify Westend or Asset Hub Westend"
+        )
+    try:
+        for extrinsic_hash in hashes:
+            data = subscan.get_extrinsic(network, extrinsic_hash)
+            if not data or data.get("success") is not True:
+                continue
+            if str(data.get("account_id", "")) != student.polkadot_address:
+                continue
+            action_text = _extrinsic_action_text(data)
+            if any(
+                keyword in action_text
+                for keyword in (
+                    "xcm",
+                    "xcmp",
+                    "polkadotxcm",
+                    "messagequeue",
+                    "reserve_transfer",
+                    "limited_reserve_transfer",
+                )
+            ):
+                return WorkValidationResult(
+                    "PASS",
+                    f"{network} XCM extrinsic {extrinsic_hash}; "
+                    f"block={data.get('block_num')}; "
+                    f"method={data.get('call_module')}.{data.get('call_module_function')}",
+                )
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"Subscan API error: {exc}")
+    return WorkValidationResult(
+        "FAIL", "no successful XCM extrinsic signed by the registered wallet was found"
+    )
+
+
+def _valid_ton_address(value: str) -> bool:
+    return bool(TON_ADDRESS_RE.fullmatch(str(value).strip()))
+
+
+def _ton_hash_equal(left: Any, right: Any) -> bool:
+    return str(left).strip().lower().removeprefix("0x") == str(right).strip().lower().removeprefix(
+        "0x"
+    )
+
+
+def _ton_transaction_succeeded(transaction: dict[str, Any]) -> bool:
+    description = transaction.get("description", {})
+    if not isinstance(description, dict):
+        return False
+    if description.get("aborted") is True:
+        return False
+    compute = description.get("compute_ph", {})
+    action = description.get("action", {})
+    if isinstance(compute, dict) and compute.get("success") is False:
+        return False
+    if isinstance(action, dict) and action.get("success") is False:
+        return False
+    return True
+
+
+def validate_lab10(
+    student: Student,
+    work: WorkSubmission,
+    toncenter: TonCenterClient,
+) -> WorkValidationResult:
+    """Validate the required 0.01 TON testnet transfer."""
+    if "ton" not in normalize_header(work.network) or "testnet" not in normalize_header(
+        work.network
+    ):
+        return WorkValidationResult("FAIL", "labs.lab10.network must be TON testnet")
+    wallet = student.ton_address.strip()
+    if not _valid_ton_address(wallet):
+        return WorkValidationResult("FAIL", "registered TON address is missing or invalid")
+    hashes = _evidence_hashes(work, "tx_hashes", TON_HASH_RE)
+    if not hashes:
+        return WorkValidationResult("FAIL", "TON transaction hash is missing")
+    recipient = str(work.evidence.get("recipient", "")).strip()
+    if not _valid_ton_address(recipient):
+        return WorkValidationResult("FAIL", "recipient must be a valid TON address")
+    try:
+        declared_amount = _decimal_value(work.evidence.get("amount_ton", ""))
+    except (InvalidOperation, TypeError, ValueError):
+        return WorkValidationResult("FAIL", "amount_ton must be a valid TON amount")
+    if declared_amount != Decimal("0.01"):
+        return WorkValidationResult("FAIL", "Lab 10 amount must be exactly 0.01 TON")
+
+    try:
+        transactions = toncenter.transactions(hashes[0])
+        for transaction in transactions:
+            if not toncenter.addresses_equal(str(transaction.get("account", "")), wallet):
+                continue
+            if not _ton_transaction_succeeded(transaction):
+                return WorkValidationResult("FAIL", "TON wallet transaction was aborted")
+            for message in transaction.get("out_msgs", []) or []:
+                if not isinstance(message, dict):
+                    continue
+                if not toncenter.addresses_equal(
+                    str(message.get("destination", "")), recipient
+                ):
+                    continue
+                if _integer(message.get("value", -1)) != LAB10_AMOUNT_NANOTON:
+                    return WorkValidationResult(
+                        "FAIL", "on-chain transfer value is not 0.01 TON"
+                    )
+                return WorkValidationResult(
+                    "PASS",
+                    f"TON testnet tx {hashes[0]}; account={transaction.get('account')}; "
+                    f"recipient={message.get('destination')}; value=0.01 TON",
+                )
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"TON Center API error: {exc}")
+    return WorkValidationResult(
+        "FAIL", "matching TON testnet transfer from the registered wallet was not found"
+    )
+
+
+def _collect_ton_trace_addresses(value: Any) -> list[str]:
+    addresses: list[str] = []
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            if key in {"account", "source", "destination"} and isinstance(nested, str):
+                if _valid_ton_address(nested):
+                    addresses.append(nested)
+            else:
+                addresses.extend(_collect_ton_trace_addresses(nested))
+    elif isinstance(value, list):
+        for nested in value:
+            addresses.extend(_collect_ton_trace_addresses(nested))
+    return addresses
+
+
+def validate_lab11(
+    student: Student,
+    work: WorkSubmission,
+    toncenter: TonCenterClient,
+) -> WorkValidationResult:
+    """Validate a testnet jetton transfer and its wallet-contract trace."""
+    if "ton" not in normalize_header(work.network) or "testnet" not in normalize_header(
+        work.network
+    ):
+        return WorkValidationResult("FAIL", "labs.lab11.network must be TON testnet")
+    wallet = student.ton_address.strip()
+    master = str(work.evidence.get("jetton_master", "")).strip()
+    sender_wallet = str(work.evidence.get("sender_jetton_wallet", "")).strip()
+    recipient_wallet = str(work.evidence.get("recipient_jetton_wallet", "")).strip()
+    if not all(
+        _valid_ton_address(value)
+        for value in (wallet, master, sender_wallet, recipient_wallet)
+    ):
+        return WorkValidationResult(
+            "FAIL", "registered wallet, Jetton Master, and both Jetton Wallets are required"
+        )
+    explanation = str(work.answers.get("jetton_architecture_explanation", "")).strip()
+    if len(explanation) < 40:
+        return WorkValidationResult(
+            "FAIL", "jetton architecture explanation is missing or too short"
+        )
+    hashes = _evidence_hashes(work, "tx_hashes", TON_HASH_RE)
+    if not hashes:
+        return WorkValidationResult("FAIL", "jetton transaction hash is missing")
+    try:
+        transfers = toncenter.jetton_transfers(wallet, master)
+        transfer = next(
+            (
+                item
+                for item in transfers
+                if any(
+                    _ton_hash_equal(item.get(field, ""), hashes[0])
+                    for field in ("transaction_hash", "trace_id")
+                )
+            ),
+            None,
+        )
+        if not transfer:
+            return WorkValidationResult(
+                "FAIL", "matching outgoing jetton transfer was not found"
+            )
+        if transfer.get("transaction_aborted") is True:
+            return WorkValidationResult("FAIL", "jetton transfer was aborted")
+        if not toncenter.addresses_equal(str(transfer.get("source", "")), wallet):
+            return WorkValidationResult(
+                "FAIL", "jetton owner does not match the registered TON wallet"
+            )
+        if not toncenter.addresses_equal(
+            str(transfer.get("source_wallet", "")), sender_wallet
+        ):
+            return WorkValidationResult(
+                "FAIL", "sender_jetton_wallet does not match TON Center data"
+            )
+        if not toncenter.addresses_equal(
+            str(transfer.get("jetton_master", "")), master
+        ):
+            return WorkValidationResult(
+                "FAIL", "jetton_master does not match TON Center data"
+            )
+        trace_addresses = [
+            address
+            for trace in toncenter.traces(hashes[0])
+            for address in _collect_ton_trace_addresses(trace)
+        ]
+        if not any(
+            toncenter.addresses_equal(address, recipient_wallet)
+            for address in trace_addresses
+        ):
+            return WorkValidationResult(
+                "FAIL", "recipient Jetton Wallet was not found in the transaction trace"
+            )
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"TON Center API error: {exc}")
+    return WorkValidationResult(
+        "PASS",
+        f"jetton transfer {hashes[0]}; master={master}; "
+        f"sender_wallet={sender_wallet}; recipient_wallet={recipient_wallet}",
+    )
+
+
+def validate_lab12(
+    student: Student,
+    work: WorkSubmission,
+    submission: SubmissionResult,
+    gh: GitHubHelper,
+    toncenter: TonCenterClient,
+) -> WorkValidationResult:
+    """Validate the STON.fi track or safely precheck a HackTON report."""
+    if "ton" not in normalize_header(work.network) or "testnet" not in normalize_header(
+        work.network
+    ):
+        return WorkValidationResult("FAIL", "labs.lab12.network must be TON testnet")
+    wallet = student.ton_address.strip()
+    if not _valid_ton_address(wallet):
+        return WorkValidationResult("FAIL", "registered TON address is missing or invalid")
+    mode = normalize_header(work.evidence.get("mode", "")).replace("-", "_")
+    if mode not in {"stonfi_swap", "hackton"}:
+        return WorkValidationResult("FAIL", "mode must be stonfi_swap or hackton")
+
+    if mode == "hackton":
+        proof = str(work.evidence.get("proof", "")).strip()
+        explanation = str(work.answers.get("security_explanation", "")).strip()
+        if not proof and not work.links:
+            return WorkValidationResult("FAIL", "HackTON proof or proof link is missing")
+        if len(explanation) < 40:
+            return WorkValidationResult(
+                "FAIL", "HackTON vulnerability explanation is missing or too short"
+            )
+        return WorkValidationResult(
+            "REVIEW",
+            "HackTON report precheck passed; instructor must confirm challenge completion",
+        )
+
+    hashes = _evidence_hashes(work, "tx_hashes", TON_HASH_RE)
+    if not hashes:
+        return WorkValidationResult("FAIL", "STON.fi swap transaction hash is missing")
+    if not work.links:
+        return WorkValidationResult("FAIL", "STON.fi report or script link is missing")
+    try:
+        if not _repository_has_code_artifact(
+            gh, submission, {".js", ".ts", ".mjs", ".cjs"}
+        ):
+            return WorkValidationResult(
+                "FAIL", "repository has no JavaScript/TypeScript swap script"
+            )
+        actions = toncenter.actions(hashes[0])
+        for action in actions:
+            action_type = normalize_header(action.get("type", ""))
+            if "swap" not in action_type or action.get("success") is not True:
+                continue
+            details_text = json.dumps(
+                action.get("details", {}), sort_keys=True, default=str
+            ).lower()
+            if "stonfi" not in details_text and "ston.fi" not in details_text:
+                continue
+            accounts = [str(value) for value in action.get("accounts", []) or []]
+            if not any(toncenter.addresses_equal(account, wallet) for account in accounts):
+                continue
+            return WorkValidationResult(
+                "PASS", f"successful STON.fi swap action found for tx {hashes[0]}"
+            )
+    except Exception as exc:
+        return WorkValidationResult("ERROR", f"TON Center API error: {exc}")
+    return WorkValidationResult(
+        "FAIL", "successful STON.fi swap involving the registered wallet was not found"
     )
 
 
@@ -2633,6 +3357,10 @@ def main() -> None:
         default=os.getenv("ASSIGNMENT1_CONFIG_WORKSHEET", "ASSIGNMENT1_CONFIG"),
     )
     parser.add_argument(
+        "--lab7-sheet",
+        default=os.getenv("LAB7_CONFIG_WORKSHEET", "LAB7_CONFIG"),
+    )
+    parser.add_argument(
         "--results-spreadsheet-id",
         default=os.getenv("GOOGLE_RESULTS_SPREADSHEET_ID", ""),
     )
@@ -2671,8 +3399,11 @@ def main() -> None:
     selected = selected_work_ids(args.scope)
     needs_assignment1 = bool({"lab6", "assignment1"}.intersection(selected))
     needs_ethernaut = "assignment2" in selected
+    needs_lab7 = "lab7" in selected
+    needs_subscan = bool({"lab8", "lab9"}.intersection(selected))
+    needs_toncenter = bool({"lab10", "lab11", "lab12"}.intersection(selected))
     needs_sepolia = (
-        bool({"lab1", "lab4", "lab5"}.intersection(selected))
+        bool({"lab1", "lab4", "lab5", "lab7"}.intersection(selected))
         or needs_assignment1
         or needs_ethernaut
     )
@@ -2699,14 +3430,35 @@ def main() -> None:
             )
         except Exception as exc:
             assignment1_config_error = str(exc)
+    lab7_config: Lab7Config | None = None
+    lab7_config_error = ""
+    if needs_lab7:
+        try:
+            lab7_config = read_lab7_config_from_google_sheet(
+                client, args.spreadsheet_id, args.lab7_sheet
+            )
+        except Exception as exc:
+            lab7_config_error = str(exc)
     print(f"[INFO] Students loaded: {len(students)}")
     print(f"[INFO] Ethernaut level rules loaded: {len(level_complexity)}")
     if assignment1_config:
         print("[INFO] Assignment 1 NFT Quest settings loaded")
     elif assignment1_config_error:
         print(f"[WARN] Assignment 1 config is invalid: {assignment1_config_error}")
+    if lab7_config:
+        print("[INFO] Lab 7 class DEX settings loaded")
+    elif lab7_config_error:
+        print(f"[WARN] Lab 7 config is invalid: {lab7_config_error}")
 
     gh = GitHubHelper(os.getenv("GITHUB_TOKEN"))
+    subscan = (
+        SubscanClient(os.getenv("SUBSCAN_API_KEY", "")) if needs_subscan else None
+    )
+    toncenter = (
+        TonCenterClient(os.getenv("TONCENTER_API_KEY", ""))
+        if needs_toncenter
+        else None
+    )
     errors: list[dict[str, str]] = []
     submissions: dict[str, SubmissionResult] = {}
     print("[INFO] Reading submission.json from each registered repository...")
@@ -2906,7 +3658,19 @@ def main() -> None:
         a2_results[student.student_id] = a2
 
         student_validator_results: dict[str, WorkValidationResult] = {}
-        for work_id in ("lab1", "lab2", "lab3", "lab4", "lab5"):
+        for work_id in (
+            "lab1",
+            "lab2",
+            "lab3",
+            "lab4",
+            "lab5",
+            "lab7",
+            "lab8",
+            "lab9",
+            "lab10",
+            "lab11",
+            "lab12",
+        ):
             if work_id not in selected:
                 continue
             work = submission.works.get(work_id, WorkSubmission())
@@ -2916,6 +3680,35 @@ def main() -> None:
                 validation = validate_lab2_precheck(work, submission, gh)
             elif work_id == "lab3":
                 validation = validate_lab3_precheck(work, submission, gh)
+            elif work_id == "lab7":
+                if lab7_config is None:
+                    validation = WorkValidationResult(
+                        "ERROR", lab7_config_error or "LAB7_CONFIG is missing"
+                    )
+                else:
+                    validation = validate_lab7(student, work, w3, lab7_config)
+            elif work_id in {"lab8", "lab9"}:
+                if subscan is None:
+                    validation = WorkValidationResult(
+                        "ERROR", "Subscan client is unavailable"
+                    )
+                elif work_id == "lab8":
+                    validation = validate_lab8(student, work, subscan)
+                else:
+                    validation = validate_lab9(student, work, subscan)
+            elif work_id in {"lab10", "lab11", "lab12"}:
+                if toncenter is None:
+                    validation = WorkValidationResult(
+                        "ERROR", "TON Center client is unavailable"
+                    )
+                elif work_id == "lab10":
+                    validation = validate_lab10(student, work, toncenter)
+                elif work_id == "lab11":
+                    validation = validate_lab11(student, work, toncenter)
+                else:
+                    validation = validate_lab12(
+                        student, work, submission, gh, toncenter
+                    )
             elif w3 is None:
                 validation = WorkValidationResult(
                     "ERROR", "Sepolia RPC unavailable"

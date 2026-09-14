@@ -7,7 +7,7 @@ The instructor starts the checker from GitHub Actions. Students prepare the regi
 1. The protected `COURSE_STUDENTS` sheet supplies identity, exact repository, group, and registered public wallets.
 2. The checker pins the latest commit in that repository and validates its root `submission.json`.
 3. A `submitted` work section tells the checker which evidence and links belong to the work.
-4. Implemented validators query GitHub, Sepolia, and explorer/RPC data against registered wallets.
+4. Implemented validators query GitHub, Sepolia, Subscan, and TON Center against registered wallets.
 5. The permanent instructor-owned workbook is updated; the source registry is never changed.
 6. GitHub Actions stores `input_snapshot.json` and `results.json` as a 90-day audit artifact.
 
@@ -23,13 +23,21 @@ The current production validators verify:
 - Lab 4 transaction status, sender, gas limit, gas used, fee, and explanation;
 - Lab 5 deployed ERC20 metadata methods, three student transfers, `Transfer` events, and a batch Disperse transaction;
 - Lab 6 professor NFT receive/return and personal NFT mint/approve/transfer flow;
+- Lab 7 successful swaps through the instructor-configured pair of class DEX contracts; the declared final portfolio calculation remains instructor-reviewed;
+- Lab 8 successful Westend transfer, signer, recipient, and amount through Subscan;
+- Lab 9 successful registered-wallet XCM extrinsic on Westend or Asset Hub Westend;
+- Lab 10 exact `0.01 TON` testnet transfer from the registered wallet;
+- Lab 11 outgoing Jetton transfer, master contract, owner wallet, sender Jetton Wallet, and recipient-wallet trace;
+- Lab 12 successful STON.fi swap plus a JavaScript/TypeScript script at the pinned commit, or a safe HackTON precheck;
 - Assignment 1 professor NFT receive/return and personal NFT mint/approve/transfer flow;
 - Assignment 2 Ethernaut registered-wallet completions and configured complexity;
 - report schema, exact student ID, pinned GitHub commit, and evidence-link extraction for all 16 works.
 
-Lab 2 and Lab 3 have safe prechecks for required values, code artifacts, collision/difficulty conditions, and explanations. They remain `REVIEW` because the course currently permits different implementation algorithms and the checker never executes untrusted student code.
+Lab 2 and Lab 3 have safe prechecks for required values, code artifacts, collision/difficulty conditions, and explanations. They remain `REVIEW` because the course currently permits different implementation algorithms and the checker never executes untrusted student code. Lab 7 also remains `REVIEW` after its on-chain checks because the course has not fixed one deterministic portfolio-valuation formula. The HackTON path in Lab 12 remains `REVIEW`; its challenge proof requires instructor confirmation. The STON.fi path can receive an automatic `PASS`.
 
-Lab 7–12 and Assignment 3–4 are retained in the main course and report schema. Until a dedicated deterministic validator is added, a valid submitted report is sent to `Manual review`; it is never automatically marked `PASS` merely because JSON claims success.
+Assignment 3–4 are retained in the main course and report schema. Until their dedicated deterministic validators are added, a valid submitted report is sent to `Manual review`; it is never automatically marked `PASS` merely because JSON claims success.
+
+Subscan checks use the network-specific Westend and Asset Hub endpoints. TON checks use TON Center testnet indexing. A provider outage, rate limit, or malformed API response produces `ERROR`, not a student `FAIL`.
 
 ## Result worksheets
 

@@ -12,8 +12,11 @@ from scripts.course_autotest import (
     Assignment1Result,
     EthernautResult,
     GitHubHelper,
+    Lab7Config,
     SubmissionResult,
+    SubscanClient,
     Student,
+    TonCenterClient,
     WorkOutcome,
     WorkSubmission,
     WorkValidationResult,
@@ -26,6 +29,7 @@ from scripts.course_autotest import (
     parse_submission_document,
     read_assignment1_config_from_google_sheet,
     read_ethernaut_config_from_google_sheet,
+    read_lab7_config_from_google_sheet,
     read_students_from_google_sheet,
     selected_work_ids,
     validate_lab1,
@@ -33,6 +37,12 @@ from scripts.course_autotest import (
     validate_lab3_precheck,
     validate_lab4,
     validate_lab5,
+    validate_lab7,
+    validate_lab8,
+    validate_lab9,
+    validate_lab10,
+    validate_lab11,
+    validate_lab12,
     write_google_results,
 )
 
@@ -281,6 +291,284 @@ class CourseAutotestTests(unittest.TestCase):
         self.assertEqual(result.status, "PASS")
         self.assertIn("3 Disperse Transfer events", result.note)
 
+    def test_lab7_checks_class_dex_swaps_before_manual_valuation_review(self):
+        wallet = "0x" + "1" * 40
+        dex_alpha = "0x" + "a" * 40
+        dex_beta = "0x" + "b" * 40
+        tx_hash = "0x" + "7" * 64
+        student = Student("Ada", "101", "", [wallet])
+        work = WorkSubmission(
+            status="submitted",
+            network="sepolia",
+            evidence={
+                "dex_contracts": [dex_alpha, dex_beta],
+                "swap_txs": [tx_hash],
+                "initial_reserves": {
+                    "alpha": {"TEST": "100", "USDC": "200"},
+                    "beta": {"TEST": "150", "USDC": "180"},
+                },
+                "final_portfolio_value": "42.5",
+            },
+            answers={
+                "strategy": (
+                    "Buy on the cheaper class DEX and sell on the other after "
+                    "checking fees and reserve changes."
+                )
+            },
+        )
+        w3 = MagicMock()
+        w3.eth.chain_id = 11155111
+        w3.eth.get_transaction.return_value = {"from": wallet, "to": dex_alpha}
+        w3.eth.get_transaction_receipt.return_value = {
+            "status": 1,
+            "logs": [{"address": dex_alpha, "topics": []}],
+        }
+
+        result = validate_lab7(
+            student, work, w3, Lab7Config(dex_alpha=dex_alpha, dex_beta=dex_beta)
+        )
+
+        self.assertEqual(result.status, "REVIEW")
+        self.assertIn("successful class-DEX swap", result.note)
+
+    def test_lab8_validates_westend_transfer_with_subscan(self):
+        extrinsic_hash = "0x" + "8" * 64
+        student = Student(
+            "Ada", "101", "", [], polkadot_address="5RegisteredPolkadotAddress"
+        )
+        work = WorkSubmission(
+            status="submitted",
+            network="westend",
+            evidence={
+                "extrinsic_hashes": [extrinsic_hash],
+                "recipient": "5RecipientPolkadotAddress",
+                "amount": "1.25",
+            },
+        )
+        subscan = MagicMock()
+        subscan.get_extrinsic.return_value = {
+            "success": True,
+            "account_id": student.polkadot_address,
+            "block_num": 123,
+            "call_module": "Balances",
+            "call_module_function": "transfer_keep_alive",
+            "transfer": {
+                "success": True,
+                "to": "5RecipientPolkadotAddress",
+                "amount": "1250000000000",
+            },
+        }
+
+        result = validate_lab8(student, work, subscan)
+
+        self.assertEqual(result.status, "PASS")
+        subscan.get_extrinsic.assert_called_once_with("westend", extrinsic_hash)
+
+    def test_subscan_client_uses_network_endpoint_and_api_key(self):
+        extrinsic_hash = "0x" + "8" * 64
+        response = MagicMock()
+        response.json.return_value = {"code": 0, "data": {"success": True}}
+        session = MagicMock()
+        session.post.return_value = response
+
+        result = SubscanClient("subscan-key", session).get_extrinsic(
+            "westend", extrinsic_hash
+        )
+
+        self.assertEqual(result, {"success": True})
+        session.post.assert_called_once_with(
+            "https://westend.api.subscan.io/api/scan/extrinsic",
+            headers={"Content-Type": "application/json", "X-API-Key": "subscan-key"},
+            json={"hash": extrinsic_hash, "hide_events": False, "events_limit": 100},
+            timeout=30,
+        )
+
+    def test_lab9_validates_registered_xcm_extrinsic(self):
+        extrinsic_hash = "0x" + "9" * 64
+        student = Student(
+            "Ada", "101", "", [], polkadot_address="5RegisteredPolkadotAddress"
+        )
+        work = WorkSubmission(
+            status="submitted",
+            network="westend",
+            evidence={
+                "source_chain": "Westend",
+                "destination_chain": "Asset Hub Westend",
+                "xcm_extrinsic_hashes": [extrinsic_hash],
+            },
+            answers={
+                "xcm_execution_explanation": (
+                    "The source chain sends an XCM message and Asset Hub executes "
+                    "the corresponding reserve transfer instruction."
+                )
+            },
+        )
+        subscan = MagicMock()
+        subscan.get_extrinsic.return_value = {
+            "success": True,
+            "account_id": student.polkadot_address,
+            "block_num": 456,
+            "call_module": "PolkadotXcm",
+            "call_module_function": "limited_reserve_transfer_assets",
+            "params": [],
+            "event": [{"module_id": "XcmPallet", "event_id": "Sent"}],
+        }
+
+        result = validate_lab9(student, work, subscan)
+
+        self.assertEqual(result.status, "PASS")
+        self.assertIn("XCM extrinsic", result.note)
+
+    def test_lab10_validates_exact_ton_testnet_transfer(self):
+        wallet = "0:" + "1" * 64
+        recipient = "0:" + "2" * 64
+        tx_hash = "a" * 64
+        student = Student("Ada", "101", "", [], ton_address=wallet)
+        work = WorkSubmission(
+            status="submitted",
+            network="TON testnet",
+            evidence={
+                "tx_hashes": [tx_hash],
+                "recipient": recipient,
+                "amount_ton": "0.01",
+            },
+        )
+        toncenter = MagicMock()
+        toncenter.addresses_equal.side_effect = (
+            lambda left, right: str(left).lower() == str(right).lower()
+        )
+        toncenter.transactions.return_value = [
+            {
+                "account": wallet,
+                "description": {"aborted": False},
+                "out_msgs": [{"destination": recipient, "value": 10_000_000}],
+            }
+        ]
+
+        result = validate_lab10(student, work, toncenter)
+
+        self.assertEqual(result.status, "PASS")
+        self.assertIn("value=0.01 TON", result.note)
+
+    def test_toncenter_client_normalizes_user_friendly_address(self):
+        friendly = "E" + "A" * 47
+        response = MagicMock()
+        response.json.return_value = {
+            "ok": True,
+            "result": {"workchain": 0, "addr_hex": "A" * 64},
+        }
+        session = MagicMock()
+        session.get.return_value = response
+
+        result = TonCenterClient("ton-key", session).canonical_address(friendly)
+
+        self.assertEqual(result, "0:" + "a" * 64)
+        session.get.assert_called_once_with(
+            "https://testnet.toncenter.com/api/v2/unpackAddress",
+            params={"address": friendly},
+            headers={"Accept": "application/json", "X-API-Key": "ton-key"},
+            timeout=30,
+        )
+
+    def test_lab11_validates_jetton_wallets_and_trace(self):
+        wallet = "0:" + "1" * 64
+        master = "0:" + "2" * 64
+        sender_wallet = "0:" + "3" * 64
+        recipient_wallet = "0:" + "4" * 64
+        tx_hash = "b" * 64
+        student = Student("Ada", "101", "", [], ton_address=wallet)
+        work = WorkSubmission(
+            status="submitted",
+            network="TON testnet",
+            evidence={
+                "tx_hashes": [tx_hash],
+                "jetton_master": master,
+                "sender_jetton_wallet": sender_wallet,
+                "recipient_jetton_wallet": recipient_wallet,
+            },
+            answers={
+                "jetton_architecture_explanation": (
+                    "The master controls jetton metadata while each holder has a "
+                    "separate wallet contract that participates in transfers."
+                )
+            },
+        )
+        toncenter = MagicMock()
+        toncenter.addresses_equal.side_effect = (
+            lambda left, right: str(left).lower() == str(right).lower()
+        )
+        toncenter.jetton_transfers.return_value = [
+            {
+                "transaction_hash": tx_hash,
+                "transaction_aborted": False,
+                "source": wallet,
+                "source_wallet": sender_wallet,
+                "jetton_master": master,
+            }
+        ]
+        toncenter.traces.return_value = [{"messages": [{"destination": recipient_wallet}]}]
+
+        result = validate_lab11(student, work, toncenter)
+
+        self.assertEqual(result.status, "PASS")
+        self.assertIn("jetton transfer", result.note)
+
+    def test_lab12_validates_stonfi_swap_and_pinned_script(self):
+        wallet = "0:" + "1" * 64
+        tx_hash = "c" * 64
+        student = Student("Ada", "101", "", [], ton_address=wallet)
+        work = WorkSubmission(
+            status="submitted",
+            network="TON testnet",
+            evidence={"mode": "stonfi_swap", "tx_hashes": [tx_hash]},
+            links=["https://github.com/ada/course/blob/main/labs/lab12.ts"],
+        )
+        submission = SubmissionResult(
+            status="VALID", repository="ada/course", commit_sha="d" * 40
+        )
+        github = MagicMock()
+        github.get_repo_tree.return_value = [
+            {"type": "blob", "path": "labs/lab12.ts"}
+        ]
+        toncenter = MagicMock()
+        toncenter.addresses_equal.side_effect = (
+            lambda left, right: str(left).lower() == str(right).lower()
+        )
+        toncenter.actions.return_value = [
+            {
+                "type": "JettonSwap",
+                "success": True,
+                "details": {"protocol": "STON.fi"},
+                "accounts": [wallet],
+            }
+        ]
+
+        result = validate_lab12(student, work, submission, github, toncenter)
+
+        self.assertEqual(result.status, "PASS")
+        github.get_repo_tree.assert_called_once_with("ada", "course", "d" * 40)
+
+    def test_lab12_hackton_requires_manual_confirmation(self):
+        wallet = "0:" + "1" * 64
+        student = Student("Ada", "101", "", [], ton_address=wallet)
+        work = WorkSubmission(
+            status="submitted",
+            network="TON testnet",
+            evidence={"mode": "hackton", "proof": "challenge proof"},
+            answers={
+                "security_explanation": (
+                    "The exploit abuses a broken authorization boundary and the "
+                    "submitted trace shows the resulting unauthorized state change."
+                )
+            },
+        )
+
+        result = validate_lab12(
+            student, work, SubmissionResult(), MagicMock(), MagicMock()
+        )
+
+        self.assertEqual(result.status, "REVIEW")
+
     def test_lab2_precheck_never_executes_student_code(self):
         work = WorkSubmission(
             status="submitted",
@@ -387,7 +675,7 @@ class CourseAutotestTests(unittest.TestCase):
         self.assertEqual(outcome.final_status, "PASS")
         self.assertIn("NFT flow", outcome.note)
 
-    def test_unimplemented_work_is_reviewed_but_assignment1_can_pass(self):
+    def test_unimplemented_assignment_is_reviewed_but_assignment1_can_pass(self):
         student = Student(
             "Ada", "101", "https://github.com/ada/course", ["0x" + "1" * 40]
         )
@@ -396,7 +684,9 @@ class CourseAutotestTests(unittest.TestCase):
             repository="ada/course",
             commit_sha="a" * 40,
             works={
-                "lab7": WorkSubmission(status="submitted", network="sepolia"),
+                "assignment3": WorkSubmission(
+                    status="submitted", network="sepolia"
+                ),
                 "assignment1": WorkSubmission(
                     status="submitted", network="sepolia"
                 ),
@@ -405,13 +695,13 @@ class CourseAutotestTests(unittest.TestCase):
 
         outcomes = build_work_outcomes(
             students=[student],
-            selected=("lab7", "assignment1"),
+            selected=("assignment3", "assignment1"),
             submissions={"101": submission},
             a1_results={"101": Assignment1Result(status="PASS")},
             a2_results={},
         )["101"]
 
-        self.assertEqual(outcomes["lab7"].final_status, "REVIEW")
+        self.assertEqual(outcomes["assignment3"].final_status, "REVIEW")
         self.assertEqual(outcomes["assignment1"].final_status, "PASS")
 
     def test_reads_only_active_students_and_normalizes_id(self):
@@ -503,6 +793,19 @@ class CourseAutotestTests(unittest.TestCase):
         self.assertEqual(config.start_block, 123)
         self.assertEqual(config.end_block, 456)
         self.assertTrue(config.require_approval)
+
+    def test_reads_lab7_class_dexes_from_protected_sheet(self):
+        dex_alpha = "0x" + "a" * 40
+        dex_beta = "0x" + "b" * 40
+        client = FakeClient(
+            {"LAB7_CONFIG": [{"DEX Alpha": dex_alpha, "DEX Beta": dex_beta}]}
+        )
+
+        config = read_lab7_config_from_google_sheet(
+            client, "sheet-id", "LAB7_CONFIG"
+        )
+
+        self.assertEqual(config, Lab7Config(dex_alpha=dex_alpha, dex_beta=dex_beta))
 
     def test_matches_new_assignment1_nft_flows_in_order(self):
         student = "0x" + "1" * 40

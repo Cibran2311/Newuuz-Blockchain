@@ -42,4 +42,13 @@ Share the source spreadsheet with the GitHub Actions service account as **Viewer
 
 `ETHERNAUT_LEVELS` contains `Level`, `Address`, and `Complexity`. Assignment 2 automatically passes only when registered-wallet evidence reaches the configured complexity threshold.
 
+`LAB7_CONFIG` contains one protected row:
+
+| Column | Purpose |
+|---|---|
+| `DEX Alpha` | First class DEX contract used for the arbitrage exercise |
+| `DEX Beta` | Second class DEX contract used for the arbitrage exercise |
+
+Both values must be different valid `0x` contract addresses. Lab 7 rejects submitted DEX addresses that do not exactly match this instructor-controlled pair.
+
 The checker never edits the source registry. It updates only the permanent instructor-owned result workbook.
