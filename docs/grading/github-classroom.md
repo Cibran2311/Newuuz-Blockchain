@@ -23,7 +23,7 @@ The exact repository or profile URL is recorded once in the protected Google She
 3. Select **Actions → Blockchain Autotest → Run workflow**.
 4. Choose `preview` for a diagnostic run or `final` for the grading snapshot.
 5. Choose all checks or one assignment.
-6. Open the newly created Google result spreadsheet.
+6. Open the instructor-owned Google result spreadsheet from the workflow summary.
 7. Review the `Manual review` and `Errors` worksheets before entering grades in Classroom.
 
 The workflow is manual by design: the instructor controls when a snapshot becomes final.
