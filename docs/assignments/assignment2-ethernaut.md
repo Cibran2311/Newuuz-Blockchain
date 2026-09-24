@@ -184,7 +184,7 @@ Push a short write-up for each solved level to the registered repository. In `su
 | Network | Completion events are on Sepolia. |
 | Level completion | Ethernaut `LevelCompletedLog` events exist. |
 | Unique levels | Duplicate completions do not increase score twice. |
-| Complexity | Sum of official JSON difficulty values for unique completed levels is at least 10. |
+| JSON difficulty score | Sum of official JSON difficulty values for unique completed levels is at least 10. |
 | Evidence | Found levels match submitted wallet. |
 
 ---
