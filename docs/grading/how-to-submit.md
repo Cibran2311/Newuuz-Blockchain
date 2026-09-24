@@ -1,38 +1,50 @@
 # How to Submit
 
-All work is submitted through the assignment created in Google Classroom. There is no student submission JSON file.
+The course uses two records with different purposes:
+
+- Google Sheets stores your identity, repository, and public testnet wallets;
+- `submission.json` in your GitHub repository stores reports for all 12 labs and all 4 assignments.
+
+Do not copy wallet addresses or personal data into every report. The checker joins the two records by `student_id`.
 
 ## Before the first submission
 
-Confirm with the instructor that the protected course registry contains your current:
+Fill your assigned row in `COURSE_STUDENTS` during the registration window:
 
-- student ID and Classroom email;
-- GitHub profile or repository;
-- Sepolia wallet;
-- Polkadot and TON testnet wallets when a task uses them.
+- name and stable student ID;
+- GitHub **repository** URL, not only a profile URL;
+- Sepolia, Polkadot, and TON Testnet public addresses used in the course;
+- group, when the instructor has assigned one.
 
-Only activity from registered addresses can be matched automatically.
+The instructor protects the registry after registration. Ask the instructor to change a wallet or repository; do not add an unregistered address only to the JSON report.
 
-## Submission workflow
+## Prepare the repository once
 
-1. Open the assignment in Google Classroom.
-2. Complete the lab in the required testnet.
-3. Push code, notebooks, and reports to the assigned GitHub repository.
-4. Attach or paste the repository, notebook, explorer, or article link requested by the task.
-5. Add a short note if the transaction used a newly registered wallet.
-6. Click **Turn in**.
+1. Copy `submission.example.json` from the course repository to the root of your repository.
+2. Rename the copy to `submission.json`.
+3. Replace `TEST-001` with the exact `ID` from your Sheet row.
+4. Keep all sections from `lab1` through `lab12` and `assignment1` through `assignment4`.
+5. Commit and push the file.
 
-The instructor runs the course checker from GitHub Actions. It reads the protected registry, verifies available GitHub and on-chain evidence, and updates the protected result spreadsheet.
+From a local clone of the course repository, you can validate the file before pushing:
+
+```bash
+python scripts/check_submission_json.py /path/to/student-repo/submission.json
+```
+
+## Submit one work
+
+1. Complete the work on the required testnet.
+2. Push code, notebooks, screenshots, and longer reports to the registered repository.
+3. Fill only that work's `evidence`, `links`, `answers`, and `notes` in `submission.json`.
+4. Change its `status` from `draft` to `submitted`.
+5. Commit and push the final version before the deadline.
+
+The instructor's GitHub Action pins the exact commit it reads, validates the JSON, matches the registered wallets, checks available blockchain evidence, and updates the result workbook.
 
 ## If the result needs review
 
-The instructor checks the `Manual review` and `Errors` worksheets. Common reasons are:
-
-- the wallet or GitHub repository is not registered;
-- the wrong testnet was used;
-- an explorer or RPC service was temporarily unavailable;
-- the evidence is qualitative and cannot be graded safely by a script;
-- the transaction has not been indexed yet.
+The instructor checks `Manual review` and `Errors`. Common reasons are an invalid JSON file, a draft section, a wallet mismatch, the wrong testnet, an unavailable RPC/explorer, or evidence that requires human assessment.
 
 !!! danger
-    Never submit a seed phrase, private key, wallet password, or API key through Classroom, GitHub, or Google Sheets.
+    Never commit or submit a seed phrase, private key, wallet password, service-account key, or API key. Only public addresses, transaction hashes, contract addresses, and public links belong in the registry or report.

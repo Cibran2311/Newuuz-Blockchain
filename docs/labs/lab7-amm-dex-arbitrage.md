@@ -1,15 +1,15 @@
 # Mission 7 — Trade Like a DeFi Bot
 
-!!! note "Compact Course Status"
-    This lab is an additional challenge. Use it as a DeFi additional challenge task.
+!!! note "Current Course Status"
+    Lab 7 is currently part of the main block. Its later difficulty or bonus classification has not been decided.
 
 ## Difficulty Mode
 
 | Mode | Recommendation |
 |---|---|
-| Course track | Standard / Advanced |
+| Course track | To be classified |
 
-Core students may watch this as a demo or submit a guided report. Standard students complete the simplified swap/arbitrage workflow. Advanced students optimize the strategy and explain price impact.
+Complete the simplified swap/arbitrage workflow. Difficulty variants may be redesigned later.
 
 ---
 
@@ -175,7 +175,7 @@ At the end of this lab you should have reserve data for DEX Alpha and DEX Beta, 
 
 ## Submission
 
-Submit the GitHub repository in Google Classroom. Your report must identify both DEX contracts, initial reserves, chosen strategy, both swap transactions, and the final portfolio value. Use Sepolia or the instructor-approved private testnet only.
+In `submission.json`, fill `labs.lab7` with both DEX contracts, initial reserves, strategy, swap transactions, final portfolio value, and the report link. Set its status to `submitted`. Use Sepolia or the instructor-approved private testnet only.
 
 ---
 

@@ -87,7 +87,7 @@ At the end of the lab you should have two different inputs that produce the same
 
 ## Submission
 
-Attach the Colab notebook or GitHub notebook link to the Lab 2 Google Classroom assignment. In the Classroom comment, include both different inputs, their equal weak-hash result, and one sentence explaining why SHA-256 collisions are much harder to find.
+In `submission.json`, fill `labs.lab2` with both different inputs, their equal weak-hash results, the notebook or script link, and your SHA-256 collision explanation. Set its status to `submitted`.
 
 ---
 

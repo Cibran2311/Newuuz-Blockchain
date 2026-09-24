@@ -1,15 +1,15 @@
 # Assignment 1 — NFT Quest: Trading and Special Contract Interaction
 
-!!! note "Compact Course Status"
-    This assignment is an additional challenge. It can be used as an extension of Lab 6.
+!!! note "Current Course Status"
+    Assignment 1 is currently part of the main block. Its later difficulty or bonus classification has not been decided.
 
 ## Difficulty Mode
 
 | Mode | Recommendation |
 |---|---|
-| Course track | Standard |
+| Course track | To be classified |
 
-In the Core track this assignment can be merged with Lab 6. In Standard and Advanced tracks it remains a separate checkpoint.
+For the current workflow this remains a separate checkpoint from Lab 6.
 
 ---
 
@@ -137,7 +137,7 @@ Submit:
 
 ## Submission Format
 
-Submit the GitHub repository and relevant Sepolia Etherscan links in Google Classroom. Include the professor NFT receive/return transactions, personal NFT contract and token ID, mint transaction, special contract, approval transaction, and transfer transaction.
+Fill `assignments.assignment1` in `submission.json` with the professor NFT receive/return transactions, personal NFT contract and token ID, mint transaction, special contract evidence, approval transaction, transfer transaction, and explorer links. Set its status to `submitted`.
 
 ---
 
@@ -163,7 +163,7 @@ Submit the GitHub repository and relevant Sepolia Etherscan links in Google Clas
 | Professor NFT flow | 25% | Correct receive/buy and return/sell evidence. |
 | Personal NFT mint | 20% | Correct NFT contract and token ID. |
 | Special contract interaction | 30% | Approval and transfer to correct contract. |
-| Evidence quality | 15% | Classroom links, hashes, and explorer evidence are correct. |
+| Evidence quality | 15% | JSON links, hashes, and explorer evidence are correct. |
 | Explanation | 10% | Student can explain ownership flow. |
 
 ---
@@ -177,4 +177,4 @@ Submit the GitHub repository and relevant Sepolia Etherscan links in Google Clas
 - [ ] Special contract address is correct.
 - [ ] NFT was approved if required.
 - [ ] NFT was transferred to special contract.
-- [ ] Repository and explorer links are submitted in Google Classroom.
+- [ ] The `assignment1` JSON section is complete and marked `submitted`.

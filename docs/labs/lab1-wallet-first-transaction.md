@@ -97,7 +97,7 @@ At the end of the lab you should have a MetaMask wallet, Sepolia ETH, one succes
 
 ## Submission
 
-In the Lab 1 Google Classroom assignment, submit the Sepolia Etherscan transaction link and a short note with the recipient and amount. The sender must be the Ethereum address registered by the instructor.
+In `submission.json`, fill `labs.lab1` with the Sepolia transaction hash, explorer link, recipient, and amount. Set its status to `submitted`. The sender must be an Ethereum address registered in Google Sheets.
 
 ---
 
@@ -111,6 +111,7 @@ The checker will verify:
 | Network | Transaction must be on Sepolia. |
 | Status | Transaction must be successful. |
 | Sender | Transaction sender must match submitted wallet. |
+| Recipient | Transaction recipient must match `Lab 1 Recipient` from the protected course configuration. |
 | Amount | Transaction value must be correct or within accepted range. |
 
 ---

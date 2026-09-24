@@ -94,6 +94,8 @@ Use the faucet or bot provided by instructor. Record your TON testnet wallet add
 
 Send `0.01 TON` to instructor wallet or assigned address.
 
+Wallet implementations may deduct the outbound forwarding fee from the message value. The automatic check therefore accepts a recipient value from `0.0099` through `0.01 TON`, while the submitted amount must still be `0.01 TON`.
+
 ### Step 5 — Open Tonviewer
 
 Open https://testnet.tonviewer.com/ and search for your wallet or transaction. Record transaction link, sender, recipient, amount, status/time, and message trace if visible.
@@ -108,7 +110,7 @@ At the end of this lab you should have TON testnet wallet, test TON balance, suc
 
 ## Submission
 
-Submit the TON Testnet explorer transaction link in Google Classroom and state the recipient and amount. The sender must match the TON address registered in the protected course registry.
+In `submission.json`, fill `labs.lab10` with the TON Testnet transaction hash and explorer link, recipient, and amount. Set its status to `submitted`. The sender must match the TON address registered in Google Sheets.
 
 ---
 
@@ -119,7 +121,8 @@ Submit the TON Testnet explorer transaction link in Google Classroom and state t
 | Network | Transaction must be on TON testnet. |
 | Transaction | Transaction link must exist. |
 | Sender | Sender must match submitted wallet. |
-| Amount | Amount must match required value or accepted range. |
+| Recipient | Recipient must match `Lab 10 Recipient` from the protected course configuration. |
+| Amount | Submitted amount is `0.01 TON`; recipient receives `0.0099`–`0.01 TON` after any forwarding fee. |
 | Status | Transaction must be successful / visible in explorer. |
 
 ---

@@ -1,80 +1,30 @@
 # Difficulty Levels
 
-The course uses three practical difficulty levels.
+Difficulty redistribution is intentionally postponed.
 
-## Level 1 — Required Path
+## Current catalog
 
-This is the normal course path.
+The main block currently contains:
 
-Expected workload:
+- all 12 labs;
+- Assignment 1 — NFT Quest;
+- Assignment 2 — Security Arena;
+- Assignment 3 — Group Chain of Contracts;
+- Assignment 4 — Web3 Technical Article.
 
-```text
-40–55 hours
-```
+No existing work is classified as optional or bonus-only in this version. This keeps the curriculum and the new reporting schema complete while the instructor compares workload and validator complexity.
 
-Required:
+## Later classification
 
-- Lab 1;
-- Lab 2;
-- Lab 3;
-- Lab 4;
-- Lab 5;
-- Lab 6;
-- Lab 8;
-- Lab 10;
-- Assignment 3;
-- Assignment 4.
+The instructor may later split individual works or advanced variants into provisional tiers such as core, standard, and additional challenge. That decision should consider:
 
-This level is enough to complete the course requirements.
-
-## Level 2 — Required Path + Challenges
-
-This level is for students who want a stronger practical portfolio.
-
-Expected workload:
-
-```text
-55–75 hours
-```
-
-Recommended:
-
-- complete all required work;
-- choose one or two additional challenges.
-
-Good challenge choices:
-
-| Interest | Recommended Challenge |
+| Factor | Question |
 |---|---|
-| DeFi | Lab 7 |
-| Polkadot | Lab 9 |
-| TON | Lab 11 |
-| NFT | NFT Quest |
-| Security | Ethernaut |
+| Prerequisites | Which earlier work must be complete? |
+| Student time | How many independent hours are realistic? |
+| Infrastructure | Does the task depend on a fragile faucet, RPC, or testnet? |
+| Deterministic checking | Can evidence be verified safely without trusting a JSON claim? |
+| Manual load | How much instructor review is required? |
+| Learning value | Does the task add a distinct skill? |
 
-## Level 3 — Advanced Path
-
-This level is for strong students or project-oriented work.
-
-Expected workload:
-
-```text
-85+ hours
-```
-
-Recommended:
-
-- complete all required work;
-- complete several additional challenges;
-- write a deeper article;
-- add stronger technical evidence;
-- explain trade-offs and failures, not only successful transactions.
-
-## Grading Recommendation
-
-| Component | Weight |
-|---|---:|
-| Required labs | 50% |
-| Assignment 3 — Group Chain of Contracts | 25% |
-| Assignment 4 — Technical Article | 15% |
-| Additional challenges | 10% |
+When tiers are approved, navigation, grading weights, and JSON requirements can be updated together. Until then, the 12+4 structure is the source of truth.
