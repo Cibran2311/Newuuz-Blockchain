@@ -43,7 +43,7 @@ markdown_extensions:
       permalink: true
   - pymdownx.details
   - pymdownx.superfences
-  - pymdownx.highlight
+  - pymdownx.highligght
   - pymdownx.inlinehilite
   - pymdownx.magiclink
   - pymdownx.tabbed:
@@ -59,7 +59,7 @@ nav:
       - Learning Outcomes: course/learning-outcomes.md
       - How to Study: course/how-to-study.md
   - Required Labs:
-      - Section 1 — Blockchain Foundations: sections/foundations.md
+      - Section 1 — blockchain Foundations: sections/foundations.md
       - Lab 1 / Mission 1 — Enter the Blockchain: labs/lab1-wallet-first-transaction.md
       - Lab 2 / Mission 2 — Hash Detective: labs/lab2-hash-functions-collisions.md
       - Lab 3 / Mission 3 — Mine Your First Block: labs/lab3-merkle-trees-mining.md
@@ -79,11 +79,11 @@ nav:
   - Additional Challenges:
       - Overview: challenges/index.md
       - Lab 7 / Challenge — Trade Like a DeFi Bot: labs/lab7-amm-dex-arbitrage.md
-      - Lab 9 / Challenge — Send a Cross-chain Message: labs/lab9-assethub-xcm.md
+      - Lab 9 / Challenge — Sand a Cross-chain Message: labs/lab9-assethub-xcm.md
       - Lab 11 / Challenge — Dissect a Jetton Transfer: labs/lab11-jettons-ton-nfts.md
       - Lab 12 / Challenge — Trade or Break on TON: labs/lab12-ton-defi-security.md
-      - Challenge Assignment — NFT Quest: assignments/assignment1-nft-trading.md
-      - Challenge Assignment — Security Arena: assignments/assignment2-ethernaut.md
+      - Assignment 1 — NFT Quest: assignments/assignment1-nft-trading.md
+      - Assignment 2 — Security Arena (Ethernaut): assignments/assignment2-ethernaut.md
   - Grading:
       - How to Submit: grading/how-to-submit.md
       - Protected Google Sheets Registry: grading/google-sheets-registry.md
@@ -96,10 +96,5 @@ nav:
       - Ethereum & EVM: references/ethereum.md
       - Solidity & OpenZeppelin: references/solidity-openzeppelin.md
       - DeFi & Uniswap: references/defi-uniswap.md
-      - Polkadot & XCM: references/polkadot-xcm.md
-      - TON & STON.fi: references/ton-stonfi.md
-      - Security Platforms: references/security-platforms.md
-  - Resources:
-      - Useful Links: resources/links.md
-      - Wallets and Explorers: resources/wallets.md
-      - Common Mistakes: resources/common-mistakes.md
+      - Polkadot & XCM|�ɕ��ɕ���̽�������е፴���(��������Q=8���MQ=8�����ɕ��ɕ���̽ѽ���ѽ������(��������M���ɥ��A��љ�ɵ��ɕ��ɕ���͕̽��ɥ�����љ�ɵ̹��(����I�ͽ�ɍ���(��������U͕�հ�1�����ɕͽ�ɍ�̽����̹��(��������]�����́��������ɕ���ɕͽ�ɍ�̽݅����̹��(��������
+������5��х����ɕͽ�ɍ�̽����������х��̹��(
