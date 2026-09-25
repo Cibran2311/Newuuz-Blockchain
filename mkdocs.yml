@@ -8,19 +8,6 @@ docs_dir: docs
 theme:
   name: material
   language: en
-  palette:
-    - scheme: default
-      primary: green
-      accent: teal
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-    - scheme: slate
-      primary: green
-      accent: teal
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to light mode
   features:
     - navigation.instant
     - navigation.sections
@@ -43,7 +30,7 @@ markdown_extensions:
       permalink: true
   - pymdownx.details
   - pymdownx.superfences
-  - pymdownx.highligght
+  - pymdownx.highlight
   - pymdownx.inlinehilite
   - pymdownx.magiclink
   - pymdownx.tabbed:
@@ -59,31 +46,31 @@ nav:
       - Learning Outcomes: course/learning-outcomes.md
       - How to Study: course/how-to-study.md
   - Required Labs:
-      - Section 1 — blockchain Foundations: sections/foundations.md
-      - Lab 1 / Mission 1 — Enter the Blockchain: labs/lab1-wallet-first-transaction.md
-      - Lab 2 / Mission 2 — Hash Detective: labs/lab2-hash-functions-collisions.md
-      - Lab 3 / Mission 3 — Mine Your First Block: labs/lab3-merkle-trees-mining.md
-      - Section 2 — Ethereum and Smart Contracts: sections/ethereum.md
-      - Lab 4 / Mission 4 — Read the Chain: labs/lab4-ethereum-transactions-gas.md
-      - Lab 5 / Mission 5 — Launch Your Token: labs/lab5-erc20-disperse.md
-      - Lab 6 / Mission 6 — Create and Move NFTs: labs/lab6-nft-smart-contracts.md
-      - Section 3 — Alternative Ecosystems: sections/alternative-ecosystems.md
-      - Section 3A — Polkadot: sections/polkadot.md
-      - Lab 8 / Mission 8 — Enter Polkadot: labs/lab8-polkadot-transactions.md
-      - Section 3B — TON: sections/ton.md
-      - Lab 10 / Mission 10 — Enter TON: labs/lab10-ton-transactions.md
+      - Section 1 - Blockchain Foundations: sections/foundations.md
+      - Lab 1 / Mission 1 - Enter the Blockchain: labs/lab1-wallet-first-transaction.md
+      - Lab 2 / Mission 2 - Hash Detective: labs/lab2-hash-functions-collisions.md
+      - Lab 3 / Mission 3 - Mine Your First Block: labs/lab3-merkle-trees-mining.md
+      - Section 2 - Ethereum and Smart Contracts: sections/ethereum.md
+      - Lab 4 / Mission 4 - Read the Chain: labs/lab4-ethereum-transactions-gas.md
+      - Lab 5 / Mission 5 - Launch Your Token: labs/lab5-erc20-disperse.md
+      - Lab 6 / Mission 6 - Create and Move NFTs: labs/lab6-nft-smart-contracts.md
+      - Section 3 - Alternative Ecosystems: sections/alternative-ecosystems.md
+      - Section 3A - Polkadot: sections/polkadot.md
+      - Lab 8 / Mission 8 - Enter Polkadot: labs/lab8-polkadot-transactions.md
+      - Section 3B - TON: sections/ton.md
+      - Lab 10 / Mission 10 - Enter TON: labs/lab10-ton-transactions.md
   - Required Assignments:
       - Overview: assignments/index.md
-      - Assignment 3 — Group Chain of Contracts: assignments/assignment3-cross-chain-interaction.md
-      - Assignment 4 — Web3 Technical Article: assignments/assignment4-technical-article.md
+      - Assignment 3 - Group Chain of Contracts: assignments/assignment3-cross-chain-interaction.md
+      - Assignment 4 - Web3 Technical Article: assignments/assignment4-technical-article.md
   - Additional Challenges:
       - Overview: challenges/index.md
-      - Lab 7 / Challenge — Trade Like a DeFi Bot: labs/lab7-amm-dex-arbitrage.md
-      - Lab 9 / Challenge — Sand a Cross-chain Message: labs/lab9-assethub-xcm.md
-      - Lab 11 / Challenge — Dissect a Jetton Transfer: labs/lab11-jettons-ton-nfts.md
-      - Lab 12 / Challenge — Trade or Break on TON: labs/lab12-ton-defi-security.md
-      - Assignment 1 — NFT Quest: assignments/assignment1-nft-trading.md
-      - Assignment 2 — Security Arena (Ethernaut): assignments/assignment2-ethernaut.md
+      - Lab 7 / Challenge - Trade Like a DeFi Bot: labs/lab7-amm-dex-arbitrage.md
+      - Lab 9 / Challenge - Send a Cross-chain Message: labs/lab9-assethub-xcm.md
+      - Lab 11 / Challenge - Dissect a Jetton Transfer: labs/lab11-jettons-ton-nfts.md
+      - Lab 12 / Challenge - Trade or Break on TON: labs/lab12-ton-defi-security.md
+      - Assignment 1 - NFT Quest: assignments/assignment1-nft-trading.md
+      - Assignment 2 - Security Arena (Ethernaut): assignments/assignment2-ethernaut.md
   - Grading:
       - How to Submit: grading/how-to-submit.md
       - Protected Google Sheets Registry: grading/google-sheets-registry.md
@@ -93,8 +80,13 @@ nav:
       - Deadline-gated Checks: grading/deadline-gated-checks.md
   - References:
       - Reading Roadmap: references/reading-roadmap.md
-      - Ethereum & EVM: references/ethereum.md
-      - Solidity & OpenZeppelin: references/solidity-openzeppelin.md
-      - DeFi & Uniswap: references/defi-uniswap.md
-      - Polkadot & XCM|�ɕ��ɕ���̽�������е፴���(��������Q=8���MQ=8�����ɕ��ɕ���̽ѽ���ѽ������(��������M���ɥ��A��љ�ɵ��ɕ��ɕ���͕̽��ɥ�����љ�ɵ̹��(����I�ͽ�ɍ���(��������U͕�հ�1�����ɕͽ�ɍ�̽����̹��(��������]�����́��������ɕ���ɕͽ�ɍ�̽݅����̹��(��������
-������5��х����ɕͽ�ɍ�̽����������х��̹��(
+      - Ethereum and EVM: references/ethereum.md
+      - Solidity and OpenZeppelin: references/solidity-openzeppelin.md
+      - DeFi and Uniswap: references/defi-uniswap.md
+      - Polkadot and XCM: references/polkadot-xcm.md
+      - TON and STON.fi: references/ton-stonfi.md
+      - Security Platforms: references/security-platforms.md
+  - Resources:
+      - Useful Links: resources/links.md
+      - Wallets and Explorers: resources/wallets.md
+      - Common Mistakes: resources/common-mistakes.md
