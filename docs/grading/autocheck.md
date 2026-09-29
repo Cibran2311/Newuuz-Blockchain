@@ -14,13 +14,13 @@ The instructor starts the checker with one button in GitHub Actions. Students do
 
 The first production version verifies:
 
-- Assignment 1 token activity;
-- Assignment 1 swap activity;
-- Assignment 1 NFT mint activity;
+- Assignment 1 professor NFT receive and return flow;
+- Assignment 1 personal NFT mint;
+- Assignment 1 approval and transfer to the configured special contract;
 - GitHub repository availability as supporting metadata;
 - Ethernaut on-chain completions and instructor-defined complexity.
 
-Assignment 1 is `PASS` only when token, swap, and NFT mint evidence are all present. Ethernaut is `PASS` at verified complexity 10 or higher.
+Assignment 1 is `PASS` only when the complete current NFT Quest flow is present. Course addresses and the block range are read from the protected `ASSIGNMENT1_CONFIG` worksheet. Ethernaut is `PASS` at verified complexity 10 or higher.
 
 ## Result worksheets
 
