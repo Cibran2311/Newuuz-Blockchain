@@ -1,0 +1,45 @@
+/* Compact course navigation: keep the page focused on the lesson content. */
+
+/* The table of contents is intentionally removed from the right side. */
+.md-sidebar--secondary {
+  display: none !important;
+}
+
+@media screen and (min-width: 60em) {
+  /* Give the lesson content the space previously occupied by the TOC. */
+  .md-content__inner {
+    margin-right: 0 !important;
+  }
+
+  /* The navigation is compact because its course sections are collapsible. */
+  .md-sidebar--primary {
+    width: 10.5rem;
+  }
+
+  .md-sidebar--primary .md-sidebar__scrollwrap {
+    width: 10.5rem;
+  }
+}
+
+/* Keep the mobile drawer behavior unchanged. */
+@media screen and (max-width: 76.2344em) {
+  .md-sidebar--primary {
+    width: 12.1rem;
+  }
+
+  [dir="ltr"] .md-sidebar--primary {
+    left: -12.1rem;
+  }
+
+  [dir="rtl"] .md-sidebar--primary {
+    right: -12.1rem;
+  }
+
+  [data-md-toggle="drawer"]:checked ~ .md-container .md-sidebar--primary {
+    transform: translateX(12.1rem);
+  }
+
+  [dir="rtl"] [data-md-toggle="drawer"]:checked ~ .md-container .md-sidebar--primary {
+    transform: translateX(-12.1rem);
+  }
+}
