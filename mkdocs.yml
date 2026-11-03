@@ -4,6 +4,8 @@ site_url: https://cibran2311.github.io/Newuuz-Blockchain/
 repo_url: https://github.com/Cibran2311/Newuuz-Blockchain
 repo_name: Cibran2311/Newuuz-Blockchain
 docs_dir: docs
+extra_css:
+  - stylesheets/extra.css
 
 theme:
   name: material
@@ -11,10 +13,8 @@ theme:
   features:
     - navigation.instant
     - navigation.sections
-    - navigation.expand
     - navigation.top
     - navigation.path
-    - toc.follow
     - content.code.copy
     - search.highlight
 
