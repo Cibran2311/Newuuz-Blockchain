@@ -91,7 +91,7 @@ Open the [interactive SHA-256 demonstration](https://andersbrownworth.com/blockc
 4. Record the new hash.
 5. Describe how many hexadecimal characters appear to change. The exact count is not the important result; the important observation is that a one-character change affects the whole digest.
 
-Repeat the same experiment in Python in Step 5. The interactive page is for intuition and must not be the only evidence.
+Repeat the same experiment in Python in Step 6. The interactive page is for intuition and must not be the only evidence.
 
 ### Step 3 — Read the hash-function distinction
 
