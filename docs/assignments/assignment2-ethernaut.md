@@ -172,7 +172,7 @@ At the end of the assignment you should have several completed Ethernaut levels,
 
 ## Submission
 
-Push a short write-up for each solved level to the registered GitHub repository and submit that repository link in Google Classroom. Complete and submit all levels from the Ethereum address stored in the protected course registry. The checker reads on-chain completion events; an automatic pass requires a verified official Reference difficulty score of at least 10.
+Push a short write-up for each solved level to the registered GitHub repository and submit that repository link in Google Classroom. Complete and submit all levels from the Ethereum address stored in the protected course registry. The checker reads on-chain completion events; an automatic pass requires a verified configured Reference difficulty score of at least 10.
 
 ## Automatic Validation
 
