@@ -15,11 +15,11 @@
 | Advanced | Total Reference difficulty score ≥ 10 | Automatic pass threshold |
 | Bonus | Total Reference difficulty score ≥ 15 | Extended challenge result |
 
-The checker uses the official Ethernaut Reference difficulty values. It sums the values for unique completed levels; duplicate completions do not add points.
+The checker uses the configured Reference difficulty values from the protected ETHERNAUT_LEVELS Google Sheet. It sums the values for unique completed levels; duplicate completions do not add points.
 
 ## Difficulty Reference
 
-The numeric value is taken directly from the official Ethernaut `gamedata.json`. The labels below are course guidance only.
+The table below is a readable course reference seeded from the public Ethernaut data. The protected ETHERNAUT_LEVELS Google Sheet is authoritative for grading; the labels below are course guidance only.
 
 | Reference difficulty | Course guidance |
 |---:|---|
@@ -31,7 +31,7 @@ The numeric value is taken directly from the official Ethernaut `gamedata.json`.
 
 ## Course Ethernaut Level Reference
 
-The complete table is shown here so that the grading is visible without opening an additional block. The IDs, names, and difficulty values follow the official Ethernaut JSON.
+The complete reference table is shown here for orientation. The protected ETHERNAUT_LEVELS Google Sheet is authoritative if a configured course value changes; the public Ethernaut JSON is reference material only.
 
 | ID | Level | Reference difficulty | Guidance |
 |---:|---|---:|---|
@@ -133,7 +133,7 @@ After completing this assignment you will be able to:
 | `Instance` | Personal deployed contract copy for a level. |
 | `Submit instance` | Final transaction that checks whether the level is solved. |
 | `LevelCompletedLog` | Event emitted when a level is successfully completed. |
-| `Reference difficulty` | Numeric score assigned to a level in the official Ethernaut JSON. |
+| `Reference difficulty` | Numeric score configured for the level in the protected ETHERNAUT_LEVELS Google Sheet. |
 | `Total score` | Sum of Reference difficulty values for unique completed levels. |
 
 ## Step-by-Step Instructions
@@ -144,7 +144,7 @@ Open https://ethernaut.openzeppelin.com/ and connect MetaMask on Sepolia.
 
 ### Step 2 — Select a Level
 
-Start with beginner-friendly levels such as Hello Ethernaut (0), Fallback (1), Fallout (2), Telephone (1), Coin Flip (3), Token (3), or Vault (3). Add more levels until the total of official Reference difficulty score reaches 10.
+Start with beginner-friendly levels such as Hello Ethernaut (0), Fallback (1), Fallout (2), Telephone (1), Coin Flip (3), Token (3), or Vault (3). Add more levels until the total of configured Reference difficulty score reaches 10.
 
 ### Step 3 — Create Level Instance
 
@@ -168,7 +168,7 @@ Open Sepolia Etherscan and inspect the submit transaction. The checker will look
 
 ## Expected Result
 
-At the end of the assignment you should have several completed Ethernaut levels, total official Reference difficulty score ≥ 10, completion evidence on Sepolia, and the wallet address used for all levels.
+At the end of the assignment you should have several completed Ethernaut levels, total configured Reference difficulty score ≥ 10, completion evidence on Sepolia, and the wallet address used for all levels.
 
 ## Submission
 
@@ -182,7 +182,7 @@ Push a short write-up for each solved level to the registered GitHub repository 
 | Network | Completion events are on Sepolia. |
 | Level completion | Ethernaut `LevelCompletedLog` events exist. |
 | Unique levels | Duplicate completions do not increase the score twice. |
-| Reference difficulty score | Sum of official Reference difficulty values for unique completed levels is at least 10. |
+| Reference difficulty score | Sum of configured Reference difficulty values for unique completed levels is at least 10. |
 | Evidence | Found levels match the submitted wallet. |
 
 ## Common Mistakes
@@ -194,4 +194,4 @@ Push a short write-up for each solved level to the registered GitHub repository 
 | Solving on the wrong network | Use Sepolia. |
 | Claiming a level without a completion event | Verify the event in Etherscan. |
 | Counting a duplicate level twice | Only unique completed levels count. |
-| JSON score below 10 | Solve additional levels or choose higher-difficulty levels. |
+| Configured score below 10 | Solve additional levels or choose higher-difficulty levels. |
