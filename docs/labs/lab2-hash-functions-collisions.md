@@ -176,18 +176,21 @@ At the end of the lab you should have:
 
 ## Submission
 
-Commit the script or notebook to the course GitHub repository and put the evidence in the same file or in its README:
+Commit the script or notebook to the assigned student GitHub repository and put the evidence in the same file or in its README:
 
 - file path of the script or notebook;
 - input_1, input_2, hash_1, and hash_2 for the weak collision;
 - the two SHA-256 digests from the one-character change;
 - a short explanation of why the weak collision is easy to reproduce and why a SHA-256 collision is computationally infeasible.
 
-Use the repository's current submission/checker process. Do not submit private keys, seed phrases, API keys, or real credentials.
+Submit the student repository or notebook link through Google Classroom. Do not commit to the course repository. Do not submit private keys, seed phrases, API keys, or real credentials.
 
 ---
 
 ## Automatic Validation
+
+!!! note "Current validation status"
+    The current production GitHub Actions workflow does not execute this lab directly. The table below is the validation contract for manual review or future automation. Do not submit a student JSON file.
 
 The checker will verify:
 

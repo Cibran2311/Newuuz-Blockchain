@@ -230,7 +230,7 @@ At the end of the lab you should have:
 
 ## Submission
 
-Commit the notebook or script to the course GitHub repository and include the reproducible evidence in the same file or its README.
+Commit the notebook or script to the assigned student GitHub repository and include the reproducible evidence in the same file or its README.
 
 The submission must contain:
 
@@ -242,11 +242,14 @@ The submission must contain:
 - the resulting block hash;
 - a short explanation of why changing one transaction changes the root.
 
-Use the repository's current submission/checker process. Do not submit private keys, seed phrases, API keys, or real credentials.
+Submit the student repository or notebook link through Google Classroom. Do not commit to the course repository. Do not submit private keys, seed phrases, API keys, or real credentials.
 
 ---
 
 ## Automatic Validation
+
+!!! note "Current validation status"
+    The current production GitHub Actions workflow does not execute this lab directly. The table below is the validation contract for manual review or future automation. Do not submit a student JSON file.
 
 The checker will verify:
 

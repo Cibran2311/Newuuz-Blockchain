@@ -181,6 +181,9 @@ Submit the GitHub repository in Google Classroom. Your report must identify both
 
 ## Automatic Validation
 
+!!! note "Current validation status"
+    The current production GitHub Actions workflow does not execute this lab directly. The table below is the validation contract for manual review or future automation. Do not submit a student JSON file.
+
 | Check | Requirement |
 |---|---|
 | DEX contracts | Submitted DEX addresses match class contracts. |

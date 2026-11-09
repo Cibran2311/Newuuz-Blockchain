@@ -23,7 +23,7 @@ Students learn:
 
 The Ethereum section prepares students for:
 
-- Assignment 1 — NFT Quest;
+- Assignment 1 — Token, Swap and NFT Quest;
 - Assignment 2 — Security Arena.
 
 All major assignments are listed in the separate **Assignments** section.

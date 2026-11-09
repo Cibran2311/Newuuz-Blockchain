@@ -51,8 +51,7 @@ KEYWORDS_A2 = [
     "motorbike",
 ]
 A1_TOKEN_CONTRACT = "0x4efF872d9bd5924C3862566075af7D6E180075a1"
-A1_START_BLOCK = 10320000
-A1_END_BLOCK = 10435000
+A1_START_BLOCK = int(os.getenv("A1_START_BLOCK", "10320000"))
 A1_LOG_STEP = 10000
 A2_PASS_COMPLEXITY = 10
 A2_BONUS_LEVELS = 15
@@ -894,9 +893,11 @@ def check_token_swap(
     wallets: list[str],
     token: str = A1_TOKEN_CONTRACT,
     start_block: int = A1_START_BLOCK,
-    end_block: int = A1_END_BLOCK,
+    end_block: int | None = None,
 ) -> dict[str, Any]:
-    """Return token+swap evidence using the same logic as the earlier working check.py."""
+    """Return token+swap evidence and scan through the current latest block."""
+    if end_block is None:
+        end_block = w3.eth.block_number
     transfer_topic = w3.keccak(text="Transfer(address,address,uint256)").hex().lower()
     swap_v3_topic = (
         w3.keccak(text="Swap(address,address,int256,int256,uint160,uint128,int24)")
@@ -1021,7 +1022,7 @@ def check_nft_mint_to_wallet(
     w3: Web3,
     wallets: list[str],
     start_block: int = A1_START_BLOCK,
-    end_block: int = A1_END_BLOCK,
+    end_block: int | None = None,
 ) -> dict[str, Any]:
     """Find ERC721 mint events to student wallets via Etherscan Sepolia API.
 
@@ -1034,6 +1035,9 @@ def check_nft_mint_to_wallet(
     Set ETHERSCAN_API_KEY in PowerShell before running:
       $env:ETHERSCAN_API_KEY="..."
     """
+    if end_block is None:
+        end_block = w3.eth.block_number
+
     api_key = os.getenv("ETHERSCAN_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError(

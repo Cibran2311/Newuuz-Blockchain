@@ -5,20 +5,23 @@
 
 ## Difficulty Mode
 
+!!! note "Source of truth"
+    The protected ETHERNAUT_LEVELS Google Sheet is the grading source of truth. Its configured complexity values are based on the public Ethernaut level data. The public JSON links below are reference material only; students do not submit JSON files.
+
 | Mode | Requirement | Meaning |
 |---|---|---|
 | Core | Optional 3–5 beginner levels | Practice track; no automatic pass threshold |
-| Standard | Total JSON difficulty score ≥ 6 | Regular challenge completion |
-| Advanced | Total JSON difficulty score ≥ 10 | Automatic pass threshold |
-| Bonus | Total JSON difficulty score ≥ 15 | Extended challenge result |
+| Standard | Total Reference difficulty score ≥ 6 | Regular challenge completion |
+| Advanced | Total Reference difficulty score ≥ 10 | Automatic pass threshold |
+| Bonus | Total Reference difficulty score ≥ 15 | Extended challenge result |
 
-The checker uses the official Ethernaut JSON difficulty values. It sums the values for unique completed levels; duplicate completions do not add points.
+The checker uses the official Ethernaut Reference difficulty values. It sums the values for unique completed levels; duplicate completions do not add points.
 
-## JSON Difficulty Scale
+## Difficulty Reference
 
 The numeric value is taken directly from the official Ethernaut `gamedata.json`. The labels below are course guidance only.
 
-| JSON difficulty | Course guidance |
+| Reference difficulty | Course guidance |
 |---:|---|
 | 0 | Tutorial |
 | 1–2 | Basic |
@@ -26,11 +29,11 @@ The numeric value is taken directly from the official Ethernaut `gamedata.json`.
 | 5–6 | Advanced |
 | 7–8 | Expert |
 
-## Official Ethernaut Level Grading
+## Course Ethernaut Level Reference
 
 The complete table is shown here so that the grading is visible without opening an additional block. The IDs, names, and difficulty values follow the official Ethernaut JSON.
 
-| ID | Level | JSON difficulty | Guidance |
+| ID | Level | Reference difficulty | Guidance |
 |---:|---|---:|---|
 | 0 | Hello Ethernaut | 0 | Tutorial |
 | 1 | Fallback | 1 | Basic |
@@ -85,7 +88,7 @@ The complete table is shown here so that the grading is visible without opening 
 
 In this assignment you will solve Ethernaut smart contract security challenges on Ethereum Sepolia.
 
-You must reach a total official JSON difficulty score of at least:
+You must reach a total official Reference difficulty score of at least:
 
 ```text
 10
@@ -130,8 +133,8 @@ After completing this assignment you will be able to:
 | `Instance` | Personal deployed contract copy for a level. |
 | `Submit instance` | Final transaction that checks whether the level is solved. |
 | `LevelCompletedLog` | Event emitted when a level is successfully completed. |
-| `JSON difficulty` | Numeric score assigned to a level in the official Ethernaut JSON. |
-| `Total score` | Sum of JSON difficulty values for unique completed levels. |
+| `Reference difficulty` | Numeric score assigned to a level in the official Ethernaut JSON. |
+| `Total score` | Sum of Reference difficulty values for unique completed levels. |
 
 ## Step-by-Step Instructions
 
@@ -141,7 +144,7 @@ Open https://ethernaut.openzeppelin.com/ and connect MetaMask on Sepolia.
 
 ### Step 2 — Select a Level
 
-Start with beginner-friendly levels such as Hello Ethernaut (0), Fallback (1), Fallout (2), Telephone (1), Coin Flip (3), Token (3), or Vault (3). Add more levels until the total of official JSON difficulty score reaches 10.
+Start with beginner-friendly levels such as Hello Ethernaut (0), Fallback (1), Fallout (2), Telephone (1), Coin Flip (3), Token (3), or Vault (3). Add more levels until the total of official Reference difficulty score reaches 10.
 
 ### Step 3 — Create Level Instance
 
@@ -165,11 +168,11 @@ Open Sepolia Etherscan and inspect the submit transaction. The checker will look
 
 ## Expected Result
 
-At the end of the assignment you should have several completed Ethernaut levels, total official JSON difficulty score ≥ 10, completion evidence on Sepolia, and the wallet address used for all levels.
+At the end of the assignment you should have several completed Ethernaut levels, total official Reference difficulty score ≥ 10, completion evidence on Sepolia, and the wallet address used for all levels.
 
 ## Submission
 
-Push a short write-up for each solved level to the registered GitHub repository and submit that repository link in Google Classroom. Complete and submit all levels from the Ethereum address stored in the protected course registry. The checker reads on-chain completion events; an automatic pass requires a verified official JSON difficulty score of at least 10.
+Push a short write-up for each solved level to the registered GitHub repository and submit that repository link in Google Classroom. Complete and submit all levels from the Ethereum address stored in the protected course registry. The checker reads on-chain completion events; an automatic pass requires a verified official Reference difficulty score of at least 10.
 
 ## Automatic Validation
 
@@ -179,7 +182,7 @@ Push a short write-up for each solved level to the registered GitHub repository 
 | Network | Completion events are on Sepolia. |
 | Level completion | Ethernaut `LevelCompletedLog` events exist. |
 | Unique levels | Duplicate completions do not increase the score twice. |
-| JSON difficulty score | Sum of official JSON difficulty values for unique completed levels is at least 10. |
+| Reference difficulty score | Sum of official Reference difficulty values for unique completed levels is at least 10. |
 | Evidence | Found levels match the submitted wallet. |
 
 ## Common Mistakes

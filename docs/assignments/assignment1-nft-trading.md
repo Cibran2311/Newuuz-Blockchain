@@ -1,180 +1,170 @@
-# Assignment 1 — NFT Quest: Trading and Special Contract Interaction
+# Assignment 1 — Token, Swap and NFT Quest
 
 !!! note "Compact Course Status"
-    This assignment is an additional challenge. It can be used as an extension of Lab 6.
+    This assignment is an additional challenge and an extension of Labs 5–6. It is also the first production assignment covered by the course autotest.
 
 ## Difficulty Mode
 
-| Mode | Recommendation |
-|---|---|
-| Course track | Standard |
-
-In the Core track this assignment can be merged with Lab 6. In Standard and Advanced tracks it remains a separate checkpoint.
-
----
+| Mode | Requirement | Meaning |
+|---|---|---|
+| Core | Complete one guided token/NFT flow | Practice track with instructor review |
+| Standard | Token + Swap + NFT mint | Normal assignment target |
+| Advanced | Standard target plus complete NFT ownership quest | Deeper evidence and explanation |
 
 ## Goal
 
-Complete a full NFT ownership flow:
+Complete three independently verifiable Sepolia requirements:
 
-1. interact with the professor NFT;
-2. return or sell it back;
-3. mint your own NFT;
-4. approve a special contract;
-5. transfer your NFT to the special contract.
+1. perform the required course ERC20 token activity;
+2. complete the required swap activity;
+3. mint an ERC721 NFT to the registered student wallet.
 
-This assignment checks whether you can work with NFT ownership, approvals, events, and smart contract interaction.
+The NFT ownership quest from Lab 6 may be included as an advanced extension: receive or return the Professor NFT, approve the special contract, and transfer the personal NFT to it.
 
----
+## PASS Rule
 
-## Scenario
+The automatic Assignment 1 result is **PASS only when all three objective checks pass**:
 
-You are an NFT engineer working with a course NFT system.
+- Token;
+- Swap;
+- NFT mint.
 
-The professor NFT represents a controlled asset. Your personal NFT represents your own on-chain artifact. The special contract represents an external system that must receive or lock your NFT.
+The GitHub repository link and written explanations are supporting evidence. They do not replace missing on-chain activity.
 
-Your task is to prove the complete ownership flow using on-chain evidence.
+Professor NFT flow, approval details, transfer to the special contract, screenshots, and explanations are reviewed manually. Manual evidence must not silently turn a missing Token, Swap, or NFT result into an automatic PASS.
 
----
+## Why This Assignment Matters
 
-## Learning Objectives
+This assignment combines fungible tokens, decentralized exchange activity, NFT minting, wallet ownership, transaction events, and evidence-based blockchain verification.
+
+## What You Will Learn
 
 After completing this assignment you will be able to:
 
-- work with ERC721 NFTs;
-- track NFT ownership history;
-- use `approve`, `transferFrom`, and `safeTransferFrom`;
-- inspect ERC721 events in Etherscan;
-- understand how contracts can receive NFTs;
-- prepare NFT evidence for automatic grading.
-
----
+- inspect ERC20 token activity;
+- explain what a swap transaction changes;
+- mint and identify an ERC721 NFT;
+- connect wallet activity with transaction logs;
+- prepare evidence for automatic and manual review.
 
 ## Requirements
 
-1. Use Ethereum Sepolia.
-2. Use the same wallet registered in the protected course registry.
-3. Receive or buy the professor NFT.
-4. Return or sell the professor NFT back according to instructor rules.
-5. Mint your own ERC721 NFT.
-6. Approve the special contract if approval is required.
-7. Transfer your personal NFT to the special contract.
-8. Save all transaction hashes.
-9. Submit NFT contract addresses and token IDs.
-
----
+1. Use Ethereum Sepolia only.
+2. Use the Ethereum wallet registered in the protected course registry.
+3. Use the instructor-provided course token and approved swap route.
+4. Complete the required token activity.
+5. Complete the required swap activity.
+6. Mint one ERC721 NFT to the registered wallet.
+7. Save contract addresses, token IDs, transaction hashes, and explorer links.
+8. Never submit a private key, seed phrase, password, or API key.
 
 ## Step-by-Step Plan
 
-### Step 1 — Prepare Wallet
+### Step 1 — Prepare the wallet
 
-Use the same Sepolia wallet from previous labs. Make sure you have Sepolia ETH for gas.
+Use the Sepolia wallet registered by the instructor. Make sure it has enough test ETH for gas.
 
-### Step 2 — Interact with Professor NFT
+### Step 2 — Complete token activity
 
-The instructor will provide professor NFT contract, token ID or mint/buy flow, and return/sell instructions.
+Use the course ERC20 token or the instructor-provided token address. Record:
 
-Complete the professor NFT flow and save evidence.
+- token contract address;
+- token transfer transaction hash;
+- sender and recipient;
+- amount;
+- Sepolia explorer link.
 
-### Step 3 — Mint Personal NFT
+### Step 3 — Complete swap activity
 
-Use class NFT minter, Remix + OpenZeppelin Wizard, or instructor-provided contract.
+Use the assigned DEX or swap route. Record:
 
-Save contract address, token ID, and mint transaction hash.
+- input token;
+- output token;
+- swap transaction hash;
+- wallet address;
+- successful Sepolia explorer link.
 
-### Step 4 — Verify Ownership
+### Step 4 — Mint the personal NFT
 
-Call:
+Use the class NFT minter or deploy an ERC721 contract with Remix and OpenZeppelin Wizard. Record:
 
-```solidity
-ownerOf(tokenId)
-```
+- NFT contract address;
+- token ID;
+- mint transaction hash;
+- owner after minting.
 
-Expected result:
+### Step 5 — Optional advanced NFT quest
 
-```text
-your wallet
-```
+If the instructor assigns the full Lab 6 extension:
 
-### Step 5 — Approve Special Contract
-
-Call:
-
-```solidity
-approve(special_contract, tokenId)
-```
-
-Save approval transaction.
-
-### Step 6 — Transfer NFT to Special Contract
-
-Transfer NFT to special contract using the required function or UI.
-
-Check:
-
-```solidity
-ownerOf(tokenId) == special_contract
-```
-
----
+1. receive or buy the Professor NFT;
+2. return or sell it according to the course rules;
+3. approve the special contract if required;
+4. transfer the personal NFT to the special contract;
+5. save every transaction and explain the ownership changes.
 
 ## Deliverables
 
-Submit:
+### Required automatic evidence
 
-- professor NFT contract address;
-- professor token ID;
-- receive/buy transaction hash;
-- return/sell transaction hash;
+- course token contract and token transaction hash;
+- swap transaction hash;
 - personal NFT contract address;
-- personal token ID;
-- mint transaction hash;
+- personal NFT token ID;
+- NFT mint transaction hash;
+- registered wallet address.
+
+### Optional manual evidence
+
+- Professor NFT receive/buy transaction;
+- Professor NFT return/sell transaction;
+- approval transaction;
 - special contract address;
-- approval transaction hash;
-- transfer-to-special-contract transaction hash.
+- transfer-to-special-contract transaction;
+- short explanation of the NFT ownership flow.
 
----
+## Submission
 
-## Submission Format
+Push the code, notebook, report, or README to the assigned student GitHub repository. Submit the repository and Sepolia explorer links in the Google Classroom assignment.
 
-Submit the GitHub repository and relevant Sepolia Etherscan links in Google Classroom. Include the professor NFT receive/return transactions, personal NFT contract and token ID, mint transaction, special contract, approval transaction, and transfer transaction.
-
----
+Do not commit to the course repository. Do not submit student JSON files. The protected registry and the instructor's Google Sheets remain the source of student identity and wallet data.
 
 ## Automatic Validation
 
 | Check | Requirement |
 |---|---|
-| Network | All evidence is on Sepolia. |
-| Professor NFT received | Transfer event shows NFT moved to student. |
-| Professor NFT returned | Transfer event shows NFT moved away from student. |
-| Personal NFT minted | Mint event exists. |
-| Ownership | `ownerOf(personal_token_id)` existed for student before transfer. |
-| Approval | Approval event exists if required. |
-| Special contract | Personal NFT was transferred to special contract. |
-| Wallet | Student wallet participated in required transactions. |
+| Network | Objective evidence is on Ethereum Sepolia. |
+| Wallet | The registered student wallet is involved. |
+| Token | Required token activity is found. |
+| Swap | Required swap activity is found. |
+| NFT | An ERC721 mint to the registered wallet is found. |
+| Assignment 1 | PASS only when Token, Swap, and NFT all pass. |
 
----
+## Manual Review
+
+| Check | Review |
+|---|---|
+| Professor NFT flow | Receive/buy and return/sell evidence |
+| Special contract | Approval and transfer details |
+| Explanation | Student can explain token, swap, and NFT events |
+| Repository | Code/report quality and reproducibility |
 
 ## Grading Rubric
 
-| Criterion | Weight | Description |
-|---|---:|---|
-| Professor NFT flow | 25% | Correct receive/buy and return/sell evidence. |
-| Personal NFT mint | 20% | Correct NFT contract and token ID. |
-| Special contract interaction | 30% | Approval and transfer to correct contract. |
-| Evidence quality | 15% | Classroom links, hashes, and explorer evidence are correct. |
-| Explanation | 10% | Student can explain ownership flow. |
-
----
+| Criterion | Weight |
+|---|---:|
+| Token activity | 25% |
+| Swap activity | 25% |
+| NFT mint | 30% |
+| Evidence quality | 10% |
+| Explanation and optional NFT quest | 10% |
 
 ## Final Checklist
 
-- [ ] Professor NFT was received/bought.
-- [ ] Professor NFT was returned/sold back.
-- [ ] Personal NFT was minted.
-- [ ] Personal token ID is known.
-- [ ] Special contract address is correct.
-- [ ] NFT was approved if required.
-- [ ] NFT was transferred to special contract.
-- [ ] Repository and explorer links are submitted in Google Classroom.
+- [ ] Registered Sepolia wallet was used.
+- [ ] Required token transaction exists.
+- [ ] Required swap transaction exists.
+- [ ] Personal NFT was minted to the registered wallet.
+- [ ] Contract addresses, token ID, hashes, and links are saved.
+- [ ] Repository and explorer links were submitted in Google Classroom.
+- [ ] No private keys, seed phrases, passwords, or student JSON files were submitted.

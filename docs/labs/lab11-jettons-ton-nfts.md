@@ -143,6 +143,9 @@ Submit the TON Testnet explorer link and your report in Google Classroom. Identi
 
 ## Automatic Validation
 
+!!! note "Current validation status"
+    The current production GitHub Actions workflow does not execute this lab directly. The table below is the validation contract for manual review or future automation. Do not submit a student JSON file.
+
 | Check | Requirement |
 |---|---|
 | Network | Evidence is from TON testnet. |

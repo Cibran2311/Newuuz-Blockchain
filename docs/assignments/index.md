@@ -13,7 +13,7 @@ The course has two required assignments.
 
 | Challenge Assignment | Purpose |
 |---|---|
-| NFT Quest | Extended NFT ownership and contract interaction |
+| Token, Swap and NFT Quest | Token, Swap and NFT evidence plus optional ownership flow |
 | Security Arena | Ethernaut smart contract security challenges |
 
 ## Why Assignment 3 Is Central

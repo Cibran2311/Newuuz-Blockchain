@@ -198,6 +198,9 @@ Submit the GitHub repository and personal NFT contract link in Google Classroom.
 
 ## Automatic Validation
 
+!!! note "Current validation status"
+    The current production GitHub Actions workflow does not execute this lab directly. The table below is the validation contract for manual review or future automation. Do not submit a student JSON file.
+
 | Check | Requirement |
 |---|---|
 | Network | All transactions are on Sepolia. |
