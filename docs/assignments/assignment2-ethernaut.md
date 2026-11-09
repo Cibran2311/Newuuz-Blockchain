@@ -88,7 +88,7 @@ The complete reference table is shown here for orientation. The protected ETHERN
 
 In this assignment you will solve Ethernaut smart contract security challenges on Ethereum Sepolia.
 
-You must reach a total official Reference difficulty score of at least:
+You must reach a total configured Reference difficulty score of at least:
 
 ```text
 10
@@ -134,7 +134,7 @@ After completing this assignment you will be able to:
 | `Submit instance` | Final transaction that checks whether the level is solved. |
 | `LevelCompletedLog` | Event emitted when a level is successfully completed. |
 | `Reference difficulty` | Numeric score configured for the level in the protected ETHERNAUT_LEVELS Google Sheet. |
-| `Total score` | Sum of Reference difficulty values for unique completed levels. |
+| `Total score` | Sum of configured Reference difficulty values for unique completed levels. |
 
 ## Step-by-Step Instructions
 
