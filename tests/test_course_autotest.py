@@ -212,5 +212,56 @@ class CourseAutotestTests(unittest.TestCase):
         self.assertEqual(url, "https://docs.google.com/spreadsheets/d/result-sheet-id")
 
 
+    def test_overall_status_error_overrides_partial_evidence(self):
+        status, reason = overall_status(
+            "101",
+            "all",
+            Assignment1Result(status="PARTIAL"),
+            EthernautResult(status="PASS"),
+            [{"student_id": "101", "stage": "Sepolia RPC", "error": "timeout"}],
+        )
+
+        self.assertEqual(status, "ERROR")
+        self.assertIn("Sepolia RPC", reason)
+
+    def test_overall_status_fails_when_assignment_requirement_is_missing(self):
+        status, reason = overall_status(
+            "101",
+            "assignment1",
+            Assignment1Result(status="FAIL"),
+            EthernautResult(status="PASS"),
+            [],
+        )
+
+        self.assertEqual(status, "FAIL")
+        self.assertIn("Required evidence", reason)
+
+    def test_ethernaut_score_uses_unique_levels_not_submit_count(self):
+        wallet = "0x" + "2" * 40
+        student = Student("Grace", "102", "", [wallet])
+        result = check_ethernaut(
+            student=student,
+            completed_by_wallet={
+                wallet: {
+                    "count": 7,
+                    "level_addresses": {"0x" + "a" * 40, "0x" + "b" * 40},
+                    "level_names": {"Fallback", "Coin Flip"},
+                }
+            },
+            level_complexity={"Fallback": 4, "Coin Flip": 6},
+            level_addr_to_name={
+                "0x" + "a" * 40: "Fallback",
+                "0x" + "b" * 40: "Coin Flip",
+            },
+            repo_texts_cache={},
+            gh=GitHubHelper(),
+        )
+
+        self.assertEqual(result.onchain_total_submits, 7)
+        self.assertEqual(result.onchain_unique_levels, 2)
+        self.assertEqual(result.onchain_complexity, 10)
+        self.assertEqual(result.status, "PASS")
+
+
 if __name__ == "__main__":
     unittest.main()

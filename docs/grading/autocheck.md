@@ -53,12 +53,19 @@ Every run creates PREVIEW_AUTOTEST_<timestamp> or FINAL_AUTOTEST_<timestamp> wit
 
 ## Status Semantics
 
-- PASS means all selected objective checks passed.
-- REVIEW means evidence exists but an instructor must decide.
-- ERROR means a technical problem prevented a reliable check.
-- FAIL means the required objective evidence was not found.
-- Manual review never silently becomes PASS.
-- An API or RPC failure must be visible as ERROR, not treated as student failure.
+| Final status | Meaning |
+|---|---|
+| PASS | Every selected objective check passed. |
+| FAIL | The required objective evidence was not found. |
+| REVIEW | Evidence exists, but an instructor must decide; this includes partial or declared-only evidence. |
+| ERROR | A technical problem prevented a reliable check. |
+| NOT RUN | The component was not selected by the workflow scope. |
+
+Component-level details such as `PARTIAL`, `TRIED`, and `DECLARED ONLY` explain why a final result is REVIEW. Manual review never silently becomes PASS. An API or RPC failure must be visible as ERROR, not treated as student failure.
+
+## Manual Test Matrix
+
+Before the first real grading run, execute the controlled scenarios in the [Manual Test Matrix](manual-test-matrix.md). Keep the expected and actual results together with the run identifiers.
 
 ## Preview and Final
 

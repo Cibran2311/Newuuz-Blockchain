@@ -74,6 +74,7 @@ nav:
       - How to Submit: grading/how-to-submit.md
       - Protected Google Sheets Registry: grading/google-sheets-registry.md
       - Auto-check System: grading/autocheck.md
+      - Manual Test Matrix: grading/manual-test-matrix.md
       - Instructor Setup: grading/autotest-setup.md
       - Classroom and GitHub: grading/github-classroom.md
       - Deadline-gated Checks: grading/deadline-gated-checks.md

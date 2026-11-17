@@ -95,7 +95,7 @@ Submit the Sepolia Etherscan transaction link in Google Classroom. Add the gas l
 !!! note "Current validation status"
     The current production GitHub Actions workflow does not execute this lab directly. The table below is the validation contract for manual review or future automation. Do not submit a student JSON file.
 
-The checker will verify:
+For manual review or future automation, verify:
 
 | Check | Requirement |
 |---|---|
