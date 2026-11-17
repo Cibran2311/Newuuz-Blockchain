@@ -157,7 +157,9 @@ Do not commit to the course repository. Do not submit student JSON files. The pr
 | Swap activity | 25% |
 | NFT mint | 30% |
 | Evidence quality | 10% |
-| Explanation | 10% |\n\nThe base rubric totals 100%. The optional Professor NFT Quest is not required and may be awarded as **up to +10 bonus points**; it does not replace any required criterion.
+| Explanation | 10% |
+
+The base rubric totals 100%. The optional Professor NFT Quest is not required and may be awarded as **up to +10 bonus points**; it does not replace any required criterion.
 
 ## Final Checklist
 
